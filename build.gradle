@@ -1,0 +1,52 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.2"
+    }
+}
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.3.31'
+}
+
+group 'com.papsign.ktor'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "ch.qos.logback:logback-classic:$logback_version"
+    implementation "io.ktor:ktor-server-core:$ktor_version"
+    implementation "io.ktor:ktor-server-host-common:$ktor_version"
+    implementation "io.ktor:ktor-metrics:$ktor_version"
+    implementation "io.ktor:ktor-server-sessions:$ktor_version"
+    
+    // needed for oauth interop
+    implementation "io.ktor:ktor-auth:$ktor_version" 
+    implementation "io.ktor:ktor-client-core:$ktor_version"
+    implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
+    implementation "io.ktor:ktor-client-apache:$ktor_version"
+    // ------------------------
+    
+    implementation "io.ktor:ktor-jackson:$ktor_version" // needed for parameter parsing
+    implementation 'org.webjars:swagger-ui:3.18.2'
+
+    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8"
+    testImplementation "io.ktor:ktor-server-netty:$ktor_version"
+    
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
