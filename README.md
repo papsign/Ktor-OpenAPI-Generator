@@ -1,4 +1,4 @@
-# Ktor_OpenAPI_Generator
+# Ktor OpenAPI Generator
 The Ktor OpenAPI Generator is a library to automatically generate the descriptor as you route your ktor application.
 
 ## The project is in ALPHA, some features may be broken.
