@@ -19,7 +19,7 @@ Currently Supported:
 
 It is inspired by ktor Locations, but makes no use of it.
 
-Minimal Example:
+Basic Example:
 
 ```kotlin
 
