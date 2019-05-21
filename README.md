@@ -64,6 +64,315 @@ data class StringResponse(val str: String)
 data class StringUsable(val str: String)
 ```
 
+Creates this openapi.json description:
+
+```json
+{  
+   "info":{  
+      "title":"Test API",
+      "version":"0.0.1",
+      "description":"The Test API",
+      "termsOfService":null,
+      "contact":{  
+         "name":"Support",
+         "url":null,
+         "email":"support@test.com"
+      },
+      "license":null
+   },
+   "openapi":"3.0.0",
+   "servers":[  
+      {  
+         "url":"http://localhost:8080/",
+         "description":"Test server",
+         "variables":null
+      }
+   ],
+   "paths":{  
+      "/string/{a}":{  
+         "get":{  
+            "tags":null,
+            "summary":null,
+            "description":null,
+            "externalDocs":null,
+            "operationId":null,
+            "parameters":null,
+            "requestBody":null,
+            "responses":{  
+               "200":{  
+                  "description":"OK",
+                  "headers":{  
+
+                  },
+                  "content":{  
+                     "application/json":{  
+                        "schema":{  
+                           "$ref":"#/components/schemas/StringParam"
+                        },
+                        "example":null,
+                        "examples":null
+                     }
+                  }
+               }
+            },
+            "deprecated":null,
+            "security":null,
+            "servers":null
+         },
+         "parameters":[  
+            {  
+               "name":"a",
+               "in":"path",
+               "required":true,
+               "description":"A simple String Param",
+               "deprecated":false,
+               "allowEmptyValue":null,
+               "schema":{  
+                  "type":"string",
+                  "format":null,
+                  "nullable":false,
+                  "minimum":null,
+                  "maximum":null,
+                  "example":null
+               },
+               "example":null,
+               "examples":null
+            },
+            {  
+               "name":"optional",
+               "in":"query",
+               "required":false,
+               "description":"Optional String",
+               "deprecated":false,
+               "allowEmptyValue":false,
+               "schema":{  
+                  "type":"string",
+                  "format":null,
+                  "nullable":true,
+                  "minimum":null,
+                  "maximum":null,
+                  "example":null
+               },
+               "example":null,
+               "examples":null
+            }
+         ]
+      },
+      "/inine/string/{a}":{  
+         "get":{  
+            "tags":null,
+            "summary":"String Param Endpoint",
+            "description":"This is a String Param Endpoint",
+            "externalDocs":null,
+            "operationId":null,
+            "parameters":null,
+            "requestBody":null,
+            "responses":{  
+               "200":{  
+                  "description":"A String Response",
+                  "headers":{  
+
+                  },
+                  "content":{  
+                     "application/json":{  
+                        "schema":{  
+                           "$ref":"#/components/schemas/StringResponse"
+                        },
+                        "example":{  
+                           "str":"Hi"
+                        },
+                        "examples":null
+                     }
+                  }
+               }
+            },
+            "deprecated":null,
+            "security":null,
+            "servers":null
+         },
+         "parameters":[  
+            {  
+               "name":"a",
+               "in":"path",
+               "required":true,
+               "description":"A simple String Param",
+               "deprecated":false,
+               "allowEmptyValue":null,
+               "schema":{  
+                  "type":"string",
+                  "format":null,
+                  "nullable":false,
+                  "minimum":null,
+                  "maximum":null,
+                  "example":null
+               },
+               "example":null,
+               "examples":null
+            },
+            {  
+               "name":"optional",
+               "in":"query",
+               "required":false,
+               "description":"Optional String",
+               "deprecated":false,
+               "allowEmptyValue":false,
+               "schema":{  
+                  "type":"string",
+                  "format":null,
+                  "nullable":true,
+                  "minimum":null,
+                  "maximum":null,
+                  "example":null
+               },
+               "example":null,
+               "examples":null
+            }
+         ]
+      },
+      "/block":{  
+         "post":{  
+            "tags":null,
+            "summary":"String Post Endpoint",
+            "description":"This is a String Post Endpoint",
+            "externalDocs":null,
+            "operationId":null,
+            "parameters":null,
+            "requestBody":{  
+               "content":{  
+                  "application/json":{  
+                     "schema":{  
+                        "$ref":"#/components/schemas/StringUsable"
+                     },
+                     "example":{  
+                        "str":"Ho"
+                     },
+                     "examples":null
+                  }
+               },
+               "description":"A String Request",
+               "required":null
+            },
+            "responses":{  
+               "200":{  
+                  "description":"A String Response",
+                  "headers":{  
+
+                  },
+                  "content":{  
+                     "application/json":{  
+                        "schema":{  
+                           "$ref":"#/components/schemas/StringUsable"
+                        },
+                        "example":{  
+                           "str":"Ho"
+                        },
+                        "examples":null
+                     }
+                  }
+               }
+            },
+            "deprecated":null,
+            "security":null,
+            "servers":null
+         },
+         "parameters":[  
+
+         ]
+      }
+   },
+   "components":{  
+      "schemas":{  
+         "StringParam":{  
+            "properties":{  
+               "a":{  
+                  "type":"string",
+                  "format":null,
+                  "nullable":false,
+                  "minimum":null,
+                  "maximum":null,
+                  "example":null
+               },
+               "optional":{  
+                  "type":"string",
+                  "format":null,
+                  "nullable":true,
+                  "minimum":null,
+                  "maximum":null,
+                  "example":null
+               }
+            },
+            "required":[  
+               "a"
+            ],
+            "nullable":false,
+            "example":null,
+            "type":"object"
+         },
+         "StringResponse":{  
+            "properties":{  
+               "str":{  
+                  "type":"string",
+                  "format":null,
+                  "nullable":false,
+                  "minimum":null,
+                  "maximum":null,
+                  "example":null
+               }
+            },
+            "required":[  
+               "str"
+            ],
+            "nullable":false,
+            "example":null,
+            "type":"object"
+         },
+         "StringUsable":{  
+            "properties":{  
+               "str":{  
+                  "type":"string",
+                  "format":null,
+                  "nullable":false,
+                  "minimum":null,
+                  "maximum":null,
+                  "example":null
+               }
+            },
+            "required":[  
+               "str"
+            ],
+            "nullable":false,
+            "example":null,
+            "type":"object"
+         }
+      },
+      "responses":{  
+
+      },
+      "parameters":{  
+
+      },
+      "examples":{  
+
+      },
+      "requestBodies":{  
+
+      },
+      "headers":{  
+
+      },
+      "securitySchemes":{  
+
+      }
+   },
+   "security":[  
+
+   ],
+   "tags":[  
+
+   ],
+   "externalDocs":null
+}
+```
 
 Full Example:
 
