@@ -49,19 +49,6 @@ inline fun <T: OpenAPIRoute<T>> T.provider(vararg content: ContentTypeProvider, 
     provider(*content).fn()
 }
 
-fun <T: OpenAPIRoute<T>> T.exclude(vararg content: ContentTypeProvider): T {
-    return child().apply {
-        content.forEach {
-            provider.unRegisterModule(it)
-        }
-    }
-}
-
-@ContextDsl
-inline fun <T: OpenAPIRoute<T>> T.exclude(vararg content: ContentTypeProvider, crossinline fn: T.() -> Unit) {
-    exclude(*content).fn()
-}
-
 
 fun <T: OpenAPIRoute<T>> T.tag(tag: APITag): T {
     return child().apply {

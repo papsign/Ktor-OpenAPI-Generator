@@ -5,12 +5,11 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.github.jengelman.gradle.plugins:shadow:4.0.2"
     }
 }
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.3.30'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 group 'com.papsign.ktor'
@@ -36,11 +35,14 @@ dependencies {
     implementation "io.ktor:ktor-client-apache:$ktor_version"
     // ------------------------
     
-    implementation "io.ktor:ktor-jackson:$ktor_version" // needed for parameter parsing
+    implementation "io.ktor:ktor-jackson:$ktor_version" // needed for parameter parsing and multipart parsing
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8" // needed for multipart parsing
     implementation 'org.webjars:swagger-ui:3.18.2'
-
-    testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8"
+ 
+    implementation "org.reflections:reflections:0.9.11" // only used while initializing
+    
     testImplementation "io.ktor:ktor-server-netty:$ktor_version"
+    testImplementation "io.ktor:ktor-server-test-host:$ktor_version"
     
 }
 

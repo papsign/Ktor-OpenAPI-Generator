@@ -9,7 +9,7 @@ import com.papsign.ktor.openapigen.openapi.Schema.SchemaLitteral
 import com.papsign.ktor.openapigen.put
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.*
 import kotlin.reflect.KType
 
@@ -48,11 +48,11 @@ class PrimitiveSchemas(val namer: SchemaNamer) : PartialSchemaRegistrar {
             registerSchema<BigDecimal>(DataType.number)
             registerSchema<BigDecimal?>(DataType.number)
 
-            registerSchema<Date>(DataType.string, DataFormat.date)
-            registerSchema<Date?>(DataType.string, DataFormat.date)
+            registerSchema<Instant>(DataType.string, DataFormat.`date-time`)
+            registerSchema<Instant?>(DataType.string, DataFormat.`date-time`)
 
-            registerSchema<LocalDateTime>(DataType.string, DataFormat.`date-time`)
-            registerSchema<LocalDateTime?>(DataType.string, DataFormat.`date-time`)
+            registerSchema<Date>(DataType.string, DataFormat.`date-time`)
+            registerSchema<Date?>(DataType.string, DataFormat.`date-time`)
         }
 
         inline fun <reified T> MutableSchemaMap.registerSchema(

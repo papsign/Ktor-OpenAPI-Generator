@@ -41,10 +41,13 @@ data class RequestBody<T>(
 )
 
 data class MediaType<T>(
-    var schema: Schema<T>? = null,
-    var example: T? = null,
-    var examples: MutableMap<String, T>? = null
+    val schema: Schema<T>? = null,
+    val example: T? = null,
+    val examples: MutableMap<String, T>? = null,
+    val encoding: Map<String, MediaTypeEncoding>? = null
 )
+
+data class MediaTypeEncoding(val contentType: String)
 
 data class StatusResponse(
     var description: String,

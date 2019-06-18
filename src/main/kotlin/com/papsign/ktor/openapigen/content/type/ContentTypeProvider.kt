@@ -8,6 +8,15 @@ import io.ktor.http.ContentType
 import kotlin.reflect.KType
 
 interface ContentTypeProvider: OpenAPIModule {
-    val contentType: ContentType
-    fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T? = null): MediaType<T>?
+
+    enum class Usage {
+        SERIALIZE, PARSE
+    }
+
+    /**
+     * Done once when routes are created, for request object and response object
+     * @return null to disable module, or [Map] to register the handler on every content type
+     * @throws Exception to signal a bad configuration (usually with assert)
+     */
+    fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: Usage): Map<ContentType, MediaType<T>>?
 }

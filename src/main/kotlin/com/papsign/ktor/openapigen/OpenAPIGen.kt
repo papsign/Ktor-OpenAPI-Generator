@@ -1,8 +1,7 @@
 package com.papsign.ktor.openapigen
 
-import com.papsign.ktor.openapigen.content.type.ktor.KtorJSONContentProvider
-import com.papsign.ktor.openapigen.content.type.ktor.KtorJSONParser
-import com.papsign.ktor.openapigen.content.type.ktor.KtorJSONSerializer
+import com.papsign.ktor.openapigen.annotations.encodings.APIEncoding
+import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.schema.*
 import com.papsign.ktor.openapigen.openapi.ExternalDocumentation
@@ -14,6 +13,7 @@ import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
 import io.ktor.request.path
 import io.ktor.util.AttributeKey
+import org.reflections.Reflections
 import kotlin.reflect.KType
 
 class OpenAPIGen(private val config: Configuration) {
@@ -31,9 +31,18 @@ class OpenAPIGen(private val config: Configuration) {
     private val registrars: Array<out PartialSchemaRegistrar> = config.registrars.plus(PrimitiveSchemas(schemaNamer))
     val schemaRegistrar = Schemas()
 
-    val globalModuleProvider = CachingModuleProvider().apply {
-        registerModule(KtorJSONParser)
-        registerModule(KtorJSONSerializer)
+    val globalModuleProvider = CachingModuleProvider()
+
+    init {
+        val reflections = Reflections(this::class.java.`package`.name)
+        val classes = reflections.getTypesAnnotatedWith(APIEncoding::class.java).mapNotNull { it.kotlin.objectInstance }
+        classes.forEach {
+            when (it) {
+                is ContentTypeProvider -> {
+                    globalModuleProvider.registerModule(it)
+                }
+            }
+        }
     }
 
     class Configuration(val api: OpenAPI) {
@@ -94,7 +103,7 @@ class OpenAPIGen(private val config: Configuration) {
         return tag.name
     }
 
-    companion object Feature : ApplicationFeature<ApplicationCallPipeline, OpenAPIGen.Configuration, OpenAPIGen> {
+    companion object Feature : ApplicationFeature<ApplicationCallPipeline, Configuration, OpenAPIGen> {
 
         override val key = AttributeKey<OpenAPIGen>("OpenAPI Generator")
 

@@ -24,7 +24,7 @@ inline fun <reified T> getKType(): KType {
 open class SuperTypeTokenHolder<T>
 
 fun SuperTypeTokenHolder<*>.getKTypeImpl(): KType =
-    javaClass.genericSuperclass.toKType().arguments.single().type!!
+        javaClass.genericSuperclass.toKType().arguments.single().type!!
 
 fun KClass<*>.toInvariantFlexibleProjection(arguments: List<KTypeProjection> = emptyList()): KTypeProjection {
     // TODO: there should be an API in kotlin-reflect which creates KType instances corresponding to flexible types
@@ -52,7 +52,7 @@ fun Type.toKTypeProjection(): KTypeProjection = when (this) {
     is WildcardType -> when {
         lowerBounds.isNotEmpty() -> KTypeProjection.contravariant(lowerBounds.single().toKType())
         upperBounds.isNotEmpty() -> KTypeProjection.covariant(upperBounds.single().toKType())
-        // This looks impossible to obtain through Java com.papsign.reflection API, but someone may construct and pass such an instance here anyway
+        // This looks impossible to obtain through Java reflection API, but someone may construct and pass such an instance here anyway
         else -> KTypeProjection.STAR
     }
     is GenericArrayType -> Array<Any>::class.toInvariantFlexibleProjection(listOf(genericComponentType.toKTypeProjection()))
@@ -100,6 +100,7 @@ private fun getObjectSubTypes(type: KType): Set<KType> {
     }.toSet()
 }
 
+
 private fun makeMapSchema(type: KType): Set<KType> {
     return setOf(type.arguments[1].type!!, getKType<String>())
 }
@@ -108,13 +109,17 @@ fun KType.allTypes(): Set<KType> {
     return getTypeSubTypes(this)
 }
 
+fun KType.getObjectSubtypes(): Set<KType> {
+    return getObjectSubTypes(this)
+}
+
 // --- Usage example ---
 
-fun main(args: Array<String>) {
-    println(getKType<List<Map<String, Array<Double>>>>())
-    println(getKType<List<*>>())
-    println(getKType<Array<*>>())
-    println(getKType<Array<Int?>?>())
-    println(getKType<Array<Array<String>>>())
-    println(getKType<Unit>())
-}
+//fun main(args: Array<String>) {
+//    println(getKType<List<Map<String, Array<Double>>>>())
+//    println(getKType<List<*>>())
+//    println(getKType<Array<*>>())
+//    println(getKType<Array<Int?>?>())
+//    println(getKType<Array<Array<String>>>())
+//    println(getKType<Unit>())
+//}

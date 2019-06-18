@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
+import com.papsign.ktor.openapigen.content.type.SelectedParser
+import com.papsign.ktor.openapigen.content.type.SelectedSerializer
 import com.papsign.ktor.openapigen.exceptions.OpenAPINoParserException
 import com.papsign.ktor.openapigen.exceptions.OpenAPINoSerializerException
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
@@ -26,8 +28,8 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
     abstract fun child(route: Route = this.ktorRoute): T
 
     inline fun <reified P : Any, reified B : Any, C : OpenAPIPipelineContext> handle(
-        crossinline body: suspend C.(P, B) -> Unit,
-        crossinline createContext: OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>) -> C
+            crossinline body: suspend C.(P, B) -> Unit,
+            crossinline createContext: OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>) -> C
     ) {
         val apiGen = ktorRoute.application.openAPIGen
         provider.ofClass<HandlerModule>().forEach {
@@ -51,14 +53,18 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
 
     fun getResponseSerializer(req: ApplicationRequest): ResponseSerializer {
         val accept = req.acceptItems()
-        val serializers = provider.ofClass<ResponseSerializer>()
-        accept.forEach { acc ->
-            serializers.lastOrNull { ser -> ser.contentType.match(acc.value) }?.let { return it }
+        val serializers = provider.ofClass<SelectedSerializer>()
+        if (accept.isEmpty()) {
+            serializers.firstOrNull()?.module?.let { return it }
+        } else {
+            accept.forEach { acc ->
+                serializers.firstOrNull { ser -> ser.module.accept(ContentType.parse(acc.value)) }?.let { return it.module }
+            }
         }
         throw OpenAPINoSerializerException(accept.map { ContentType.parse(it.value) })
     }
 
     fun getBodyParser(contentType: ContentType): BodyParser {
-        return provider.ofClass<BodyParser>().lastOrNull { contentType.match(it.contentType) } ?: throw OpenAPINoParserException(contentType)
+        return provider.ofClass<SelectedParser>().firstOrNull()?.module ?: throw OpenAPINoParserException(contentType)
     }
 }

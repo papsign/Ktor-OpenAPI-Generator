@@ -82,7 +82,7 @@ class OAuth2Handler<A, T>(
     }
 
     companion object {
-        private fun ApplicationCall.defaultURLProvider(settings: OAuthServerSettings): String {
+        fun ApplicationCall.defaultURLProvider(settings: OAuthServerSettings): String {
             val defaultPort = if (request.origin.scheme == "http") 80 else 443
             val hostPort = request.host() + request.port().let { port -> if (port == defaultPort) "" else ":$port" }
             val protocol = request.origin.scheme
