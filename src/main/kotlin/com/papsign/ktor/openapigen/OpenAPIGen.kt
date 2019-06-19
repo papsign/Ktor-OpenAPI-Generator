@@ -1,6 +1,6 @@
 package com.papsign.ktor.openapigen
 
-import com.papsign.ktor.openapigen.annotations.encodings.APIEncoding
+import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.schema.*
@@ -8,15 +8,16 @@ import com.papsign.ktor.openapigen.openapi.ExternalDocumentation
 import com.papsign.ktor.openapigen.openapi.OpenAPI
 import com.papsign.ktor.openapigen.openapi.Schema.SchemaRef
 import com.papsign.ktor.openapigen.openapi.Server
-import io.ktor.application.ApplicationCallPipeline
-import io.ktor.application.ApplicationFeature
-import io.ktor.application.call
+import io.ktor.application.*
 import io.ktor.request.path
 import io.ktor.util.AttributeKey
 import org.reflections.Reflections
 import kotlin.reflect.KType
 
-class OpenAPIGen(private val config: Configuration) {
+class OpenAPIGen(
+        private val config: Configuration,
+        @Deprecated("Will be replaced with less dangerous alternative when the use case has been fleshed out.") val pipeline: ApplicationCallPipeline
+) {
 
     val api = config.api
 
@@ -35,7 +36,7 @@ class OpenAPIGen(private val config: Configuration) {
 
     init {
         val reflections = Reflections(this::class.java.`package`.name)
-        val classes = reflections.getTypesAnnotatedWith(APIEncoding::class.java).mapNotNull { it.kotlin.objectInstance }
+        val classes = reflections.getTypesAnnotatedWith(APIFormatter::class.java).mapNotNull { it.kotlin.objectInstance }
         classes.forEach {
             when (it) {
                 is ContentTypeProvider -> {
@@ -118,7 +119,7 @@ class OpenAPIGen(private val config: Configuration) {
                         ui.serve(call.request.path().removePrefix(cmp), call)
                 }
             }
-            return OpenAPIGen(cfg)
+            return OpenAPIGen(cfg, pipeline)
         }
     }
 }

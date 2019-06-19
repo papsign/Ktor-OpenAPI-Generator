@@ -13,7 +13,7 @@ inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.get(
     vararg modules: RouteOpenAPIModule,
     example: R? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
-) = route<P, R, Unit>(HttpMethod.Get, modules, example) { p, _ -> body(p) }
+) = route(HttpMethod.Get, modules, example, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRoute.post(
@@ -44,14 +44,14 @@ inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.delete(
     vararg modules: RouteOpenAPIModule,
     example: R? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
-) = route<P, R, Unit>(HttpMethod.Delete, modules, example) { p, _ -> body(p) }
+) = route(HttpMethod.Delete, modules, example, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.head(
     vararg modules: RouteOpenAPIModule,
     example: R? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
-) = route<P, R, Unit>(HttpMethod.Head, modules, example) { p, _ -> body(p) }
+) = route(HttpMethod.Head, modules, example, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRoute.route(
@@ -65,12 +65,32 @@ inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRout
 }
 
 @ContextDsl
+inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.route(
+    method: HttpMethod,
+    modules: Array<out RouteOpenAPIModule>,
+    exampleResponse: R? = null,
+    crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
+) {
+    method(method).apply { modules.forEach(provider::registerModule) }.handle(exampleResponse, body)
+}
+
+@ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRoute.handle(
     exampleResponse: R? = null,
     exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit
 ) {
     preHandle<P, R, B, NormalOpenAPIRoute>(exampleResponse, exampleRequest) {
+        handle(body)
+    }
+}
+
+@ContextDsl
+inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.handle(
+    exampleResponse: R? = null,
+    crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
+) {
+    preHandle<P, R, Unit, NormalOpenAPIRoute>(exampleResponse, Unit) {
         handle(body)
     }
 }

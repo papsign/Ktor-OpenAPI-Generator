@@ -15,7 +15,7 @@ inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.ge
     vararg modules: RouteOpenAPIModule,
     example: R? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
-) = route<P, R, Unit, A>(HttpMethod.Get, modules, example) { p, _ -> body(p) }
+) = route(HttpMethod.Get, modules, example, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.post(
@@ -46,14 +46,14 @@ inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.de
     vararg modules: RouteOpenAPIModule,
     example: R? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
-) = route<P, R, Unit, A>(HttpMethod.Delete, modules, example) { p, _ -> body(p) }
+) = route(HttpMethod.Delete, modules, example, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.head(
     vararg modules: RouteOpenAPIModule,
     example: R? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
-) = route<P, R, Unit, A>(HttpMethod.Head, modules, example) { p, _ -> body(p) }
+) = route(HttpMethod.Head, modules, example, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.route(
@@ -67,6 +67,16 @@ inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthent
 }
 
 @ContextDsl
+inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.route(
+    method: HttpMethod,
+    modules: Array<out RouteOpenAPIModule>,
+    exampleResponse: R? = null,
+    crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+) {
+    method(method).apply { modules.forEach(provider::registerModule) }.handle(exampleResponse, body)
+}
+
+@ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.handle(
     exampleResponse: R? = null,
     exampleRequest: B? = null,
@@ -77,11 +87,21 @@ inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthent
     }
 }
 
+@ContextDsl
+inline fun <reified P : Any, reified R : Any,  A> OpenAPIAuthenticatedRoute<A>.handle(
+    exampleResponse: R? = null,
+    crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+) {
+    preHandle<P, R, Unit, OpenAPIAuthenticatedRoute<A>>(exampleResponse, Unit) {
+        handle(body)
+    }
+}
+
 suspend fun <A> OpenAPIPipelineAuthContext<A, *>.principal() = authProvider.getAuth(pipeline)
 
 
-inline fun <A, T> NormalOpenAPIRoute.auth(handler: OAuth2Handler<A, T>, vararg scopes: T, noinline fn: OpenAPIAuthenticatedRoute<A>.()->Unit) where T: Enum<T>, T: Described = auth(handler, scopes.asList(), fn)
+inline fun <A, T> NormalOpenAPIRoute.auth(handler: OAuth2Handler<A, T>, vararg scopes: T, crossinline fn: OpenAPIAuthenticatedRoute<A>.()->Unit) where T: Enum<T>, T: Described = auth(handler, scopes.asList(), fn)
 
-inline fun <A, T> NormalOpenAPIRoute.auth(handler: OAuth2Handler<A, T>, scopes: List<T>, noinline fn: OpenAPIAuthenticatedRoute<A>.()->Unit) where T: Enum<T>, T: Described {
+inline fun <A, T> NormalOpenAPIRoute.auth(handler: OAuth2Handler<A, T>, scopes: List<T>, crossinline fn: OpenAPIAuthenticatedRoute<A>.()->Unit) where T: Enum<T>, T: Described {
     handler.auth(this, scopes).fn()
 }

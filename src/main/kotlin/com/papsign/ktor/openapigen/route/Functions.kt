@@ -65,7 +65,7 @@ inline fun <T: OpenAPIRoute<T>> T.tag(tag: APITag, crossinline fn: T.() -> Unit)
 inline fun <reified P : Any, reified R : Any, reified B : Any, T: OpenAPIRoute<T>> T.preHandle(
     exampleResponse: R? = null,
     exampleRequest: B? = null,
-    crossinline handle: T.() -> Unit
+    handle: T.() -> Unit
 ) {
     val path = P::class.findAnnotation<Path>()
     val new = if (path != null) child(ktorRoute.createRouteFromPath(path.path)) else child()

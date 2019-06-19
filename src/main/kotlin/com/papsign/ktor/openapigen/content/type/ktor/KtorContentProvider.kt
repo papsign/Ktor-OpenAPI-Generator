@@ -3,7 +3,9 @@ package com.papsign.ktor.openapigen.content.type.ktor
 import com.papsign.kotlin.reflection.allTypes
 import com.papsign.kotlin.reflection.getKType
 import com.papsign.ktor.openapigen.OpenAPIGen
-import com.papsign.ktor.openapigen.annotations.encodings.APIEncoding
+import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
+import com.papsign.ktor.openapigen.annotations.encodings.APIRequestFormat
+import com.papsign.ktor.openapigen.annotations.encodings.APIResponseFormat
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
@@ -15,8 +17,8 @@ import com.papsign.ktor.openapigen.openapi.DataFormat
 import com.papsign.ktor.openapigen.openapi.DataType
 import com.papsign.ktor.openapigen.openapi.MediaType
 import com.papsign.ktor.openapigen.openapi.Schema
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
+import io.ktor.application.*
+import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
@@ -31,11 +33,18 @@ import kotlin.reflect.jvm.jvmErasure
 /**
  * default content provider using the ktor pipeline to handle the serialization and deserialization
  */
-@APIEncoding
+@APIFormatter
 object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer {
 
-    private val contentType = ContentType.Application.Json
     private val arrayType = getKType<ByteArray>()
+    private var contentNegotiation: ContentNegotiation? = null
+    private var contentTypes: Set<ContentType>? = null
+
+    private fun initContentTypes(apiGen: OpenAPIGen): Set<ContentType>? {
+        contentNegotiation = contentNegotiation ?: apiGen.pipeline.featureOrNull(ContentNegotiation) ?: return null
+        contentTypes = contentNegotiation!!.registrations.map { it.contentType }.toSet()
+        return contentTypes
+    }
 
     private class Registrar(val previous: SchemaRegistrar) : SchemaRegistrar {
 
@@ -55,26 +64,46 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
     }
 
     override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage):Map<ContentType, MediaType<T>>? {
-        if (type.jvmErasure.annotations.find { it.annotationClass.findAnnotation<APIEncoding>() != null } != null) return null //fallback
+        val clazz = type.jvmErasure
+        when (usage) { // check if it is explicitly declared or none is present
+            ContentTypeProvider.Usage.PARSE -> when {
+                clazz.findAnnotation<KtorRequest>() != null -> {}
+                clazz.findAnnotation<APIRequestFormat>() == null -> {}
+                else -> return null
+            }
+            ContentTypeProvider.Usage.SERIALIZE -> when {
+                clazz.findAnnotation<KtorResponse>() != null -> {}
+                clazz.findAnnotation<APIResponseFormat>() == null -> {}
+                else -> return null
+            }
+        }
+        val contentTypes = initContentTypes(apiGen) ?: return null
         val reg = if (type.allTypes().contains(arrayType)) {
             Registrar(SimpleSchemaRegistrar(apiGen.schemaRegistrar.namer))
         } else apiGen.schemaRegistrar
 
+        val media =  MediaType(reg[type].schema as Schema<T>, example)
         @Suppress("UNCHECKED_CAST")
-        return mapOf(contentType to MediaType(reg[type].schema as Schema<T>, example))
+        return contentTypes.associateWith { media.copy() }
+    }
+
+    override fun <T : Any> getParseableContentTypes(clazz: KClass<T>): List<ContentType> {
+        return contentTypes!!.toList()
     }
 
     override suspend fun <T: Any> parseBody(clazz: KClass<T>, request: PipelineContext<Unit, ApplicationCall>): T {
         return request.call.receive(clazz)
     }
 
-    override fun accept(contentType: ContentType): Boolean = this.contentType.match(contentType)
+    override fun <T: Any> getSerializableContentTypes(clazz: KClass<T>): List<ContentType> {
+        return contentTypes!!.toList()
+    }
 
-    override suspend fun <T: Any> respond(response: T, request: PipelineContext<Unit, ApplicationCall>) {
+    override suspend fun <T: Any> respond(response: T, request: PipelineContext<Unit, ApplicationCall>, contentType: ContentType) {
         request.call.respond(response)
     }
 
-    override suspend fun <T: Any> respond(statusCode: HttpStatusCode, response: T, request: PipelineContext<Unit, ApplicationCall>) {
+    override suspend fun <T: Any> respond(statusCode: HttpStatusCode, response: T, request: PipelineContext<Unit, ApplicationCall>, contentType: ContentType) {
         request.call.respond(statusCode, response)
     }
 }

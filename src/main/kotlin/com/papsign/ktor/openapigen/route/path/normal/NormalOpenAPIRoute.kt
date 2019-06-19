@@ -12,9 +12,15 @@ class NormalOpenAPIRoute(route: Route, provider: CachingModuleProvider = Caching
         return NormalOpenAPIRoute(route, provider.child())
     }
 
-    inline fun <reified P : Any, R: Any, reified B : Any> handle(crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit) {
-        handle(body) {
-            ResponseContextImpl(it, this)
+    inline fun <reified P : Any, reified R: Any, reified B : Any> handle(crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit) {
+        handle<P, R, B> {pipeline, responder, p, b ->
+            ResponseContextImpl<R>(pipeline, this, responder).body(p, b)
+        }
+    }
+
+    inline fun <reified P : Any, reified R: Any> handle(crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit) {
+        handle<P, R, Unit> {pipeline, responder, p, _ ->
+            ResponseContextImpl<R>(pipeline, this, responder).body(p)
         }
     }
 }

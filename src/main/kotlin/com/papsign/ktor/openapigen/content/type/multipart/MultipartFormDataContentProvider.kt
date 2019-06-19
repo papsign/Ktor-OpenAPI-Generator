@@ -3,7 +3,7 @@ package com.papsign.ktor.openapigen.content.type.multipart
 import com.papsign.kotlin.reflection.getKType
 import com.papsign.kotlin.reflection.getObjectSubtypes
 import com.papsign.ktor.openapigen.OpenAPIGen
-import com.papsign.ktor.openapigen.annotations.encodings.APIEncoding
+import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.exceptions.assertContent
@@ -29,9 +29,12 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.jvmErasure
 
-@APIEncoding
+@APIFormatter
 object MultipartFormDataContentProvider : BodyParser {
 
+    override fun <T : Any> getParseableContentTypes(clazz: KClass<T>): List<ContentType> {
+        return listOf(ContentType.MultiPart.FormData)
+    }
 
     private class Registrar(val previous: SchemaRegistrar) : SchemaRegistrar {
 
