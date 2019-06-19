@@ -7,7 +7,7 @@ data class Operation(
     var externalDocs: ExternalDocumentation? = null,
     var operationId: String? = null,
     var parameters: List<Parameter<*>>? = null,
-    var requestBody: RequestBody<*>? = null,
+    var requestBody: RequestBody? = null,
     var responses: MutableMap<String, StatusResponse> = mutableMapOf(),
     // var callbacks ...
     var deprecated: Boolean? = null,

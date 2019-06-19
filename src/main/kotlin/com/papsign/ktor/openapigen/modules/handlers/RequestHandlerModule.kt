@@ -3,6 +3,7 @@ package com.papsign.ktor.openapigen.modules.handlers
 import com.papsign.kotlin.reflection.getKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Request
+import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.SelectedParser
@@ -21,15 +22,29 @@ class RequestHandlerModule<T : Any>(
         val requestType: KType,
         val requestExample: T? = null
 ) : OperationModule {
+
+    private val log = classLogger()
+
     override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: Operation) {
-        operation.requestBody = RequestBody(provider.ofClass<BodyParser>().mapNotNull {
+        val map = provider.ofClass<BodyParser>().mapNotNull {
             val mediaType = it.getMediaType(requestType, apiGen, provider, requestExample, ContentTypeProvider.Usage.PARSE)
                     ?: return@mapNotNull null
             provider.registerModule(SelectedParser(it))
             mediaType.map { Pair(it.key.toString(), it.value) }
-        }.flatten().fold(mutableMapOf<String, MediaType<T>>()) { a, b -> a[b.first] = b.second; a },
-                description = requestClass.findAnnotation<Request>()?.description
-        )
+        }.flatten().associate { it }
+
+        val requestMeta = requestClass.findAnnotation<Request>()
+
+        operation.requestBody = operation.requestBody?.apply {
+            map.forEach { (key, value) ->
+                content.putIfAbsent(key, value)?.let { if (value != it) log.warn("ContentType of $requestType request $key already registered, ignoring $value") }
+            }
+            if (description != null) {
+                if (requestMeta?.description != null) log.warn("ContentType description of $requestType request already registered, ignoring")
+            } else {
+                description = requestMeta?.description
+            }
+        } ?: RequestBody(map.toMutableMap(), description = requestMeta?.description)
     }
 
     companion object {

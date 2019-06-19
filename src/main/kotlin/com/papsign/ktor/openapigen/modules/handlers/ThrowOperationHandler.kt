@@ -1,6 +1,8 @@
 package com.papsign.ktor.openapigen.modules.handlers
 
+import com.papsign.kotlin.reflection.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
+import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
 import com.papsign.ktor.openapigen.content.type.SelectedSerializer
@@ -14,12 +16,14 @@ import com.papsign.ktor.openapigen.openapi.Schema
 import com.papsign.ktor.openapigen.openapi.StatusResponse
 
 object ThrowOperationHandler : OperationModule {
+    private val log = classLogger()
     override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: Operation) {
 
         val exceptions = provider.ofClass<ThrowInfoProvider>().flatMap { it.exceptions }
         exceptions.groupBy { it.status }.forEach { exceptions ->
-            val mediaTypes: MutableMap<String, MediaType<*>> = exceptions.value.flatMap { ex ->
+            val map: MutableMap<String, MediaType<*>> = exceptions.value.flatMap { ex ->
                 provider.ofClass<ResponseSerializer>().mapNotNull {
+                    if (ex.contentType == unitKType) return@mapNotNull null
                     val mediaType = it.getMediaType<Any>(ex.contentType, apiGen, provider, null, ContentTypeProvider.Usage.SERIALIZE) ?: return@mapNotNull null
                     provider.registerModule(SelectedSerializer(it))
                     mediaType.map { Pair(it.key.toString(), it.value) }
@@ -33,10 +37,13 @@ object ThrowOperationHandler : OperationModule {
                 }
                 MediaType(schema)
             }.toMutableMap()
-            val status = exceptions.key
-            val prev = operation.responses[status.value.toString()]
-            if (prev != null) error("Error Mapping Exception handlers on $status, it is already in use by ${status.description(prev.description)}")
-            operation.responses[status.value.toString()] = StatusResponse(status.description, content = mediaTypes)
+            val statusCode = exceptions.key
+            val status = statusCode.value.toString()
+            operation.responses[status] = operation.responses[status]?.apply {
+                map.forEach { (key, value) ->
+                    content.putIfAbsent(key, value)?.let { if (value != it) log.warn("Cannot map Exception handler on $status with type $key, it is already in use by ${statusCode.description(description)}") }
+                }
+            } ?: StatusResponse(statusCode.description, content = map.toMutableMap())
         }
     }
 }

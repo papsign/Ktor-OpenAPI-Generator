@@ -21,6 +21,9 @@ class PrimitiveSchemas(val namer: SchemaNamer) : PartialSchemaRegistrar {
 
     companion object {
         private val basicSchemas = LinkedHashSchemaMap().apply {
+            registerSchema<Any>(DataType.`object`)
+            registerSchema<Any?>(DataType.`object`)
+
             registerSchema<Boolean>(DataType.boolean)
             registerSchema<Boolean?>(DataType.boolean)
 

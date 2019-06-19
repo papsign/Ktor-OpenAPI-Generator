@@ -34,8 +34,8 @@ enum class DataFormat {
     int32, int64, float, double, string, byte, binary, date, `date-time`, password, email, uuid
 }
 
-data class RequestBody<T>(
-    var content: MutableMap<String, MediaType<T>>,
+data class RequestBody(
+    var content: MutableMap<String, MediaType<*>>,
     var description: String? = null,
     var required: Boolean? = null
 )
@@ -105,7 +105,7 @@ data class Components(
     var responses: MutableMap<String, StatusResponse> = sortedMapOf(),
     var parameters: MutableMap<String, Parameter<*>> = sortedMapOf(),
     var examples: MutableMap<String, Example<*>> = sortedMapOf(),
-    var requestBodies: MutableMap<String, RequestBody<*>> = sortedMapOf(),
+    var requestBodies: MutableMap<String, RequestBody> = sortedMapOf(),
     var headers: MutableMap<String, Header<*>> = sortedMapOf(),
     var securitySchemes: MutableMap<String, SecurityScheme<*>> = sortedMapOf()
     //links

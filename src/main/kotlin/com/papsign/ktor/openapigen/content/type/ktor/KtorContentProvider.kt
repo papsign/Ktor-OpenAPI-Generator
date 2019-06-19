@@ -68,12 +68,12 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
         when (usage) { // check if it is explicitly declared or none is present
             ContentTypeProvider.Usage.PARSE -> when {
                 clazz.findAnnotation<KtorRequest>() != null -> {}
-                clazz.findAnnotation<APIRequestFormat>() == null -> {}
+                clazz.annotations.none { it.annotationClass.findAnnotation<APIRequestFormat>() != null } -> {}
                 else -> return null
             }
             ContentTypeProvider.Usage.SERIALIZE -> when {
                 clazz.findAnnotation<KtorResponse>() != null -> {}
-                clazz.findAnnotation<APIResponseFormat>() == null -> {}
+                clazz.annotations.none { it.annotationClass.findAnnotation<APIResponseFormat>() != null } -> {}
                 else -> return null
             }
         }

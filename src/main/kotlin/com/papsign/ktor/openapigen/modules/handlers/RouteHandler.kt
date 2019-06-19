@@ -33,7 +33,7 @@ object RouteHandler: HandlerModule {
             pathItem.parameters = (pathItem.parameters + parameters).distinct()
             methods.forEach {
                 val name = it.method.value.toLowerCase()
-                if (pathItem.containsKey(name)) error("$path::$name already defined")
+                //if (pathItem.containsKey(name)) error("$path::$name already defined")
                 val op = pathItem.getOrPut(name) { Operation() } as Operation
                 operationModules.forEach {
                     it.configure(apiGen, provider, op)
