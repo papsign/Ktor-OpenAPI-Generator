@@ -44,7 +44,7 @@ class RequestHandlerModule<T : Any>(
             } else {
                 description = requestMeta?.description
             }
-        } ?: RequestBody(map.toMutableMap(), description = requestMeta?.description)
+        } ?: if (map.isNotEmpty()) RequestBody(map.toMutableMap(), description = requestMeta?.description) else null
     }
 
     companion object {

@@ -70,12 +70,12 @@ inline fun <reified P : Any, reified R : Any, reified B : Any, T: OpenAPIRoute<T
     val path = P::class.findAnnotation<Path>()
     val new = if (path != null) child(ktorRoute.createRouteFromPath(path.path)) else child()
     new.apply {
-        if (Unit !is B) provider.registerModule(
+        provider.registerModule(
             RequestHandlerModule.create(
                 exampleRequest
             )
         )
-        if (Unit !is R) provider.registerModule(
+        provider.registerModule(
             ResponseHandlerModule.create(
                 exampleResponse
             )

@@ -2,6 +2,7 @@ package com.papsign.ktor.openapigen.content.type.ktor
 
 import com.papsign.kotlin.reflection.allTypes
 import com.papsign.kotlin.reflection.getKType
+import com.papsign.kotlin.reflection.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
 import com.papsign.ktor.openapigen.annotations.encodings.APIRequestFormat
@@ -64,6 +65,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
     }
 
     override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage):Map<ContentType, MediaType<T>>? {
+        if (type == unitKType) return null
         val clazz = type.jvmErasure
         when (usage) { // check if it is explicitly declared or none is present
             ContentTypeProvider.Usage.PARSE -> when {

@@ -2,6 +2,7 @@ package com.papsign.ktor.openapigen.content.type.multipart
 
 import com.papsign.kotlin.reflection.getKType
 import com.papsign.kotlin.reflection.getObjectSubtypes
+import com.papsign.kotlin.reflection.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
 import com.papsign.ktor.openapigen.content.type.BodyParser
@@ -125,6 +126,7 @@ object MultipartFormDataContentProvider : BodyParser {
 
 
     override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaType<T>>? {
+        if (type == unitKType) return null
         type.jvmErasure.findAnnotation<FormDataRequest>() ?: return null
         when (usage) {
             ContentTypeProvider.Usage.PARSE -> {

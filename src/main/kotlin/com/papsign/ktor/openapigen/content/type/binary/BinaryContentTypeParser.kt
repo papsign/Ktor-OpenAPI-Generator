@@ -2,6 +2,7 @@ package com.papsign.ktor.openapigen.content.type.binary
 
 import com.papsign.kotlin.reflection.getKType
 import com.papsign.kotlin.reflection.getObjectSubtypes
+import com.papsign.kotlin.reflection.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
@@ -58,6 +59,7 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer {
     }
 
     override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaType<T>>? {
+        if (type == unitKType) return null
         val contentTypes = when(usage) {
             ContentTypeProvider.Usage.PARSE -> {
                 val binaryRequest = type.jvmErasure.findAnnotation<BinaryRequest>() ?: return null

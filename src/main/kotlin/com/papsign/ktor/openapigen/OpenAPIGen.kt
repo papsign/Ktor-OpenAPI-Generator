@@ -11,7 +11,10 @@ import com.papsign.ktor.openapigen.openapi.Server
 import io.ktor.application.*
 import io.ktor.request.path
 import io.ktor.util.AttributeKey
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.reflections.Reflections
+import javax.xml.bind.JAXBElement
 import kotlin.reflect.KType
 
 class OpenAPIGen(
@@ -26,7 +29,7 @@ class OpenAPIGen(
     val schemaNamer = object : SchemaNamer {
         private val fn = config.schemaNamer
 
-        override fun get(type: KType): String  = fn(type)
+        override fun get(type: KType): String = fn(type)
     }
 
     private val registrars: Array<out PartialSchemaRegistrar> = config.registrars.plus(PrimitiveSchemas(schemaNamer))
@@ -35,7 +38,7 @@ class OpenAPIGen(
     val globalModuleProvider = CachingModuleProvider()
 
     init {
-        val reflections = Reflections(this::class.java.`package`.name)
+        val reflections = Reflections(javaClass.`package`.name)
         val classes = reflections.getTypesAnnotatedWith(APIFormatter::class.java).mapNotNull { it.kotlin.objectInstance }
         classes.forEach {
             when (it) {
@@ -66,13 +69,13 @@ class OpenAPIGen(
         var swaggerUiPath = "swagger-ui"
         var serveSwaggerUi = true
 
-        var schemaNamer: (KType)->String = KType::toString
+        var schemaNamer: (KType) -> String = KType::toString
 
         var registrars: Array<PartialSchemaRegistrar> = arrayOf()
     }
 
 
-    inner class Schemas: SimpleSchemaRegistrar(schemaNamer) {
+    inner class Schemas : SimpleSchemaRegistrar(schemaNamer) {
 
         private val schemas = HashSchemaMap()
         private val names = HashMap<KType, String>()
@@ -90,7 +93,7 @@ class OpenAPIGen(
                 api.components.schemas[name] = schema
                 schema
             }
-            val name= names[type]!!
+            val name = names[type]!!
             return NamedSchema(name, SchemaRef<Any>("#/components/schemas/$name"))
         }
     }
