@@ -40,7 +40,7 @@ object MultipartFormDataContentProvider : BodyParser {
     private class Registrar(val previous: SchemaRegistrar) : SchemaRegistrar {
 
         override fun get(type: KType, master: SchemaRegistrar): NamedSchema {
-            return if (streamTypes.contains(type)) {
+            return if (streamTypes.contains(type.withNullability(false))) {
                 NamedSchema(
                         "InputStream", Schema.SchemaLitteral(
                         DataType.string,
