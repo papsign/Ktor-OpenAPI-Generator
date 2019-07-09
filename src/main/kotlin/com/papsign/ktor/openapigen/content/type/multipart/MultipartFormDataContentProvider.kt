@@ -40,7 +40,7 @@ object MultipartFormDataContentProvider : BodyParser {
     private class Registrar(val previous: SchemaRegistrar) : SchemaRegistrar {
 
         override fun get(type: KType, master: SchemaRegistrar): NamedSchema {
-            return if (streamTypes.contains(type.withNullability(false))) {
+            return if (streamTypes.contains(type)) {
                 NamedSchema(
                         "InputStream", Schema.SchemaLitteral(
                         DataType.string,
@@ -61,7 +61,10 @@ object MultipartFormDataContentProvider : BodyParser {
     private val streamTypes = setOf(
             getKType<InputStream>(),
             getKType<ContentInputStream>(),
-            getKType<NamedFileInputStream>())
+            getKType<NamedFileInputStream>(),
+            getKType<InputStream?>(),
+            getKType<ContentInputStream?>(),
+            getKType<NamedFileInputStream?>())
 
     private val conversions = setOf(
             cvt({ it }, { it }, ""),
@@ -75,7 +78,7 @@ object MultipartFormDataContentProvider : BodyParser {
 
     private val conversionsByType = conversions.associateBy { it.type.withNullability(false) } + conversions.associateBy { it.type.withNullability(true) }
 
-    private val nonNullTypes = streamTypes + streamTypes.map { it.withNullability(true) } + conversionsByType.keys
+    private val nonNullTypes = streamTypes + conversionsByType.keys
 
     private val allowedTypes = nonNullTypes
 
@@ -103,7 +106,7 @@ object MultipartFormDataContentProvider : BodyParser {
         val ctor = clazz.primaryConstructor!!
         return ctor.callBy(ctor.parameters.associateWith {
             val raw = objectMap[it.name]
-            if (raw == null && it.type.isMarkedNullable) {
+            if ((raw == null || (raw !is InputStream && streamTypes.contains(it.type))) && it.type.isMarkedNullable) {
                 null
             } else {
                 if (raw is InputStream) {
