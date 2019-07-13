@@ -6,7 +6,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.pipeline.PipelineContext
 
-class ContentTypeResponder(val responseSerializer: ResponseSerializer, val contentType: ContentType): Responder {
+data class ContentTypeResponder(val responseSerializer: ResponseSerializer, val contentType: ContentType): Responder {
     override suspend fun <T : Any> respond(response: T, request: PipelineContext<Unit, ApplicationCall>) {
         responseSerializer.respond(response, request, contentType)
     }

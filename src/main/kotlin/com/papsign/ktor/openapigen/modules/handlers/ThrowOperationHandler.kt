@@ -5,6 +5,7 @@ import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
+import com.papsign.ktor.openapigen.content.type.SelectedExceptionSerializer
 import com.papsign.ktor.openapigen.content.type.SelectedSerializer
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
@@ -25,7 +26,7 @@ object ThrowOperationHandler : OperationModule {
                 provider.ofClass<ResponseSerializer>().mapNotNull {
                     if (ex.contentType == unitKType) return@mapNotNull null
                     val mediaType = it.getMediaType<Any>(ex.contentType, apiGen, provider, null, ContentTypeProvider.Usage.SERIALIZE) ?: return@mapNotNull null
-                    provider.registerModule(SelectedSerializer(it))
+                    provider.registerModule(SelectedExceptionSerializer(it))
                     mediaType.map { Pair(it.key.toString(), it.value) }
                 }
             }.flatten().groupBy { it.first }.mapValues {
