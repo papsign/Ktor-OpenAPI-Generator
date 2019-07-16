@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.*
+import com.papsign.ktor.openapigen.content.type.ktor.KtorContentProvider
 import com.papsign.ktor.openapigen.exceptions.OpenAPINoParserException
 import com.papsign.ktor.openapigen.exceptions.OpenAPINoSerializerException
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
@@ -37,7 +38,9 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
         }
 
         ktorRoute.apply {
-            getAcceptMap(R::class).forEach { (acceptType, serializers) ->
+            getAcceptMap(R::class).let {
+                if (it.isNotEmpty()) it else listOf(ContentType.Any to listOf(SelectedSerializer(KtorContentProvider)))
+            }.forEach { (acceptType, serializers) ->
                 val responder = ContentTypeResponder(serializers.getResponseSerializer(acceptType), acceptType)
                 accept(acceptType) {
                     if (Unit is B) {
