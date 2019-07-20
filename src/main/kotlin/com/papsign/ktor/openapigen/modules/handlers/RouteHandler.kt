@@ -27,10 +27,8 @@ object RouteHandler: HandlerModule {
         if (methods.size > 1) error("API cannot have two methods simultaneously: ${methods.map { it.method.value }}")
         val paths = provider.ofClass<PathProvider>()
         val path = "/${paths.map { it.path.trim('/') }.filter { it.isNotBlank() }.joinToString("/")}"
-        val parameters = provider.ofClass<ParameterProvider>().flatMap { it.getParameters(ParamBuilder(apiGen, provider)) }
         val operationModules = provider.ofClass<OperationModule>()
         apiGen.api.paths.getOrPut(path) { PathItem() }.also {pathItem ->
-            pathItem.parameters = (pathItem.parameters + parameters).distinct()
             methods.forEach {
                 val name = it.method.value.toLowerCase()
                 //if (pathItem.containsKey(name)) error("$path::$name already defined")

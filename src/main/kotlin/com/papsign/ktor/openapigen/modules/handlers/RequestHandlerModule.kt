@@ -7,9 +7,11 @@ import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.SelectedParser
+import com.papsign.ktor.openapigen.generator.ParamBuilder
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
+import com.papsign.ktor.openapigen.modules.providers.ParameterProvider
 import com.papsign.ktor.openapigen.openapi.MediaType
 import com.papsign.ktor.openapigen.openapi.Operation
 import com.papsign.ktor.openapigen.openapi.RequestBody
@@ -35,6 +37,8 @@ class RequestHandlerModule<T : Any>(
 
         val requestMeta = requestClass.findAnnotation<Request>()
 
+        val parameters = provider.ofClass<ParameterProvider>().flatMap { it.getParameters(ParamBuilder(apiGen, provider)) }
+        operation.parameters = operation.parameters?.let { (it + parameters).distinct() } ?: parameters
         operation.requestBody = operation.requestBody?.apply {
             map.forEach { (key, value) ->
                 content.putIfAbsent(key, value)?.let { if (value != it) log.warn("ContentType of $requestType request $key already registered, ignoring $value") }
