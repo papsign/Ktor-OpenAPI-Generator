@@ -20,26 +20,26 @@ inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.ge
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.post(
     vararg modules: RouteOpenAPIModule,
-    exampleRequest: R? = null,
-    exampleResponse: B? = null,
+    exampleResponse: R? = null,
+    exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
-) = route(HttpMethod.Post, modules, exampleRequest, exampleResponse, body)
+) = route(HttpMethod.Post, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.put(
     vararg modules: RouteOpenAPIModule,
-    exampleRequest: R? = null,
-    exampleResponse: B? = null,
+    exampleResponse: R? = null,
+    exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
-) = route(HttpMethod.Put, modules, exampleRequest, exampleResponse, body)
+) = route(HttpMethod.Put, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.patch(
     vararg modules: RouteOpenAPIModule,
-    exampleRequest: R? = null,
-    exampleResponse: B? = null,
+    exampleResponse: R? = null,
+    exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
-) = route(HttpMethod.Patch, modules, exampleRequest, exampleResponse, body)
+) = route(HttpMethod.Patch, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.delete(

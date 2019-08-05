@@ -18,26 +18,26 @@ inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.get(
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRoute.post(
     vararg modules: RouteOpenAPIModule,
-    exampleRequest: R? = null,
-    exampleResponse: B? = null,
+    exampleResponse: R? = null,
+    exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit
-) = route(HttpMethod.Post, modules, exampleRequest, exampleResponse, body)
+) = route(HttpMethod.Post, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRoute.put(
     vararg modules: RouteOpenAPIModule,
-    exampleRequest: R? = null,
-    exampleResponse: B? = null,
+    exampleResponse: R? = null,
+    exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit
-) = route(HttpMethod.Put, modules, exampleRequest, exampleResponse, body)
+) = route(HttpMethod.Put, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRoute.patch(
     vararg modules: RouteOpenAPIModule,
-    exampleRequest: R? = null,
-    exampleResponse: B? = null,
+    exampleResponse: R? = null,
+    exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit
-) = route(HttpMethod.Patch, modules, exampleRequest, exampleResponse, body)
+) = route(HttpMethod.Patch, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.delete(
