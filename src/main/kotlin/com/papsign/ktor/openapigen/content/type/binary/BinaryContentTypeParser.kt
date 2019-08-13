@@ -89,7 +89,7 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer {
                 }
             }
         }
-        val mediaType = MediaType(Schema.SchemaLitteral(DataType.string, DataFormat.binary), example)
+        val mediaType: MediaType<T> = MediaType(Schema.SchemaLitteral(DataType.string, DataFormat.binary), example)
         return contentTypes.map(ContentType.Companion::parse).associateWith { mediaType.copy() }
     }
 
