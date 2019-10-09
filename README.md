@@ -17,6 +17,28 @@ Currently Supported:
 
 It is inspired by ktor Locations, but makes no use of it.
 
+## Installation
+
+Install the submodule:
+```
+git submodule add https://github.com/papsign/Ktor-OpenAPI-Generator.git openapigen
+```
+
+Declare the folder in settings.gradle:
+```
+...
+include 'openapigen'
+```
+Declare the dependency in the main build.gradle
+```
+dependencies {
+    compile project(":openapigen")
+    ...
+}
+```
+
+## Examples
+
 Basic Example:
 
 ```kotlin
