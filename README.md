@@ -31,6 +31,10 @@ include 'openapigen'
 ```
 Declare the dependency in the main build.gradle
 ```
+apply plugin: 'kotlin'
+
+...
+
 dependencies {
     compile project(":openapigen")
     ...
