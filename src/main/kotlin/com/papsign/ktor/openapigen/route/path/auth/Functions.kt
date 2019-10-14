@@ -3,8 +3,8 @@ package com.papsign.ktor.openapigen.route.path.auth
 import com.papsign.ktor.openapigen.interop.OAuth2Handler
 import com.papsign.ktor.openapigen.modules.RouteOpenAPIModule
 import com.papsign.ktor.openapigen.openapi.Described
-import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.method
+import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.preHandle
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineAuthContext
 import io.ktor.http.HttpMethod

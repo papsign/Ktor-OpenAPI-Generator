@@ -19,7 +19,10 @@ import com.papsign.ktor.openapigen.openapi.Described
 import com.papsign.ktor.openapigen.openapi.Server
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.info
-import com.papsign.ktor.openapigen.route.path.auth.*
+import com.papsign.ktor.openapigen.route.path.auth.auth
+import com.papsign.ktor.openapigen.route.path.auth.get
+import com.papsign.ktor.openapigen.route.path.auth.post
+import com.papsign.ktor.openapigen.route.path.auth.principal
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route

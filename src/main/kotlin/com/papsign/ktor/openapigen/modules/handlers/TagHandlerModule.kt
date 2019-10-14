@@ -1,10 +1,10 @@
 package com.papsign.ktor.openapigen.modules.handlers
 
-import com.papsign.ktor.openapigen.modules.providers.TagProviderModule
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
+import com.papsign.ktor.openapigen.modules.providers.TagProviderModule
 import com.papsign.ktor.openapigen.openapi.Operation
 
 object TagHandlerModule: OperationModule {

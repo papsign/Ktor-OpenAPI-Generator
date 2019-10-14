@@ -8,13 +8,12 @@ import com.papsign.ktor.openapigen.openapi.ExternalDocumentation
 import com.papsign.ktor.openapigen.openapi.OpenAPI
 import com.papsign.ktor.openapigen.openapi.Schema.SchemaRef
 import com.papsign.ktor.openapigen.openapi.Server
-import io.ktor.application.*
+import io.ktor.application.ApplicationCallPipeline
+import io.ktor.application.ApplicationFeature
+import io.ktor.application.call
 import io.ktor.request.path
 import io.ktor.util.AttributeKey
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.reflections.Reflections
-import javax.xml.bind.JAXBElement
 import kotlin.reflect.KType
 
 class OpenAPIGen(

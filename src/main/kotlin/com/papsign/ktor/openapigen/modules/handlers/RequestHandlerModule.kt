@@ -12,7 +12,6 @@ import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
 import com.papsign.ktor.openapigen.modules.providers.ParameterProvider
-import com.papsign.ktor.openapigen.openapi.MediaType
 import com.papsign.ktor.openapigen.openapi.Operation
 import com.papsign.ktor.openapigen.openapi.RequestBody
 import kotlin.reflect.KClass

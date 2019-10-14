@@ -1,9 +1,9 @@
 package com.papsign.ktor.openapigen.route.path.normal
 
 import com.papsign.ktor.openapigen.modules.RouteOpenAPIModule
+import com.papsign.ktor.openapigen.route.method
 import com.papsign.ktor.openapigen.route.preHandle
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
-import com.papsign.ktor.openapigen.route.method
 import io.ktor.http.HttpMethod
 import io.ktor.util.pipeline.ContextDsl
 

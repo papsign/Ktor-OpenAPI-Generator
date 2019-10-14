@@ -1,7 +1,7 @@
 package com.papsign.ktor.openapigen.interop
 
-import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.APIException.Companion.apiException
+import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.route.ThrowsInfo
 import io.ktor.application.call
 import io.ktor.features.StatusPages

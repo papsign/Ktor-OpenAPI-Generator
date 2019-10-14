@@ -18,7 +18,9 @@ import com.papsign.ktor.openapigen.openapi.DataFormat
 import com.papsign.ktor.openapigen.openapi.DataType
 import com.papsign.ktor.openapigen.openapi.MediaType
 import com.papsign.ktor.openapigen.openapi.Schema
-import io.ktor.application.*
+import io.ktor.application.ApplicationCall
+import io.ktor.application.call
+import io.ktor.application.featureOrNull
 import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
