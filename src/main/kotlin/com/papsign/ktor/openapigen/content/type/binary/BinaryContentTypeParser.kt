@@ -4,8 +4,8 @@ import com.papsign.kotlin.reflection.getKType
 import com.papsign.kotlin.reflection.getObjectSubtypes
 import com.papsign.kotlin.reflection.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
+import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
 import com.papsign.ktor.openapigen.annotations.Response
-import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
@@ -30,8 +30,7 @@ import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmErasure
 
-@APIFormatter
-object BinaryContentTypeParser: BodyParser, ResponseSerializer {
+object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModuleExtension {
 
     override fun <T : Any> getParseableContentTypes(clazz: KClass<T>): List<ContentType> {
         return clazz.findAnnotation<BinaryRequest>()?.contentTypes?.map(ContentType.Companion::parse) ?: listOf()
