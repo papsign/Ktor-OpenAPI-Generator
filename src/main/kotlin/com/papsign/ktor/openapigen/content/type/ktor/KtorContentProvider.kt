@@ -4,7 +4,7 @@ import com.papsign.kotlin.reflection.allTypes
 import com.papsign.kotlin.reflection.getKType
 import com.papsign.kotlin.reflection.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
-import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
+import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
 import com.papsign.ktor.openapigen.annotations.encodings.APIRequestFormat
 import com.papsign.ktor.openapigen.annotations.encodings.APIResponseFormat
 import com.papsign.ktor.openapigen.content.type.BodyParser
@@ -36,8 +36,7 @@ import kotlin.reflect.jvm.jvmErasure
 /**
  * default content provider using the ktor pipeline to handle the serialization and deserialization
  */
-@APIFormatter
-object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer {
+object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer, OpenAPIGenModuleExtension {
 
     private val arrayType = getKType<ByteArray>()
     private var contentNegotiation: ContentNegotiation? = null

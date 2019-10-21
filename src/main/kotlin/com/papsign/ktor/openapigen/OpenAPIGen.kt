@@ -1,7 +1,5 @@
 package com.papsign.ktor.openapigen
 
-import com.papsign.ktor.openapigen.annotations.encodings.APIFormatter
-import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.schema.*
 import com.papsign.ktor.openapigen.openapi.ExternalDocumentation
@@ -20,6 +18,7 @@ class OpenAPIGen(
         private val config: Configuration,
         @Deprecated("Will be replaced with less dangerous alternative when the use case has been fleshed out.") val pipeline: ApplicationCallPipeline
 ) {
+    private val log = classLogger()
 
     val api = config.api
 
@@ -37,13 +36,13 @@ class OpenAPIGen(
     val globalModuleProvider = CachingModuleProvider()
 
     init {
-        val reflections = Reflections(javaClass.`package`.name)
-        val classes = reflections.getTypesAnnotatedWith(APIFormatter::class.java).mapNotNull { it.kotlin.objectInstance }
-        classes.forEach {
-            when (it) {
-                is ContentTypeProvider -> {
-                    globalModuleProvider.registerModule(it)
-                }
+        (config.scanPackagesForModules + javaClass.`package`.name).forEach {
+            val reflections = Reflections(it)
+            log.debug("Registering modules in package $it")
+            val objects = reflections.getSubTypesOf(OpenAPIGenExtension::class.java).mapNotNull { it.kotlin.objectInstance }
+            objects.forEach {
+                log.trace("Registering global module: ${it::class.simpleName}")
+                it.onInit(this)
             }
         }
     }
@@ -71,6 +70,7 @@ class OpenAPIGen(
         var schemaNamer: (KType) -> String = KType::toString
 
         var registrars: Array<PartialSchemaRegistrar> = arrayOf()
+        var scanPackagesForModules: Array<String> = arrayOf()
     }
 
 

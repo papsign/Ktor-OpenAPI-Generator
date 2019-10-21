@@ -13,6 +13,7 @@ import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.route.response.Responder
+import com.papsign.ktor.openapigen.validators.ValidationHandler
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.http.ContentType
@@ -22,6 +23,8 @@ import io.ktor.routing.accept
 import io.ktor.routing.application
 import io.ktor.routing.contentType
 import io.ktor.util.pipeline.PipelineContext
+import org.omg.PortableServer.POAHelper
+import java.security.Provider
 import kotlin.reflect.KClass
 
 abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provider: CachingModuleProvider) {
@@ -37,6 +40,9 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
             it.configure(apiGen, provider)
         }
 
+        val BHandler = ValidationHandler<B>(provider)
+        val PHandler = ValidationHandler<P>(provider)
+
         ktorRoute.apply {
             getAcceptMap(R::class).let {
                 if (it.isNotEmpty()) it else listOf(ContentType.Any to listOf(SelectedSerializer(KtorContentProvider)))
@@ -46,15 +52,15 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                     if (Unit is B) {
                         handle {
                             val params: P = if (Unit is P) Unit else buildParameterObject(call, P::class.java)
-                            pass(this, responder, params, Unit)
+                            pass(this, responder, PHandler.handle(params), Unit)
                         }
                     } else {
                         getContentTypesMap(B::class).forEach { (contentType, parsers) ->
                             contentType(contentType) {
                                 handle {
-                                    val receive: B = if (Unit is B) Unit else parsers.getBodyParser(call.request.contentType()).parseBody(B::class, this)
+                                    val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(B::class, this)
                                     val params: P = if (Unit is P) Unit else buildParameterObject(call, P::class.java)
-                                    pass(this, responder, params, receive)
+                                    pass(this, responder, PHandler.handle(params), BHandler.handle(receive))
                                 }
                             }
                         }
