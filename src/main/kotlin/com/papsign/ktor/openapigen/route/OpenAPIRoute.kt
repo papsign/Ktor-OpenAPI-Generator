@@ -23,8 +23,6 @@ import io.ktor.routing.accept
 import io.ktor.routing.application
 import io.ktor.routing.contentType
 import io.ktor.util.pipeline.PipelineContext
-import org.omg.PortableServer.POAHelper
-import java.security.Provider
 import kotlin.reflect.KClass
 
 abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provider: CachingModuleProvider) {

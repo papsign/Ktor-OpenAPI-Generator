@@ -7,7 +7,7 @@ import com.papsign.ktor.openapigen.validators.util.AValidator
 @ValidationAnnotation
 annotation class LowerCase
 
-object LowerCaseValidator : AValidator<String, LowerCase>(String::class, LowerCase::class) {
+object LowerCaseValidator: AValidator<String, LowerCase>(String::class, LowerCase::class) {
     override fun validate(subject: String?, annotation: LowerCase): String? {
         return subject?.toLowerCase()
     }
