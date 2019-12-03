@@ -1,10 +1,7 @@
 package com.papsign.ktor.openapigen.route.path.auth
 
-import com.papsign.ktor.openapigen.interop.OAuth2Handler
 import com.papsign.ktor.openapigen.modules.RouteOpenAPIModule
-import com.papsign.ktor.openapigen.openapi.Described
 import com.papsign.ktor.openapigen.route.method
-import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.preHandle
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineAuthContext
 import io.ktor.http.HttpMethod
@@ -98,10 +95,3 @@ inline fun <reified P : Any, reified R : Any,  A> OpenAPIAuthenticatedRoute<A>.h
 }
 
 suspend fun <A> OpenAPIPipelineAuthContext<A, *>.principal() = authProvider.getAuth(pipeline)
-
-
-inline fun <A, T> NormalOpenAPIRoute.auth(handler: OAuth2Handler<A, T>, vararg scopes: T, crossinline fn: OpenAPIAuthenticatedRoute<A>.()->Unit) where T: Enum<T>, T: Described = auth(handler, scopes.asList(), fn)
-
-inline fun <A, T> NormalOpenAPIRoute.auth(handler: OAuth2Handler<A, T>, scopes: List<T>, crossinline fn: OpenAPIAuthenticatedRoute<A>.()->Unit) where T: Enum<T>, T: Described {
-    handler.auth(this, scopes).fn()
-}

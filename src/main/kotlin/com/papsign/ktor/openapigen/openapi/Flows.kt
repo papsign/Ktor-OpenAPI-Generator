@@ -1,8 +1,9 @@
 package com.papsign.ktor.openapigen.openapi
 
+import java.util.*
 import kotlin.reflect.KProperty
 
-class Flows<T>: MutableMap<Flows.FlowType, Flows.Flow<T>> by HashMap()
+class Flows<T>: MutableMap<Flows.FlowType, Flows.Flow<T>> by EnumMap(FlowType::class.java)
         where T : Enum<T>, T : Described {
 
     private var implicit: Flow<T>? by this

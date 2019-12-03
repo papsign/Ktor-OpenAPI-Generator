@@ -1,4 +1,7 @@
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -11,31 +14,23 @@ import com.papsign.ktor.openapigen.annotations.Path
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
-import com.papsign.ktor.openapigen.interop.OAuth2Handler
-import com.papsign.ktor.openapigen.interop.configure
 import com.papsign.ktor.openapigen.interop.withAPI
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.openapi.Described
 import com.papsign.ktor.openapigen.openapi.Server
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.info
-import com.papsign.ktor.openapigen.route.path.auth.auth
-import com.papsign.ktor.openapigen.route.path.auth.get
-import com.papsign.ktor.openapigen.route.path.auth.post
-import com.papsign.ktor.openapigen.route.path.auth.principal
 import com.papsign.ktor.openapigen.route.path.normal.get
+import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import com.papsign.ktor.openapigen.route.tag
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.auth.Authentication
-import io.ktor.auth.OAuthServerSettings
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
 import io.ktor.features.origin
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
 import io.ktor.request.host
@@ -52,8 +47,6 @@ object TestServer {
     data class Error(val id: String, val msg: String)
 
     class ProperException(msg: String, val id: String = "proper.exception") : Exception(msg)
-
-    lateinit var oauth: OAuth2Handler<APIPrincipal, Scopes>
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -82,9 +75,9 @@ object TestServer {
             install(ContentNegotiation) {
                 jackson {
                     enable(
-                        DeserializationFeature.WRAP_EXCEPTIONS,
-                        DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,
-                        DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
+                            DeserializationFeature.WRAP_EXCEPTIONS,
+                            DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,
+                            DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
                     )
 
                     enable(SerializationFeature.WRAP_EXCEPTIONS, SerializationFeature.INDENT_OUTPUT)
@@ -117,35 +110,15 @@ object TestServer {
 
             val scopes = Scopes.values().asList()
 
-            val googleOAuthProvider = OAuthServerSettings.OAuth2ServerSettings(
-                name = "google",
-                authorizeUrl = "https://accounts.google.com/o/oauth2/auth",
-                accessTokenUrl = "https://www.googleapis.com/oauth2/v3/token",
-                requestMethod = HttpMethod.Post,
-
-                clientId = "<id>",
-                clientSecret = "<secret>",
-                defaultScopes = scopes.map { it.name }
-            )
-
-            oauth = OAuth2Handler(googleOAuthProvider, scopes, scopes, scopes, scopes) { auth ->
-                APIPrincipal(auth.tokenType, auth.accessToken)
-            }
-
-            // auth interop
-            install(Authentication) {
-                configure(oauth)
-            }
-
             // serve OpenAPI and redirect from root
             routing {
                 get("/openapi.json") {
                     val host = Server(
-                        call.request.origin.scheme + "://" + call.request.host() + if (setOf(
-                                80,
-                                443
-                            ).contains(call.request.port())
-                        ) "" else ":${call.request.port()}"
+                            call.request.origin.scheme + "://" + call.request.host() + if (setOf(
+                                            80,
+                                            443
+                                    ).contains(call.request.port())
+                            ) "" else ":${call.request.port()}"
                     )
                     application.openAPIGen.api.servers.add(0, host)
                     call.respond(application.openAPIGen.api)
@@ -160,15 +133,25 @@ object TestServer {
             apiRouting {
 
                 get<StringParam, StringResponse>(
-                    info("String Param Endpoint", "This is a String Param Endpoint"),
-                    example = StringResponse("Hi")
+                        info("String Param Endpoint", "This is a String Param Endpoint"),
+                        example = StringResponse("Hi")
                 ) { params ->
                     respond(StringResponse(params.a))
                 }
 
+                route("sealed") {
+                    post<Unit, Base, Base>(
+                            info("Sealed class Endpoint", "This is a Sealed class Endpoint"),
+                            exampleRequest = Base.A("Hi"),
+                            exampleResponse = Base.A("Hi")
+                    ) { params, base ->
+                        respond(base)
+                    }
+                }
+
                 route("long").get<LongParam, LongResponse>(
-                    info("Long Param Endpoint", "This is a String Param Endpoint"),
-                    example = LongResponse(Long.MAX_VALUE)
+                        info("Long Param Endpoint", "This is a String Param Endpoint"),
+                        example = LongResponse(Long.MAX_VALUE)
                 ) { params ->
                     respond(LongResponse(params.a))
                 }
@@ -177,45 +160,21 @@ object TestServer {
                     tag(TestServer.Tags.EXAMPLE) {
 
                         get<StringParam, StringResponse>(
-                            info("String Param Endpoint", "This is a String Param Endpoint"),
-                            example = StringResponse("Hi")
+                                info("String Param Endpoint", "This is a String Param Endpoint"),
+                                example = StringResponse("Hi")
                         ) { params ->
                             respond(StringResponse(params.a))
                         }
 
                         route("long").get<LongParam, LongResponse>(
-                            info("Long Param Endpoint", "This is a String Param Endpoint"),
-                            example = LongResponse(Long.MAX_VALUE)
+                                info("Long Param Endpoint", "This is a String Param Endpoint"),
+                                example = LongResponse(Long.MAX_VALUE)
                         ) { params ->
                             respond(LongResponse(params.a))
                         }
                     }
 
-                }
 
-                tag(TestServer.Tags.EXAMPLE) {
-                    route("authenticated") {
-
-                        auth(oauth) {
-
-                            get<StringParam, StringResponse, APIPrincipal>(
-                                info(
-                                    "Authenticated String Param Endpoint",
-                                    "This is aa authenticated String Param Endpoint"
-                                ),
-                                example = StringResponse("Hi")
-                            ) { params ->
-                                val p = principal()
-                                respond(StringResponse(params.a + p.a + p.b))
-                            }
-
-
-                            post<Unit, StringUsable, StringUsable, APIPrincipal> { _, str ->
-                                respond(str)
-                            }
-
-                        }
-                    }
                 }
             }
         }.start(true)
@@ -238,12 +197,24 @@ object TestServer {
     @Response("A Long Response")
     data class LongResponse(val str: Long)
 
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
+    @JsonSubTypes(
+            JsonSubTypes.Type(Base.A::class, name = "a"),
+            JsonSubTypes.Type(Base.B::class, name = "b"),
+            JsonSubTypes.Type(Base.C::class, name = "c")
+    )
+    sealed class Base {
+        class A(val str: String) : Base()
+        class B(val i: Int) : Base()
+        class C(val l: Long) : Base()
+    }
 
-    enum class Tags(override val description: String): APITag {
+
+    enum class Tags(override val description: String) : APITag {
         EXAMPLE("Wow this is a tag?!")
     }
 
-    enum class Scopes(override val description: String): Described {
+    enum class Scopes(override val description: String) : Described {
         profile("Basic Profile scope"), email("Email scope")
     }
 

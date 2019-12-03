@@ -8,6 +8,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 
 open class SimpleSchemaRegistrar(val namer: SchemaNamer) : SchemaRegistrar {
@@ -50,8 +51,11 @@ open class SimpleSchemaRegistrar(val namer: SchemaNamer) : SchemaRegistrar {
     }
 
     private fun SchemaRegistrar.makeObjectSchema(type: KType): Schema<*> {
-
-        val props = type.jvmErasure.declaredMemberProperties.filter { it.visibility == KVisibility.PUBLIC }
+        val erasure = type.jvmErasure
+        if (erasure.isSealed) {
+            return Schema.OneSchemaOf(erasure.sealedSubclasses.map { get(it.starProjectedType).schema })
+        }
+        val props = erasure.declaredMemberProperties.filter { it.visibility == KVisibility.PUBLIC }
         val properties = props.associate {
             Pair(it.name, get(it.returnType).schema)
         }

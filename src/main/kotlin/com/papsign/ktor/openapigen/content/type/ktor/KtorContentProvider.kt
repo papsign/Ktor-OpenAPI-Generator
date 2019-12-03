@@ -1,5 +1,8 @@
 package com.papsign.ktor.openapigen.content.type.ktor
 
+import com.fasterxml.jackson.databind.JsonMappingException
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
 import com.papsign.kotlin.reflection.allTypes
 import com.papsign.kotlin.reflection.getKType
 import com.papsign.kotlin.reflection.unitKType
@@ -25,6 +28,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
+import io.ktor.request.receiveOrNull
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import kotlin.reflect.KClass
