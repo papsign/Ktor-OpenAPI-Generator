@@ -21,6 +21,29 @@ It is inspired by ktor Locations, but makes no use of it.
 
 ## Installation
 
+### Gradle
+
+#### Step 1. Add the JitPack repository to your build file
+
+Add it in your root build.gradle at the end of repositories:
+```
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+#### Step 2. Add the dependency
+
+```
+dependencies {
+        implementation 'com.github.papsign:Ktor-OpenAPI-Generator:-SNAPSHOT'
+}
+```
+
+### Git Submodule
 Install the submodule:
 ```
 git submodule add https://github.com/papsign/Ktor-OpenAPI-Generator.git openapigen
