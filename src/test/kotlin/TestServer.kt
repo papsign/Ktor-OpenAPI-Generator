@@ -139,6 +139,15 @@ object TestServer {
                     respond(StringResponse(params.a))
                 }
 
+                route("list") {
+                    get<StringParam, List<StringResponse>>(
+                        info("String Param Endpoint", "This is a String Param Endpoint"),
+                        example = listOf(StringResponse("Hi"))
+                    ) { params ->
+                        respond(listOf(StringResponse(params.a)))
+                    }
+                }
+
                 route("sealed") {
                     post<Unit, Base, Base>(
                             info("Sealed class Endpoint", "This is a Sealed class Endpoint"),

@@ -4,6 +4,7 @@ import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.schema.*
 import com.papsign.ktor.openapigen.openapi.ExternalDocumentation
 import com.papsign.ktor.openapigen.openapi.OpenAPI
+import com.papsign.ktor.openapigen.openapi.Schema
 import com.papsign.ktor.openapigen.openapi.Schema.SchemaRef
 import com.papsign.ktor.openapigen.openapi.Server
 import io.ktor.application.ApplicationCallPipeline
@@ -85,14 +86,17 @@ class OpenAPIGen(
             }
             if (predefined != null)
                 return predefined
-            schemas.getOrPut(type) {
-                val (name, schema) = super.get(type, master)
-                schemas[type] = schema
-                names[type] = name
-                api.components.schemas[name] = schema
-                schema
+            val current = schemas[type]
+            if (current != null) {
+                val name = names[type]!!
+                return NamedSchema(name, SchemaRef<Any>("#/components/schemas/$name"))
             }
-            val name = names[type]!!
+            val (name, schema) = super.get(type, master)
+            if (schema is Schema.SchemaArr<*>) return NamedSchema(name, schema)
+
+            schemas[type] = schema
+            names[type] = name
+            api.components.schemas[name] = schema
             return NamedSchema(name, SchemaRef<Any>("#/components/schemas/$name"))
         }
     }
