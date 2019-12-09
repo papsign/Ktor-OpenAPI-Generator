@@ -3,7 +3,7 @@ package com.papsign.ktor.openapigen.openapi
 import java.util.*
 import kotlin.reflect.KProperty
 
-class Flows<T>: MutableMap<Flows.FlowType, Flows.Flow<T>> by EnumMap(FlowType::class.java)
+class Flows<T>: MutableMap<String, Flows.Flow<T>> by HashMap<String, Flow<T>>()
         where T : Enum<T>, T : Described {
 
     private var implicit: Flow<T>? by this
@@ -53,16 +53,14 @@ class Flows<T>: MutableMap<Flows.FlowType, Flows.Flow<T>> by EnumMap(FlowType::c
     }
 
     private operator fun setValue(any: Any, property: KProperty<*>, any1: Flow<T>?) {
-        val type = FlowType.valueOf(property.name)
         if (any1 == null)
-            this.remove(type)
+            this.remove(property.name)
         else
-            this[type] = any1
+            this[property.name] = any1
     }
 
     private operator fun getValue(any: Any, property: KProperty<*>): Flow<T>? {
-        val type = FlowType.valueOf(property.name)
-        return this[type]
+        return this[property.name]
     }
 
     companion object {
