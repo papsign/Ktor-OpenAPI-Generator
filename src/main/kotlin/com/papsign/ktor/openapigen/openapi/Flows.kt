@@ -74,7 +74,7 @@ class Flows<T>: MutableMap<Flows.FlowType, Flows.Flow<T>> by EnumMap(FlowType::c
     }
 
     enum class FlowType(val value: String) {
-        implicit(IMPLICIT), password(PASSWORD), clientCredentials(CLIENT_CREDENTIALS), authorizationCode(AUTHORIZATION_CODE), refreshToken(REFRESH_TOKEN);
+        implicit(IMPLICIT), password(PASSWORD), client_credentials(CLIENT_CREDENTIALS), authorization_code(AUTHORIZATION_CODE), refresh_token(REFRESH_TOKEN);
     }
 
 
