@@ -19,6 +19,8 @@ Currently Supported:
 
 It is inspired by ktor Locations, but makes no use of it.
 
+Take a look at the [wiki for advanced features and mechanics](https://github.com/papsign/Ktor-OpenAPI-Generator/wiki)
+
 ## Installation
 
 ### Gradle
