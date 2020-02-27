@@ -10,6 +10,9 @@ import com.papsign.ktor.openapigen.modules.providers.MethodProvider
 import com.papsign.ktor.openapigen.modules.providers.PathProvider
 import com.papsign.ktor.openapigen.openapi.Operation
 import com.papsign.ktor.openapigen.openapi.PathItem
+import com.papsign.ktor.openapigen.parameters.parsers.NoTranslation
+import com.papsign.ktor.openapigen.parameters.parsers.OpenAPIPathSegmentTranslator
+import com.papsign.ktor.openapigen.parameters.parsers.ParameterHandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -21,7 +24,8 @@ object RouteHandler: HandlerModule {
         val methods = provider.ofClass<MethodProvider>()
         if (methods.size > 1) error("API cannot have two methods simultaneously: ${methods.map { it.method.value }}")
         val paths = provider.ofClass<PathProvider>()
-        val path = "/${paths.map { it.path.trim('/') }.filter { it.isNotBlank() }.joinToString("/")}"
+        val translator = getTranslator(provider)
+        val path = "/${paths.flatMap { it.path.split('/').filter(String::isNotEmpty).map(translator::translateSegment) }.joinToString("/")}"
         val operationModules = provider.ofClass<OperationModule>()
         apiGen.api.paths.getOrPut(path) { PathItem() }.also {pathItem ->
             methods.forEach {
@@ -34,5 +38,12 @@ object RouteHandler: HandlerModule {
             }
         }
         log.trace("Registered $path::${methods.map { it.method.value }} with OpenAPI description with ${provider.ofClass<SelectedModule>().map { it.module::class.simpleName }}")
+    }
+
+    private fun getTranslator(provider: ModuleProvider<*>): OpenAPIPathSegmentTranslator {
+        val translator = provider.ofClass<OpenAPIPathSegmentTranslator>()
+        if (translator.size > 1) log.warn("Too many Path Segment Translators, choosing first: $translator")
+        if (translator.isEmpty()) log.debug("No Path Segment Translator, choosing default")
+        return translator.firstOrNull() ?: NoTranslation
     }
 }

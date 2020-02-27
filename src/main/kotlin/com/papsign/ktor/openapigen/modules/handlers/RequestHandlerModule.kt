@@ -7,7 +7,7 @@ import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.SelectedParser
-import com.papsign.ktor.openapigen.generator.ParamBuilder
+import com.papsign.ktor.openapigen.parameters.ParamBuilder
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule

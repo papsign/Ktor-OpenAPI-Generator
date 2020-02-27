@@ -1,5 +1,7 @@
 package com.papsign.ktor.openapigen.openapi
 
+import com.papsign.ktor.openapigen.parameters.ParameterStyle
+
 data class ExternalDocumentation(
     var url: String,
     var description: String? = null
@@ -14,7 +16,9 @@ data class Parameter<T>(
     var allowEmptyValue: Boolean? = null,
     var schema: Schema<T>? = null,
     var example: T? = null,
-    var examples: MutableMap<String, T>? = null
+    var examples: MutableMap<String, T>? = null,
+    var style: ParameterStyle? = null,
+    var explode: Boolean = false
     // incomplete
 )
 

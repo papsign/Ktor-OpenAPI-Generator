@@ -1,6 +1,6 @@
 package com.papsign.ktor.openapigen.route.modules
 
-import com.papsign.ktor.openapigen.generator.ParamBuilder
+import com.papsign.ktor.openapigen.parameters.ParamBuilder
 import com.papsign.ktor.openapigen.modules.providers.ParameterProvider
 import com.papsign.ktor.openapigen.openapi.Parameter
 import kotlin.reflect.KClass

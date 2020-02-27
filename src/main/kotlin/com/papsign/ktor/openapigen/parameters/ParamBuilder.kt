@@ -1,4 +1,4 @@
-package com.papsign.ktor.openapigen.generator
+package com.papsign.ktor.openapigen.parameters
 
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
@@ -32,6 +32,8 @@ class ParamBuilder(val apiGen: OpenAPIGen, val provider: ModuleProvider<*>) {
             it.description = description
             it.allowEmptyValue = allowEmptyValues
             it.deprecated = deprecated
+            it.style = style
+            it.explode = explode
         }
     }
 
@@ -39,6 +41,8 @@ class ParamBuilder(val apiGen: OpenAPIGen, val provider: ModuleProvider<*>) {
         return createParam(param, apiParam.`in`) {
             it.description = description
             it.deprecated = deprecated
+            it.style = style
+            it.explode = explode
         }
     }
 

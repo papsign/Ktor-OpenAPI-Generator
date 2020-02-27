@@ -1,8 +1,15 @@
 package com.papsign.ktor.openapigen.annotations.parameters
 
 import com.papsign.ktor.openapigen.openapi.ParameterLocation
+import com.papsign.ktor.openapigen.parameters.QueryParamStyle
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @APIParam(ParameterLocation.query)
-annotation class QueryParam(val description: String, val allowEmptyValues: Boolean = false, val required: Boolean = true, val deprecated: Boolean = false)
+annotation class QueryParam(
+    val description: String,
+    val style: QueryParamStyle = QueryParamStyle.form,
+    val explode: Boolean = false,
+    val allowEmptyValues: Boolean = false,
+    val deprecated: Boolean = false
+)
