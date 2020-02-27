@@ -1,7 +1,5 @@
 package com.papsign.ktor.openapigen.route
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.*
 import com.papsign.ktor.openapigen.content.type.ktor.KtorContentProvider
@@ -12,7 +10,7 @@ import com.papsign.ktor.openapigen.modules.OpenAPIModule
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
 import com.papsign.ktor.openapigen.openAPIGen
-import com.papsign.ktor.openapigen.parameters.parsers.buildParameterHandler
+import com.papsign.ktor.openapigen.parameters.util.buildParameterHandler
 import com.papsign.ktor.openapigen.route.response.Responder
 import com.papsign.ktor.openapigen.validators.ValidationHandler
 import io.ktor.application.ApplicationCall
@@ -24,7 +22,6 @@ import io.ktor.routing.accept
 import io.ktor.routing.application
 import io.ktor.routing.contentType
 import io.ktor.util.pipeline.PipelineContext
-import kotlin.math.round
 import kotlin.reflect.KClass
 
 abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provider: CachingModuleProvider) {
@@ -36,8 +33,6 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
             crossinline pass: suspend OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>, responder: Responder, P, B) -> Unit
     ) {
         val parameterHandler = buildParameterHandler<P>()
-        // vvv temporarily disabled, swagger-ui doesn't seem to handle it correctly.
-        //provider.registerModule(parameterHandler.translator) // Make OpenAPI aware of how to encode the parameters
 
         val apiGen = ktorRoute.application.openAPIGen
         provider.ofClass<HandlerModule>().forEach {
@@ -55,7 +50,6 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                 accept(acceptType) {
                     if (Unit is B) {
                         handle {
-                            println(call.parameters)
                             val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters)
                             pass(this, responder, PHandler.handle(params), Unit)
                         }
@@ -63,7 +57,6 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                         getContentTypesMap(B::class).forEach { (contentType, parsers) ->
                             contentType(contentType) {
                                 handle {
-                                    println(call.parameters)
                                     val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(B::class, this)
                                     val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters)
                                     pass(this, responder, PHandler.handle(params), BHandler.handle(receive))

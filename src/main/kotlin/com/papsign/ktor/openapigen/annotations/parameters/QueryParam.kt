@@ -8,7 +8,7 @@ import com.papsign.ktor.openapigen.parameters.QueryParamStyle
 @APIParam(ParameterLocation.query)
 annotation class QueryParam(
     val description: String,
-    val style: QueryParamStyle = QueryParamStyle.form,
+    val style: QueryParamStyle = QueryParamStyle.DEFAULT,
     val explode: Boolean = true,
     val allowEmptyValues: Boolean = false,
     val deprecated: Boolean = false

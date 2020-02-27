@@ -102,7 +102,7 @@ object Basic {
     @Path("string/{a}")
     data class StringParam(
         @PathParam("A simple String Param", style = PathParamStyle.matrix) val a: String,
-        @QueryParam("Optional String") val optional: Array<Long>? // Nullable Types are optional
+        @QueryParam("Optional String") val optional: List<Long>? // Nullable Types are optional
     )
 
     // A response can be any class, but a description will be generated from the annotation

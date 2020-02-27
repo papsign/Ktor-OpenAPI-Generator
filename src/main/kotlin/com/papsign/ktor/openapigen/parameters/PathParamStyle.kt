@@ -1,5 +1,5 @@
 package com.papsign.ktor.openapigen.parameters
 
-enum class PathParamStyle(val prefix: String): ParameterStyle {
-    simple(""), label("."), matrix(";")
+enum class PathParamStyle: ParameterStyle {
+    DEFAULT, simple, label, matrix
 }
