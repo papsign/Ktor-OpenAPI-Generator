@@ -11,13 +11,13 @@ import io.ktor.http.Parameters
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.text.SimpleDateFormat
-import java.time.Instant
 import java.util.*
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
 
@@ -27,7 +27,7 @@ interface ParameterHandler<T> {
     val translator: OpenAPIPathSegmentTranslator
 }
 
-object UnitParameterHandler: ParameterHandler<Unit> {
+object UnitParameterHandler : ParameterHandler<Unit> {
     override val translator: OpenAPIPathSegmentTranslator = NoTranslation
     override fun parse(parameters: Parameters) = Unit
 }
@@ -54,12 +54,6 @@ interface QueryParameterParser : ParameterParser {
     val explode: Boolean
 }
 
-class PrimitiveParameterParser<T>(override val key: String, val parse: (String?) -> T) : ParameterParser {
-    override fun parse(parameters: Parameters): T {
-        return parse(parameters[key])
-    }
-}
-
 private fun <T> genPathParseFunc(key: String, style: PathParamStyle, parse: (String?) -> T): (String?) -> T {
     return when (style) {
         PathParamStyle.simple -> parse
@@ -68,24 +62,24 @@ private fun <T> genPathParseFunc(key: String, style: PathParamStyle, parse: (Str
     }
 }
 
-class PrimitivePathParameterParserWrapper<T>(
-    val parser: PrimitiveParameterParser<T>,
+class PrimitivePathParameterParser<T>(
+    override val key: String,
+    val parse: (String?) -> T,
     override val style: PathParamStyle,
     override val explode: Boolean
 ) : PathParameterParser {
-    override val key: String
-        get() = parser.key
     override val translation: PathParameterTranslation = PathParameterTranslation(key, style, explode)
 
-    private val parseFunc = genPathParseFunc(key, style, parser.parse)
+    private val parseFunc = genPathParseFunc(key, style, parse)
 
     override fun parse(parameters: Parameters): Any? {
         return parseFunc(parameters[key])
     }
 }
 
-class PrimitiveQueryParameterParserWrapper<T>(
-    val parser: PrimitiveParameterParser<T>,
+class PrimitiveQueryParameterParser<T>(
+    override val key: String,
+    val parse: (String?) -> T,
     style: QueryParamStyle,
     override val explode: Boolean
 ) : QueryParameterParser {
@@ -94,21 +88,22 @@ class PrimitiveQueryParameterParserWrapper<T>(
             log.warn("Using non-form style for primitive type, it is undefined in the OpenAPI standard, reverting to form style")
     }
 
-    override val key: String
-        get() = parser.key
     override val style: QueryParamStyle = QueryParamStyle.form
     override val translation: QueryParameterTranslation = QueryParameterTranslation(key, this.style, explode)
     override fun parse(parameters: Parameters): Any? {
-        return parser.parse(parameters[key])
+        return parse(parameters[key])
     }
 }
 
-class EnumQueryParameterParser(info: ParameterInfo, val enumMap: Map<String, *>, val nullable: Boolean): QueryParameterParser {
+class EnumQueryParameterParser(info: ParameterInfo, val enumMap: Map<String, *>, val nullable: Boolean) :
+    QueryParameterParser {
     override val key: String = info.key
+
     init {
         if (info.queryAnnotation?.style != QueryParamStyle.form)
             log.warn("Using non-form style for enum type, it is undefined in the OpenAPI standard, reverting to form style")
     }
+
     override val style: QueryParamStyle = QueryParamStyle.form
     override val explode: Boolean = info.queryAnnotation!!.explode
     override val translation: QueryParameterTranslation = QueryParameterTranslation(key, style, explode)
@@ -118,10 +113,11 @@ class EnumQueryParameterParser(info: ParameterInfo, val enumMap: Map<String, *>,
     }
 }
 
-class EnumPathParameterParser(info: ParameterInfo, val enumMap: Map<String, *>, val nullable: Boolean): PathParameterParser {
+class EnumPathParameterParser(info: ParameterInfo, val enumMap: Map<String, *>, val nullable: Boolean) :
+    PathParameterParser {
     override val key: String = info.key
     override val style: PathParamStyle = info.pathAnnotation!!.style
-    override val explode: Boolean = info.queryAnnotation!!.explode
+    override val explode: Boolean = info.pathAnnotation!!.explode
     override val translation: PathParameterTranslation = PathParameterTranslation(key, style, explode)
 
     private fun parse(parameter: String?): Any? {
@@ -135,37 +131,81 @@ class EnumPathParameterParser(info: ParameterInfo, val enumMap: Map<String, *>, 
     }
 }
 
-//class CollectionPathParameterParser<T, A>(info: ParameterInfo, val cvt: (List<T>)->A): PathParameterParser {
-//    override val key: String = info.key
-//    override val style: PathParamStyle = info.pathAnnotation!!.style
-//    override val explode: Boolean = info.queryAnnotation!!.explode
-//    override val translation: PathParameterTranslation = PathParameterTranslation(key, style, explode)
-//
-//    private fun parse(parameter: String?): Any? {
-//        return parameter?.let { enumMap[it] }
-//    }
-//
-//    private val parseFunc = when (style) {
-//        PathParamStyle.simple -> {
-//
-//        }
-//        PathParamStyle.label -> {
-//
-//        }
-//        PathParamStyle.matrix -> {
-//
-//        }
-//    }
-//
-//    override fun parse(parameters: Parameters): Any? {
-//        return parseFunc(parameters[key])
-//    }
-//}
+class CollectionPathParameterParser<T, A>(info: ParameterInfo, type: KType, val cvt: (List<T>?) -> A) :
+    PathParameterParser {
+    override val key: String = info.key
+    override val style: PathParamStyle = info.pathAnnotation!!.style
+    override val explode: Boolean = info.pathAnnotation!!.explode
+    override val translation: PathParameterTranslation = PathParameterTranslation(key, style, explode)
+
+    private val typeParser =
+        primitiveParsers[type] as ((String?) -> T)? ?: error("Non-primitive Arrays aren't yet supported")
+    private val parseFunc: (String?) -> A = when (style) {
+        PathParamStyle.simple -> ({ str: String? -> cvt(str?.split(',')?.map(typeParser)) })
+        PathParamStyle.label -> {
+            if (explode) {
+                ({ str: String? -> cvt(str?.split('.')?.drop(1)?.map(typeParser)) })
+            } else {
+                ({ str: String? -> cvt(str?.removePrefix(".")?.split(',')?.map(typeParser)) })
+            }
+        }
+        PathParamStyle.matrix -> {
+            if (explode) {
+                ({ str: String? -> cvt(str?.split(";$key=")?.drop(1)?.map(typeParser)) })
+            } else {
+                ({ str: String? -> cvt(str?.removePrefix(";$key=")?.split(',')?.map(typeParser)) })
+            }
+        }
+    }
+
+    override fun parse(parameters: Parameters): Any? {
+        return parseFunc(parameters[key])
+    }
+}
+
+class CollectionQueryParameterParser<T, A>(info: ParameterInfo, type: KType, val cvt: (List<T>?) -> A) :
+    QueryParameterParser {
+    override val key: String = info.key
+    override val style: QueryParamStyle = info.queryAnnotation!!.style
+    override val explode: Boolean = info.queryAnnotation!!.explode
+    override val translation: QueryParameterTranslation = QueryParameterTranslation(key, style, explode)
+
+    private val typeParser =
+        primitiveParsers[type] as ((String?) -> T)? ?: error("Non-primitive Arrays aren't yet supported")
+    private val explodedParse = ({ parameters: Parameters -> cvt(parameters.getAll(key)?.map(typeParser)) })
+    private val parseFunc: (Parameters) -> A = when (style) {
+        QueryParamStyle.form -> {
+            if (explode) {
+                explodedParse
+            } else {
+                ({ parameters: Parameters -> cvt(parameters[key]?.split(',')?.map(typeParser)) })
+            }
+        }
+        QueryParamStyle.pipeDelimited -> {
+            if (explode) {
+                explodedParse
+            } else {
+                ({ parameters: Parameters -> cvt(parameters[key]?.split('|')?.map(typeParser)) })
+            }
+        }
+        QueryParamStyle.spaceDelimited -> {
+            if (explode) {
+                explodedParse
+            } else {
+                ({ parameters: Parameters -> cvt(parameters[key]?.split(' ')?.map(typeParser)) })
+            }
+        }
+        QueryParamStyle.deepObject -> error("Deep Objects are not supported for Arrays")
+    }
+
+    override fun parse(parameters: Parameters): Any? {
+        return parseFunc(parameters)
+    }
+}
 
 
-
-inline fun <reified T> primitive(noinline cvt: (String?) -> T): Pair<KType, (String) -> PrimitiveParameterParser<T>> {
-    return getKType<T>() to { key -> PrimitiveParameterParser(key, cvt) }
+inline fun <reified T> primitive(noinline cvt: (String?) -> T): Pair<KType, (String?) -> T> {
+    return getKType<T>() to cvt
 }
 
 private val dateFormat = SimpleDateFormat()
@@ -185,10 +225,11 @@ val primitiveParsers = mapOf(
     primitive { it?.toDoubleOrNull() },
     primitive { it?.toBoolean() ?: false },
     primitive { it?.toBoolean() },
-    primitive { it?.toLongOrNull()?.let(::Date) ?: it?.let(dateFormat::parse) ?: Date() },
-    primitive { it?.toLongOrNull()?.let(::Date) ?: it?.let(dateFormat::parse) },
-    primitive { it?.toLongOrNull()?.let(Instant::ofEpochMilli) ?: it?.let(Instant::parse) ?: Instant.now() },
-    primitive { it?.toLongOrNull()?.let(Instant::ofEpochMilli) ?: it?.let(Instant::parse) },
+    // removed temporarily because behavior may not be standard or expected
+//    primitive { it?.toLongOrNull()?.let(::Date) ?: it?.let(dateFormat::parse) ?: Date() },
+//    primitive { it?.toLongOrNull()?.let(::Date) ?: it?.let(dateFormat::parse) },
+//    primitive { it?.toLongOrNull()?.let(Instant::ofEpochMilli) ?: it?.let(Instant::parse) ?: Instant.now() },
+//    primitive { it?.toLongOrNull()?.let(Instant::ofEpochMilli) ?: it?.let(Instant::parse) },
     primitive {
         it?.let {
             try {
@@ -220,7 +261,7 @@ class ModularParameterHander<T>(val parsers: Map<KParameter, ParameterParser>, v
     )
 
     override fun parse(parameters: Parameters): T {
-        return constructor.callBy(parsers.mapValues { it.value.parse(parameters) })
+        return constructor.callBy(parsers.mapValues { it.value.parse(parameters)?.also { println(it::class) } })
     }
 }
 
@@ -235,9 +276,9 @@ inline fun <reified T : Any> buildParameterHandler(): ParameterHandler<T> {
         val info = ParameterInfo(key, param)
         primitiveParsers[type]?.let {
             if (info.pathAnnotation != null) {
-                PrimitivePathParameterParserWrapper(it(key), info.pathAnnotation.style, info.pathAnnotation.explode)
+                PrimitivePathParameterParser(key, it, info.pathAnnotation.style, info.pathAnnotation.explode)
             } else {
-                PrimitiveQueryParameterParserWrapper(it(key), info.queryAnnotation!!.style, info.queryAnnotation.explode)
+                PrimitiveQueryParameterParser(key, it, info.queryAnnotation!!.style, info.queryAnnotation.explode)
             }
         } ?: makeParameterParser(type, info)
     }
@@ -245,7 +286,11 @@ inline fun <reified T : Any> buildParameterHandler(): ParameterHandler<T> {
 }
 
 
-data class ParameterInfo(val key: String, val pathAnnotation: PathParam? = null, val queryAnnotation: QueryParam? = null) {
+data class ParameterInfo(
+    val key: String,
+    val pathAnnotation: PathParam? = null,
+    val queryAnnotation: QueryParam? = null
+) {
     constructor(key: String, parameter: KParameter) : this(
         key,
         parameter.findAnnotation<PathParam>(),
@@ -259,7 +304,7 @@ fun makeParameterParser(type: KType, info: ParameterInfo): ParameterParser {
     val jclazz = clazz.java
     return when {
         jclazz.isEnum -> makeEnumParameterParser(type, info)
-        clazz.isSubclassOf(List::class) || (jclazz.let { it.isArray && !it.componentType.isPrimitive }) -> {
+        clazz.isSubclassOf(List::class) -> {
             makeListParameterParser(type, info)
         }
         jclazz.isArray -> makeArrayParameterParser(type, info)
@@ -270,20 +315,77 @@ fun makeParameterParser(type: KType, info: ParameterInfo): ParameterParser {
 
 private fun makeEnumParameterParser(type: KType, info: ParameterInfo): ParameterParser {
     return if (info.pathAnnotation != null) {
-        EnumPathParameterParser(info, type.jvmErasure.java.enumConstants.associateBy { (it as Enum<*>).name }, type.isMarkedNullable)
+        EnumPathParameterParser(
+            info,
+            type.jvmErasure.java.enumConstants.associateBy { (it as Enum<*>).name },
+            type.isMarkedNullable
+        )
     } else {
-        EnumQueryParameterParser(info, type.jvmErasure.java.enumConstants.associateBy { (it as Enum<*>).name }, type.isMarkedNullable)
+        EnumQueryParameterParser(
+            info,
+            type.jvmErasure.java.enumConstants.associateBy { (it as Enum<*>).name },
+            type.isMarkedNullable
+        )
     }
 }
 
 private fun makeListParameterParser(type: KType, info: ParameterInfo): ParameterParser {
     val contentType = type.arguments[0].type!!
-    return TODO("Implement $type")
+    return if (info.pathAnnotation != null) {
+        CollectionPathParameterParser<Any?, Any?>(info, contentType) { it }
+    } else {
+        CollectionQueryParameterParser<Any?, Any?>(info, contentType) { it }
+    }
 }
+
+inline fun <reified T> primCVT(noinline cvt: (List<T>) -> Any): Pair<KType, (List<Any?>?) -> Any?> {
+    return getKType<T>() to ({ lst ->
+        lst?.let {
+            cvt(
+                it as List<T>
+            )
+        }
+    })
+}
+
+val primCVT = mapOf(
+    primCVT<Long> { it.toLongArray() },
+    primCVT<Int> { it.toIntArray() },
+    primCVT<Float> { it.toFloatArray() },
+    primCVT<Double> { it.toDoubleArray() },
+    primCVT<Boolean> { it.toBooleanArray() }
+)
+
+/**
+ * you may think it is redundant but it is not. Maybe the nullable types are useless though.
+ */
+val arrCVT = mapOf(
+    primCVT<Long> { it.toTypedArray() },
+    primCVT<Long?> { it.toTypedArray() },
+    primCVT<Int> { it.toTypedArray() },
+    primCVT<Int?> { it.toTypedArray() },
+    primCVT<Float> { it.toTypedArray() },
+    primCVT<Float?> { it.toTypedArray() },
+    primCVT<Double> { it.toTypedArray() },
+    primCVT<Double?> { it.toTypedArray() },
+    primCVT<Boolean> { it.toTypedArray() },
+    primCVT<Boolean?> { it.toTypedArray() }
+)
+
 
 private fun makeArrayParameterParser(type: KType, info: ParameterInfo): ParameterParser {
     val contentType = type.jvmErasure.java.componentType.toKType()
-    return TODO("Implement $type")
+
+    val cvt = if (type.toString().startsWith("kotlin.Array")) {
+        arrCVT[contentType] ?: ({ lst -> lst?.toTypedArray() })
+    } else {
+        primCVT[contentType] ?: error("Arrays with primitive type $contentType are not supported")
+    }
+    return if (info.pathAnnotation != null) {
+        CollectionPathParameterParser<Any?, Any?>(info, contentType) { cvt(it) }
+    } else {
+        CollectionQueryParameterParser<Any?, Any?>(info, contentType) { cvt(it) }
+    }
 }
 
 private fun makeObjectParameterParser(type: KType, info: ParameterInfo): ParameterParser {
