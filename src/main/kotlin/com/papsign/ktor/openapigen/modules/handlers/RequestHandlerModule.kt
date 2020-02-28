@@ -7,7 +7,6 @@ import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.SelectedParser
-import com.papsign.ktor.openapigen.parameters.ParamBuilder
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
@@ -36,7 +35,7 @@ class RequestHandlerModule<T : Any>(
 
         val requestMeta = requestClass.findAnnotation<Request>()
 
-        val parameters = provider.ofClass<ParameterProvider>().flatMap { it.getParameters(ParamBuilder(apiGen, provider)) }
+        val parameters = provider.ofClass<ParameterProvider>().flatMap { it.getParameters(apiGen, provider) }
         operation.parameters = operation.parameters?.let { (it + parameters).distinct() } ?: parameters
         operation.requestBody = operation.requestBody?.apply {
             map.forEach { (key, value) ->

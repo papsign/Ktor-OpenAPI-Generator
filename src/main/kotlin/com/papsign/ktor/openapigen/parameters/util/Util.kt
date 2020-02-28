@@ -183,19 +183,7 @@ private fun makeArrayParameterParser(type: KType, info: ParameterInfo): Paramete
 }
 
 private fun makeObjectParameterParser(type: KType, info: ParameterInfo): ParameterParser {
-    TODO("Implement $type")
-    val erasure = type.jvmErasure
-//    if (erasure.isSealed) {
-//        return Schema.OneSchemaOf(erasure.sealedSubclasses.map { get(it.starProjectedType).schema })
-//    }
-//    val props = erasure.declaredMemberProperties.filter { it.visibility == KVisibility.PUBLIC }
-//    val properties = props.associate {
-//        Pair(it.name, get(it.returnType).schema)
-//    }
-//    if (properties.isEmpty()) log.warn("No public properties found in object $type")
-//    return Schema.SchemaObj<Any>(
-//        properties,
-//        props.filter { !it.returnType.isMarkedNullable }.map { it.name })
+    return ObjectParameterParser(info, type)
 }
 
 private fun makeMapParameterParser(type: KType, info: ParameterInfo): ParameterParser {

@@ -33,6 +33,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
             crossinline pass: suspend OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>, responder: Responder, P, B) -> Unit
     ) {
         val parameterHandler = buildParameterHandler<P>()
+        provider.registerModule(parameterHandler)
 
         val apiGen = ktorRoute.application.openAPIGen
         provider.ofClass<HandlerModule>().forEach {
