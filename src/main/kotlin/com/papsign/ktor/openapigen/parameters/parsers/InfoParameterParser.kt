@@ -1,13 +1,14 @@
 package com.papsign.ktor.openapigen.parameters.parsers
 
+import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.parameters.PathParamStyle
 import com.papsign.ktor.openapigen.parameters.QueryParamStyle
 import com.papsign.ktor.openapigen.parameters.util.ParameterInfo
 
 abstract class InfoParameterParser(
     info: ParameterInfo,
-    queryStyle: (QueryParamStyle) -> QueryParamStyle,
-    pathStyle: (PathParamStyle) -> PathParamStyle
+    queryStyle: (QueryParamStyle) -> Pair<QueryParamStyle, Boolean?>,
+    pathStyle: (PathParamStyle) -> Pair<PathParamStyle, Boolean?>
 ) : ParameterParser {
 
     constructor(info: ParameterInfo, queryStyle: QueryParamStyle = QueryParamStyle.form, pathStyle: PathParamStyle = PathParamStyle.simple) : this(
@@ -16,29 +17,43 @@ abstract class InfoParameterParser(
         genReplace(PathParamStyle.DEFAULT, pathStyle)
     )
 
-    constructor(info: ParameterInfo, queryStyle: (QueryParamStyle) -> QueryParamStyle, pathStyle: PathParamStyle = PathParamStyle.simple) : this(
+    constructor(info: ParameterInfo, queryStyle: (QueryParamStyle) -> Pair<QueryParamStyle, Boolean?>, pathStyle: PathParamStyle = PathParamStyle.simple) : this(
         info,
         queryStyle,
         genReplace(PathParamStyle.DEFAULT, pathStyle)
     )
 
-    constructor(info: ParameterInfo, queryStyle: QueryParamStyle = QueryParamStyle.form, pathStyle: (PathParamStyle) -> PathParamStyle) : this(
+    constructor(info: ParameterInfo, queryStyle: QueryParamStyle = QueryParamStyle.form, pathStyle: (PathParamStyle) -> Pair<PathParamStyle, Boolean?>) : this(
         info,
         genReplace(QueryParamStyle.DEFAULT, queryStyle),
         pathStyle
     )
 
-    override val key: String = info.key
-    override val pathStyle: PathParamStyle? = info.pathAnnotation?.style?.let(pathStyle)
-    override val queryStyle: QueryParamStyle? = info.queryAnnotation?.style?.let(queryStyle)
-    override val explode: Boolean = info.pathAnnotation?.explode ?: info.queryAnnotation!!.explode
+    final override val key: String = info.key
+    final override val pathStyle: PathParamStyle?
+    final override val queryStyle: QueryParamStyle?
+    final override val explode: Boolean
+
+    init {
+        val (path, explodePath) = info.pathAnnotation?.style?.let(pathStyle) ?: null to null
+        val (query, explodeQuery) = info.queryAnnotation?.style?.let(queryStyle) ?: null to null
+        this.pathStyle = path
+        this.queryStyle = query
+        val baseExplode = info.pathAnnotation?.explode ?: info.queryAnnotation!!.explode
+        val explodeOverride = explodePath ?: explodeQuery
+        if (explodeOverride != null && explodeOverride != baseExplode) log.warn("Overriding explode $baseExplode to $explodeOverride for style ${path ?: query}")
+        this.explode = explodeOverride ?: baseExplode
+    }
 
     companion object {
-        private fun <T> genReplace(default: T, replace: T): (T) -> T {
+
+        val log = classLogger<InfoParameterParser>()
+
+        private fun <T> genReplace(default: T, replace: T): (T) -> Pair<T, Boolean?> {
             return { value ->
                 when (value) {
-                    default -> replace
-                    else -> value
+                    default -> replace to null
+                    else -> value to null
                 }
             }
         }

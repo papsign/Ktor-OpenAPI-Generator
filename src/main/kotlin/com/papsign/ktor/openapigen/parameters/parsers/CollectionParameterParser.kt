@@ -10,9 +10,9 @@ import kotlin.reflect.KType
 class CollectionParameterParser<T, A>(info: ParameterInfo, type: KType, val cvt: (List<T>?) -> A) :
     InfoParameterParser(info, { style ->
         when (style) {
-            QueryParamStyle.DEFAULT -> QueryParamStyle.form
+            QueryParamStyle.DEFAULT -> QueryParamStyle.form to null
             QueryParamStyle.deepObject -> error("Deep Objects are not supported for Arrays")
-            else -> style
+            else -> style to null
         }
     }) {
 

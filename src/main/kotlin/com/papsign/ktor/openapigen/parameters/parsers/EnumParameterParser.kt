@@ -9,10 +9,10 @@ import io.ktor.http.Parameters
 
 class EnumParameterParser(info: ParameterInfo, val enumMap: Map<String, *>, val nullable: Boolean) : InfoParameterParser(info, { style ->
         when (style) {
-            QueryParamStyle.DEFAULT, QueryParamStyle.form-> QueryParamStyle.form
+            QueryParamStyle.DEFAULT, QueryParamStyle.form-> QueryParamStyle.form to false
             else -> {
                 log.warn("Using non-form style for enum type, it is undefined in the OpenAPI standard, reverting to form style")
-                QueryParamStyle.form
+                QueryParamStyle.form to false
             }
         }
     }) {
