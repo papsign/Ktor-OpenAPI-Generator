@@ -17,7 +17,7 @@ data class Parameter<T>(
     var schema: Schema<T>? = null,
     var example: T? = null,
     var examples: MutableMap<String, T>? = null,
-    var style: ParameterStyle? = null,
+    var style: ParameterStyle<*>? = null,
     var explode: Boolean = false
     // incomplete
 )

@@ -1,28 +1,25 @@
 package com.papsign.ktor.openapigen.parameters.parsers.deepobject
 
+import com.papsign.ktor.openapigen.parameters.QueryParamStyle
+import com.papsign.ktor.openapigen.parameters.parsers.generic.Builder
+import com.papsign.ktor.openapigen.parameters.parsers.generic.BuilderFactory
+import com.papsign.ktor.openapigen.parameters.parsers.generic.BuilderSelector
+import com.papsign.ktor.openapigen.parameters.parsers.generic.SelectorFactory
 import com.papsign.ktor.openapigen.parameters.util.primitiveParsers
-import io.ktor.http.Parameters
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.jvmErasure
 
-interface DeepBuilder {
-    fun build(path: String, parameters: Parameters): Any?
-
-    companion object {
-        fun getBuilderForType(type: KType): DeepBuilder {
-            primitiveParsers[type]?.let {
-                return PrimitiveBuilder(it)
-            }
-            val clazz = type.jvmErasure
-            val jclazz = clazz.java
-            return when {
-                jclazz.isEnum -> EnumBuilder(jclazz.enumConstants.associateBy { it.toString() })
-                clazz.isSubclassOf(List::class) -> ListBuilder(type)
-                jclazz.isArray -> error("Nested array are not yet supported")
-                clazz.isSubclassOf(Map::class) -> MapBuilder(type)
-                else -> ObjectBuilder(type)
-            }
-        }
-    }
+abstract class DeepBuilder : Builder<QueryParamStyle> {
+    override val style: QueryParamStyle = QueryParamStyle.deepObject
+    override val exploded: Boolean = true
 }
+
+object DeepBuilderFactory : SelectorFactory<DeepBuilder, QueryParamStyle>(
+    PrimitiveBuilder,
+    EnumBuilder,
+    ListBuilder,
+    ArrayBuilder,
+    MapBuilder,
+    ObjectBuilder
+)

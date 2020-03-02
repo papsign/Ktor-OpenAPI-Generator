@@ -1,19 +1,24 @@
 package com.papsign.ktor.openapigen.parameters.parsers.deepobject
 
-import com.papsign.ktor.openapigen.parameters.parsers.deepobject.DeepBuilder.Companion.getBuilderForType
-import io.ktor.http.Parameters
+import com.papsign.ktor.openapigen.parameters.parsers.generic.BuilderSelector
 import kotlin.reflect.KType
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.jvm.jvmErasure
 
-class ListBuilder(val type: KType):
-    DeepBuilder {
-    private val contentType = type.arguments[0].type!!
-    private val builder = getBuilderForType(contentType)
-    override fun build(path: String, parameters: Parameters): Any? {
-        val names = parameters.names().filter { it.startsWith(path) }.toSet()
-        val indices = names.map { it.substring(path.length + 1, it.indexOf("]", path.length)).toInt() }.toSet()
-        return indices.fold(ArrayList<Any?>().also { it.ensureCapacity(indices.max()?:0) }) { acc, idx ->
-            acc[idx] = builder.build("$path[$idx]", parameters)
-            acc
+class ListBuilder(val type: KType) : CollectionBuilder() {
+    override val contentType = type.arguments[0].type!!
+    override val builder by lazy { // must be lazy or will recurse infinitely
+        DeepBuilderFactory.buildBuilder(contentType, exploded) ?: error("No DeepBuilder exists for type $type")
+    }
+
+    companion object : BuilderSelector<ListBuilder> {
+
+        override fun canHandle(type: KType): Boolean {
+            return type.jvmErasure.isSubclassOf(List::class)
+        }
+
+        override fun create(type: KType, exploded: Boolean): ListBuilder {
+            return ListBuilder(type)
         }
     }
 }
