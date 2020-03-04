@@ -7,13 +7,17 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.jvmErasure
 
-class MapConverter(type: KType): Converter {
+class MapConverter(type: KType): MappedConverter {
 
     val keyConverter = PrimitiveConverterFactory.buildConverterForced(type.arguments[0].type!!)
     val valueConverter = PrimitiveConverterFactory.buildConverterForced(type.arguments[1].type!!)
 
     override fun convert(value: String): Any? {
-        return value.split(",").windowed(2).associate { keyConverter.convert(it[0]) to valueConverter.convert(it[1]) }
+        return convert(value.split(",").windowed(2).associate { it[0] to it[1] })
+    }
+
+    override fun convert(map: Map<String, String>): Any? {
+        return map.entries.associate { (key, value) -> keyConverter.convert(key) to valueConverter.convert(value) }
     }
 
     companion object: ConverterSelector {

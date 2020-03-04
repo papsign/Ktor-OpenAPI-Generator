@@ -44,7 +44,7 @@ class ObjectDeepBuilder(val type: KType) : DeepBuilder {
             return true
         }
 
-        override fun create(type: KType, exploded: Boolean): ObjectDeepBuilder {
+        override fun create(type: KType, explode: Boolean): ObjectDeepBuilder {
             return ObjectDeepBuilder(type)
         }
     }

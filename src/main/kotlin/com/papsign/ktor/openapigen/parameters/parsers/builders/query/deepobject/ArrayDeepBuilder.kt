@@ -20,7 +20,7 @@ class ArrayDeepBuilder(type: KType) : CollectionDeepBuilder(type) {
             return type.jvmErasure.java.isArray
         }
 
-        override fun create(type: KType, exploded: Boolean): ArrayDeepBuilder {
+        override fun create(type: KType, explode: Boolean): ArrayDeepBuilder {
             return ArrayDeepBuilder(type)
         }
     }

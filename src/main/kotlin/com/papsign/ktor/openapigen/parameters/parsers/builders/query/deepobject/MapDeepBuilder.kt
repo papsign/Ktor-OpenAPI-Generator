@@ -31,7 +31,7 @@ class MapDeepBuilder(val type: KType) : DeepBuilder {
             return type.jvmErasure.isSubclassOf(Map::class)
         }
 
-        override fun create(type: KType, exploded: Boolean): MapDeepBuilder {
+        override fun create(type: KType, explode: Boolean): MapDeepBuilder {
             return MapDeepBuilder(type)
         }
     }

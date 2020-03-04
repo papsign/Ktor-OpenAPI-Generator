@@ -19,7 +19,7 @@ class ArrayExplodedFormBuilder(type: KType) : CollectionExplodedFormBuilder(type
             return type.jvmErasure.java.isArray && explode
         }
 
-        override fun create(type: KType, exploded: Boolean): ArrayExplodedFormBuilder {
+        override fun create(type: KType, explode: Boolean): ArrayExplodedFormBuilder {
             return ArrayExplodedFormBuilder(type)
         }
     }

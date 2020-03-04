@@ -17,7 +17,7 @@ class ListDeepBuilder(type: KType) : CollectionDeepBuilder(type) {
             return type.jvmErasure.isSubclassOf(List::class)
         }
 
-        override fun create(type: KType, exploded: Boolean): ListDeepBuilder {
+        override fun create(type: KType, explode: Boolean): ListDeepBuilder {
             return ListDeepBuilder(type)
         }
     }

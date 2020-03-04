@@ -19,7 +19,7 @@ class ArraySpaceDelimitedBuilder(type: KType): CollectionDelimitedBuilder(type, 
             return !explode && type.jvmErasure.java.isArray
         }
 
-        override fun create(type: KType, exploded: Boolean): ArraySpaceDelimitedBuilder {
+        override fun create(type: KType, explode: Boolean): ArraySpaceDelimitedBuilder {
             return ArraySpaceDelimitedBuilder(
                 type
             )

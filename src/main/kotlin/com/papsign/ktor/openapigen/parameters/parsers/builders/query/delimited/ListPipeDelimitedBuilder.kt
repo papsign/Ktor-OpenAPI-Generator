@@ -17,7 +17,7 @@ class ListPipeDelimitedBuilder(type: KType) : CollectionDelimitedBuilder(type, "
             return !explode && type.jvmErasure.isSubclassOf(List::class)
         }
 
-        override fun create(type: KType, exploded: Boolean): ListPipeDelimitedBuilder {
+        override fun create(type: KType, explode: Boolean): ListPipeDelimitedBuilder {
             return ListPipeDelimitedBuilder(
                 type
             )

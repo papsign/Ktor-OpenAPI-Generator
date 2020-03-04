@@ -10,7 +10,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
 
-class ObjectConverter(type: KType): Converter {
+class ObjectConverter(type: KType): MappedConverter {
 
     private val builderMap: Map<KParameter, Converter>
     private val constructor: KFunction<Any>
@@ -26,7 +26,10 @@ class ObjectConverter(type: KType): Converter {
     }
 
     override fun convert(value: String): Any? {
-        val map = value.split(",").windowed(2).associate { it[0] to it[1] }
+        return convert(value.split(",").windowed(2).associate { it[0] to it[1] })
+    }
+
+    override fun convert(map: Map<String, String>): Any? {
         return try { constructor.callBy(builderMap.mapValues { (key, value) -> map[key.name]?.let { value.convert(it) }  }) } catch (e: InvocationTargetException) { null }
     }
 

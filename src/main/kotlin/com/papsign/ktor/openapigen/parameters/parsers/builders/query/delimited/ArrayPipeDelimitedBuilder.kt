@@ -19,7 +19,7 @@ class ArrayPipeDelimitedBuilder(type: KType): CollectionDelimitedBuilder(type, "
             return !explode && type.jvmErasure.java.isArray
         }
 
-        override fun create(type: KType, exploded: Boolean): ArrayPipeDelimitedBuilder {
+        override fun create(type: KType, explode: Boolean): ArrayPipeDelimitedBuilder {
             return ArrayPipeDelimitedBuilder(
                 type
             )

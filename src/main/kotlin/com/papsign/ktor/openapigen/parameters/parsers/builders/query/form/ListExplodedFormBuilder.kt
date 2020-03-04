@@ -19,7 +19,7 @@ class ListExplodedFormBuilder(type: KType) : CollectionExplodedFormBuilder(type)
             return type.jvmErasure.isSubclassOf(List::class) && explode
         }
 
-        override fun create(type: KType, exploded: Boolean): ListExplodedFormBuilder {
+        override fun create(type: KType, explode: Boolean): ListExplodedFormBuilder {
             return ListExplodedFormBuilder(type)
         }
     }

@@ -17,7 +17,7 @@ class ListSpaceDelimitedBuilder(type: KType) : CollectionDelimitedBuilder(type, 
             return !explode && type.jvmErasure.isSubclassOf(List::class)
         }
 
-        override fun create(type: KType, exploded: Boolean): ListSpaceDelimitedBuilder {
+        override fun create(type: KType, explode: Boolean): ListSpaceDelimitedBuilder {
             return ListSpaceDelimitedBuilder(
                 type
             )
