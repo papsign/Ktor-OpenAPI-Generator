@@ -2,7 +2,6 @@ package com.papsign.ktor.openapigen.parameters.parsers.builders.query.deepobject
 
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderSelector
 import com.papsign.ktor.openapigen.parameters.parsers.converters.primitive.PrimitiveConverterFactory
-import com.papsign.ktor.openapigen.parameters.util.primitiveParsers
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.jvm.jvmErasure

@@ -1,4 +1,4 @@
-package com.papsign.ktor.openapigen.parameters.parsers.builders.path.label
+package com.papsign.ktor.openapigen.parameters.parsers.builders.path.matrix
 
 import com.papsign.ktor.openapigen.parameters.PathParamStyle
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder

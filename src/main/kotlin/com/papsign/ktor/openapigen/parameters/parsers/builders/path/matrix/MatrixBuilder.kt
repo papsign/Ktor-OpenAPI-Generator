@@ -1,4 +1,4 @@
-package com.papsign.ktor.openapigen.parameters.parsers.builders.path.label
+package com.papsign.ktor.openapigen.parameters.parsers.builders.path.matrix
 
 import com.papsign.ktor.openapigen.parameters.PathParamStyle
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
@@ -10,7 +10,7 @@ import com.papsign.ktor.openapigen.parameters.parsers.converters.collection.List
 import kotlin.reflect.KType
 
 class MatrixBuilder(type: KType, override val explode: Boolean): Builder<PathParamStyle> {
-    override val style: PathParamStyle = PathParamStyle.label
+    override val style: PathParamStyle = PathParamStyle.matrix
 
     private val converter: Converter = ConverterFactory.buildConverterForced(type)
 

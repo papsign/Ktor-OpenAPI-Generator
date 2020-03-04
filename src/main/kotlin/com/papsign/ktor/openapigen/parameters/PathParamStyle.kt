@@ -2,8 +2,8 @@ package com.papsign.ktor.openapigen.parameters
 
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderFactory
-import com.papsign.ktor.openapigen.parameters.parsers.builders.path.label.MatrixBuilderFactory
-import com.papsign.ktor.openapigen.parameters.parsers.builders.path.matrix.LabelBuilderFactory
+import com.papsign.ktor.openapigen.parameters.parsers.builders.path.matrix.MatrixBuilderFactory
+import com.papsign.ktor.openapigen.parameters.parsers.builders.path.label.LabelBuilderFactory
 import com.papsign.ktor.openapigen.parameters.parsers.builders.path.simple.SimpleBuilderFactory
 
 

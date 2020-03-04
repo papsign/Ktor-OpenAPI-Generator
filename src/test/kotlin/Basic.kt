@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.parameters.PathParamStyle
+import com.papsign.ktor.openapigen.parameters.QueryParamStyle
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.get
@@ -105,9 +106,7 @@ object Basic {
         @QueryParam("Optional String") val optional: A? // Nullable Types are optional
     )
 
-    data class A(val b: B)
-
-    data class B(val lst: List<String>)
+    data class A(val b: String)
 
     // A response can be any class, but a description will be generated from the annotation
     @Response("A String Response")
