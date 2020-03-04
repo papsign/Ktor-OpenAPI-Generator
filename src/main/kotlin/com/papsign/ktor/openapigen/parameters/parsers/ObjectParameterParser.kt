@@ -1,8 +1,7 @@
 package com.papsign.ktor.openapigen.parameters.parsers
 
 import com.papsign.ktor.openapigen.parameters.QueryParamStyle
-import com.papsign.ktor.openapigen.parameters.parsers.deepobject.DeepBuilder
-import com.papsign.ktor.openapigen.parameters.parsers.deepobject.DeepBuilderFactory
+import com.papsign.ktor.openapigen.parameters.parsers.builders.query.deepobject.DeepBuilderFactory
 import com.papsign.ktor.openapigen.parameters.util.ParameterInfo
 import io.ktor.http.Parameters
 import io.ktor.util.toMap

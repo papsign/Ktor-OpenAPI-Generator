@@ -31,6 +31,7 @@ dependencies {
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.6"
+    kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlin.ExperimentalStdlibApi"]
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.6"
