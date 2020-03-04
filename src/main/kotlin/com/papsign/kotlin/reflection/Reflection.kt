@@ -5,7 +5,6 @@ import kotlin.reflect.*
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.jvmErasure
 
 val unitKType = getKType<Unit>()
@@ -15,7 +14,8 @@ inline fun <reified T> isNullable(): Boolean {
 }
 
 inline fun <reified T> getKType(): KType {
-    return object : SuperTypeTokenHolder<T>() { }.getKTypeImpl().withNullability(isNullable<T>())
+    return typeOf<T>()
+   // return object : SuperTypeTokenHolder<T>() {}.getKTypeImpl().withNullability(isNullable<T>())
 }
 
 // TODO: Lobby for a real kotlin ::type for types because the status quo sucks
@@ -24,7 +24,7 @@ inline fun <reified T> getKType(): KType {
 open class SuperTypeTokenHolder<T>
 
 fun SuperTypeTokenHolder<*>.getKTypeImpl(): KType =
-        javaClass.genericSuperclass.toKType().arguments.single().type!!
+    javaClass.genericSuperclass.toKType().arguments.single().type!!
 
 fun KClass<*>.toInvariantFlexibleProjection(arguments: List<KTypeProjection> = emptyList()): KTypeProjection {
     // TODO: there should be an API in kotlin-reflect which creates KType instances corresponding to flexible types
@@ -41,13 +41,15 @@ fun Type.toKTypeProjection(): KTypeProjection = when (this) {
     is Class<*> -> this.kotlin.toInvariantFlexibleProjection()
     is ParameterizedType -> {
         val erasure = (rawType as Class<*>).kotlin
-        erasure.toInvariantFlexibleProjection((erasure.typeParameters.zip(actualTypeArguments).map { (parameter, argument) ->
-            val projection = argument.toKTypeProjection()
-            projection.takeIf {
-                // Get rid of use-site projections on arguments, where the corresponding parameters already have a declaration-site projection
-                parameter.variance == KVariance.INVARIANT || parameter.variance != projection.variance
-            } ?: KTypeProjection.invariant(projection.type!!)
-        }))
+        erasure.toInvariantFlexibleProjection(
+            (erasure.typeParameters.zip(actualTypeArguments).map { (parameter, argument) ->
+                val projection = argument.toKTypeProjection()
+                projection.takeIf {
+                    // Get rid of use-site projections on arguments, where the corresponding parameters already have a declaration-site projection
+                    parameter.variance == KVariance.INVARIANT || parameter.variance != projection.variance
+                } ?: KTypeProjection.invariant(projection.type!!)
+            })
+        )
     }
     is WildcardType -> when {
         lowerBounds.isNotEmpty() -> KTypeProjection.contravariant(lowerBounds.single().toKType())

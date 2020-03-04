@@ -18,13 +18,6 @@ dependencies {
     implementation "io.ktor:ktor-metrics:$ktor_version"
     implementation "io.ktor:ktor-server-sessions:$ktor_version"
     
-    // needed for oauth interop
-    implementation "io.ktor:ktor-auth:$ktor_version" 
-    implementation "io.ktor:ktor-client-core:$ktor_version"
-    implementation "io.ktor:ktor-client-core-jvm:$ktor_version"
-    implementation "io.ktor:ktor-client-apache:$ktor_version"
-    // ------------------------
-    
     implementation "io.ktor:ktor-jackson:$ktor_version" // needed for parameter parsing and multipart parsing
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8" // needed for multipart parsing
     implementation 'org.webjars:swagger-ui:3.18.2'
@@ -37,10 +30,11 @@ dependencies {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "1.6"
+    kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlin.ExperimentalStdlibApi"]
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "1.6"
 }
 
 wrapper {

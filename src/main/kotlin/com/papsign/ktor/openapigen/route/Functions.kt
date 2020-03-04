@@ -6,7 +6,6 @@ import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.modules.handlers.RequestHandlerModule
 import com.papsign.ktor.openapigen.modules.handlers.ResponseHandlerModule
 import com.papsign.ktor.openapigen.route.modules.HttpMethodProviderModule
-import com.papsign.ktor.openapigen.route.modules.ParamClassProviderModule
 import com.papsign.ktor.openapigen.route.modules.PathProviderModule
 import io.ktor.http.HttpMethod
 import io.ktor.routing.HttpMethodRouteSelector
@@ -83,8 +82,6 @@ inline fun <reified P : Any, reified R : Any, reified B : Any, T: OpenAPIRoute<T
         if (path != null) {
             provider.registerModule(PathProviderModule(path.path))
         }
-        if (Unit !is P)
-            provider.registerModule(ParamClassProviderModule(P::class))
         handle()
     }
 }

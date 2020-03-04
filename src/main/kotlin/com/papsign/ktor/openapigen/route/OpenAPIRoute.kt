@@ -1,7 +1,5 @@
 package com.papsign.ktor.openapigen.route
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.*
 import com.papsign.ktor.openapigen.content.type.ktor.KtorContentProvider
@@ -12,6 +10,7 @@ import com.papsign.ktor.openapigen.modules.OpenAPIModule
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
 import com.papsign.ktor.openapigen.openAPIGen
+import com.papsign.ktor.openapigen.parameters.util.buildParameterHandler
 import com.papsign.ktor.openapigen.route.response.Responder
 import com.papsign.ktor.openapigen.validators.ValidationHandler
 import io.ktor.application.ApplicationCall
@@ -33,6 +32,9 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
     inline fun <reified P : Any, reified R : Any, reified B : Any> handle(
             crossinline pass: suspend OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>, responder: Responder, P, B) -> Unit
     ) {
+        val parameterHandler = buildParameterHandler<P>()
+        provider.registerModule(parameterHandler)
+
         val apiGen = ktorRoute.application.openAPIGen
         provider.ofClass<HandlerModule>().forEach {
             it.configure(apiGen, provider)
@@ -49,7 +51,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                 accept(acceptType) {
                     if (Unit is B) {
                         handle {
-                            val params: P = if (Unit is P) Unit else buildParameterObject(call, P::class.java)
+                            val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters)
                             pass(this, responder, PHandler.handle(params), Unit)
                         }
                     } else {
@@ -57,7 +59,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                             contentType(contentType) {
                                 handle {
                                     val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(B::class, this)
-                                    val params: P = if (Unit is P) Unit else buildParameterObject(call, P::class.java)
+                                    val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters)
                                     pass(this, responder, PHandler.handle(params), BHandler.handle(receive))
                                 }
                             }
@@ -65,14 +67,6 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                     }
                 }
             }
-        }
-    }
-
-    companion object {
-        private val mapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-
-        fun <T> buildParameterObject(call: ApplicationCall, clazz: Class<T>): T {
-            return mapper.convertValue(call.parameters.names().associateWith { call.parameters[it] }, clazz)
         }
     }
 

@@ -5,6 +5,8 @@ import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.openAPIGen
+import com.papsign.ktor.openapigen.parameters.PathParamStyle
+import com.papsign.ktor.openapigen.parameters.QueryParamStyle
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.get
@@ -100,9 +102,11 @@ object Basic {
     // Path works like the @Location from locations, but for transparency we recommend only using it to extract the parameters
     @Path("string/{a}")
     data class StringParam(
-        @PathParam("A simple String Param") val a: String,
-        @QueryParam("Optional String") val optional: String? // Nullable Types are optional
+        @PathParam("A simple String Param", style = PathParamStyle.matrix) val a: String,
+        @QueryParam("Optional String") val optional: A? // Nullable Types are optional
     )
+
+    data class A(val b: String)
 
     // A response can be any class, but a description will be generated from the annotation
     @Response("A String Response")

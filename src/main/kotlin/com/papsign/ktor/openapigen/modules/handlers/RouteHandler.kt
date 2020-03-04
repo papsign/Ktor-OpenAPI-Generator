@@ -21,7 +21,7 @@ object RouteHandler: HandlerModule {
         val methods = provider.ofClass<MethodProvider>()
         if (methods.size > 1) error("API cannot have two methods simultaneously: ${methods.map { it.method.value }}")
         val paths = provider.ofClass<PathProvider>()
-        val path = "/${paths.map { it.path.trim('/') }.filter { it.isNotBlank() }.joinToString("/")}"
+        val path = "/${paths.flatMap { it.path.split('/').filter(String::isNotEmpty) }.joinToString("/")}"
         val operationModules = provider.ofClass<OperationModule>()
         apiGen.api.paths.getOrPut(path) { PathItem() }.also {pathItem ->
             methods.forEach {
