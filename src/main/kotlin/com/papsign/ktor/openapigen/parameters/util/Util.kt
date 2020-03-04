@@ -4,7 +4,7 @@ import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.parameters.handlers.ModularParameterHander
 import com.papsign.ktor.openapigen.parameters.handlers.ParameterHandler
-import com.papsign.ktor.openapigen.parameters.parsers.UnitParameterHandler
+import com.papsign.ktor.openapigen.parameters.handlers.UnitParameterHandler
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation

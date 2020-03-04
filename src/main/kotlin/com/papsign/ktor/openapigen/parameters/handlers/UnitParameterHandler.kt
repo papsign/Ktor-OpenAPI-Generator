@@ -1,4 +1,4 @@
-package com.papsign.ktor.openapigen.parameters.parsers
+package com.papsign.ktor.openapigen.parameters.handlers
 
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.modules.ModuleProvider
