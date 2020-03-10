@@ -14,6 +14,7 @@ import io.ktor.util.toMap
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.withNullability
 
 class ModularParameterHander<T>(val parsers: Map<KParameter, Builder<*>>, val constructor: KFunction<T>) :
     ParameterHandler<T> {
@@ -30,7 +31,7 @@ class ModularParameterHander<T>(val parsers: Map<KParameter, Builder<*>>, val co
                 `in`,
                 !param.type.isMarkedNullable
             ).also {
-                it.schema = apiGen.schemaRegistrar[param.type].schema as Schema<Any>
+                it.schema = apiGen.schemaRegistrar[param.type.withNullability(false)].schema as Schema<Any>
                 config(it)
             }
         }

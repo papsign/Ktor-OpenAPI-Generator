@@ -94,6 +94,12 @@ object Basic {
                         respond(body)
                     }
                 }
+
+                route("generic") {
+                    post<Unit, GenericTest<A?>, GenericTest<A?>> { params, body ->
+                        respond(body)
+                    }
+                }
             }
         }.start(true)
 
@@ -107,6 +113,9 @@ object Basic {
     )
 
     data class A(val b: String)
+
+    @Request
+    data class GenericTest<T>(val value: T)
 
     // A response can be any class, but a description will be generated from the annotation
     @Response("A String Response")

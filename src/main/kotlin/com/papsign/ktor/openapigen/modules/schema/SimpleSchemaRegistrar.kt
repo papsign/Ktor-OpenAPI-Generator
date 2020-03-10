@@ -1,14 +1,17 @@
 package com.papsign.ktor.openapigen.modules.schema
 
 import com.papsign.kotlin.reflection.getKType
+import com.papsign.kotlin.reflection.toInvariantFlexibleProjection
 import com.papsign.kotlin.reflection.toKType
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.openapi.Schema
 import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
 import kotlin.reflect.KVisibility
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.jvmErasure
 
 open class SimpleSchemaRegistrar(val namer: SchemaNamer) : SchemaRegistrar {
@@ -52,17 +55,23 @@ open class SimpleSchemaRegistrar(val namer: SchemaNamer) : SchemaRegistrar {
 
     private fun SchemaRegistrar.makeObjectSchema(type: KType): Schema<*> {
         val erasure = type.jvmErasure
+        val typeParameters = erasure.typeParameters.zip(type.arguments).associate { Pair(it.first.name, it.second.type) }
         if (erasure.isSealed) {
             return Schema.OneSchemaOf(erasure.sealedSubclasses.map { get(it.starProjectedType).schema })
         }
-        val props = erasure.declaredMemberProperties.filter { it.visibility == KVisibility.PUBLIC }
-        val properties = props.associate {
-            Pair(it.name, get(it.returnType).schema)
-        }
+        val props = erasure.declaredMemberProperties.filter { it.visibility == KVisibility.PUBLIC }.associateWith {
+            val retType = it.returnType
+            when(val classifier = retType.classifier) {
+            is KTypeParameter -> typeParameters[classifier.name] ?: it.returnType
+            else -> it.returnType
+        } }
+        val properties = props.map { (key, value) ->
+            Pair(key.name, get(value.withNullability(false)).schema)
+        }.associate { it }
         if (properties.isEmpty()) log.warn("No public properties found in object $type")
         return Schema.SchemaObj<Any>(
             properties,
-            props.filter { !it.returnType.isMarkedNullable }.map { it.name })
+            props.filterValues { value -> !value.isMarkedNullable }.map { it.key.name })
     }
 
     private fun SchemaRegistrar.makeMapSchema(type: KType): Schema<*> {
