@@ -15,7 +15,7 @@ Currently Supported:
 - Automatic and custom content Type routing and parsing (see com.papsign.ktor.openapigen.content.type, Binary Parser and default JSON parser (that uses the ktor implicit parsing/serializing))
 - Exception handling (use .throws(ex) {} in the routes with an APIException object) with Status pages interop (with .withAPI in the StatusPages configuration)
 - tags (.tag(tag) {} in route with a tag object, currently must be an enum, but may be subject to change)
-- Parameter Parsing (see basic example), /!\ only supports primitive types currently, needs to be put up to openapi specification.
+- Spec compliant Parameter Parsing (see basic example)
 
 It is inspired by ktor Locations, but makes no use of it.
 
