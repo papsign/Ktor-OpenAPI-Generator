@@ -5,6 +5,6 @@ DONE - handle error responses
 DONE - handle special content types
 DONE - handle security schemes
 - handle header only responses
-- proper parameter serialisation https://swagger.io/docs/specification/serialization/
+DONE - proper parameter serialisation https://swagger.io/docs/specification/serialization/
 
 - handle other parameters: Cookie and Header
