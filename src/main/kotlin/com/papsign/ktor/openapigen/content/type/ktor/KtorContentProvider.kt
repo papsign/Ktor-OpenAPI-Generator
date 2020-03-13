@@ -13,14 +13,14 @@ import com.papsign.ktor.openapigen.annotations.encodings.APIResponseFormat
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
+import com.papsign.ktor.openapigen.model.operation.MediaTypeModel
+import com.papsign.ktor.openapigen.model.schema.DataFormat
+import com.papsign.ktor.openapigen.model.schema.DataType
+import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.schema.NamedSchema
 import com.papsign.ktor.openapigen.modules.schema.SchemaRegistrar
 import com.papsign.ktor.openapigen.modules.schema.SimpleSchemaRegistrar
-import com.papsign.ktor.openapigen.openapi.DataFormat
-import com.papsign.ktor.openapigen.openapi.DataType
-import com.papsign.ktor.openapigen.openapi.MediaType
-import com.papsign.ktor.openapigen.openapi.Schema
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.featureOrNull
@@ -57,7 +57,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
         override fun get(type: KType, master: SchemaRegistrar): NamedSchema {
             return if (type == arrayType.withNullability(type.isMarkedNullable)) {
                 NamedSchema(
-                    "Base64ByteArray", Schema.SchemaLitteral(
+                    "Base64ByteArray", SchemaModel.SchemaModelLitteral(
                         DataType.string,
                         DataFormat.byte,
                         type.isMarkedNullable,
@@ -69,7 +69,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
         }
     }
 
-    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage):Map<ContentType, MediaType<T>>? {
+    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage):Map<ContentType, MediaTypeModel<T>>? {
         if (type == unitKType) return null
         val clazz = type.jvmErasure
         when (usage) { // check if it is explicitly declared or none is present
@@ -89,7 +89,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
             Registrar(SimpleSchemaRegistrar(apiGen.schemaRegistrar.namer))
         } else apiGen.schemaRegistrar
 
-        val media =  MediaType(reg[type].schema as Schema<T>, example)
+        val media =  MediaTypeModel(reg[type].schema as SchemaModel<T>, example)
         @Suppress("UNCHECKED_CAST")
         return contentTypes.associateWith { media.copy() }
     }

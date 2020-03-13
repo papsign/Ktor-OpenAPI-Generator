@@ -1,15 +1,16 @@
 package com.papsign.ktor.openapigen
 
-import com.papsign.ktor.openapigen.openapi.ExternalDocumentation
-import com.papsign.ktor.openapigen.openapi.Tag
+import com.papsign.ktor.openapigen.model.info.ExternalDocumentationModel
+import com.papsign.ktor.openapigen.model.info.TagModel
+
 
 interface APITag {
     val name: String
     val description: String
-    val externalDocs: ExternalDocumentation?
+    val externalDocs: ExternalDocumentationModel?
             get() = null
 
-    fun toTag(): Tag {
-        return Tag(name, description, externalDocs)
+    fun toTag(): TagModel {
+        return TagModel(name, description, externalDocs)
     }
 }

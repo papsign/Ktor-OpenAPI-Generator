@@ -3,9 +3,9 @@ package com.papsign.ktor.openapigen.modules.schema
 import com.papsign.kotlin.reflection.isNullable
 import com.papsign.ktor.openapigen.LinkedHashSchemaMap
 import com.papsign.ktor.openapigen.MutableSchemaMap
-import com.papsign.ktor.openapigen.openapi.DataFormat
-import com.papsign.ktor.openapigen.openapi.DataType
-import com.papsign.ktor.openapigen.openapi.Schema.SchemaLitteral
+import com.papsign.ktor.openapigen.model.schema.DataFormat
+import com.papsign.ktor.openapigen.model.schema.DataType
+import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.put
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -65,7 +65,7 @@ class PrimitiveSchemas(val namer: SchemaNamer) : PartialSchemaRegistrar {
             maxValue: T? = null
         ) {
             put(
-                SchemaLitteral(
+                SchemaModel.SchemaModelLitteral(
                     type,
                     format,
                     isNullable<T>(),

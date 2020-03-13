@@ -15,9 +15,9 @@ import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.interop.withAPI
+import com.papsign.ktor.openapigen.model.Described
+import com.papsign.ktor.openapigen.model.server.ServerModel
 import com.papsign.ktor.openapigen.openAPIGen
-import com.papsign.ktor.openapigen.openapi.Described
-import com.papsign.ktor.openapigen.openapi.Server
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.get
@@ -113,7 +113,7 @@ object TestServer {
             // serve OpenAPI and redirect from root
             routing {
                 get("/openapi.json") {
-                    val host = Server(
+                    val host = ServerModel(
                             call.request.origin.scheme + "://" + call.request.host() + if (setOf(
                                             80,
                                             443
@@ -121,7 +121,7 @@ object TestServer {
                             ) "" else ":${call.request.port()}"
                     )
                     application.openAPIGen.api.servers.add(0, host)
-                    call.respond(application.openAPIGen.api)
+                    call.respond(application.openAPIGen.api.build())
                     application.openAPIGen.api.servers.remove(host)
                 }
 

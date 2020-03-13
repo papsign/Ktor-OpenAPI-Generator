@@ -10,11 +10,11 @@ import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
 import com.papsign.ktor.openapigen.exceptions.assertContent
+import com.papsign.ktor.openapigen.model.operation.MediaTypeModel
+import com.papsign.ktor.openapigen.model.schema.DataFormat
+import com.papsign.ktor.openapigen.model.schema.DataType
+import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.openapi.DataFormat
-import com.papsign.ktor.openapigen.openapi.DataType
-import com.papsign.ktor.openapigen.openapi.MediaType
-import com.papsign.ktor.openapigen.openapi.Schema
 import io.ktor.application.ApplicationCall
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -57,7 +57,7 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModule
         return clazz.constructors.first { it.parameters.size == 1 && acceptedTypes.contains(it.parameters[0].type) }.call( request.context.receiveStream())
     }
 
-    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaType<T>>? {
+    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaTypeModel<T>>? {
         if (type == unitKType) return null
         val contentTypes = when(usage) {
             ContentTypeProvider.Usage.PARSE -> {
@@ -88,7 +88,7 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModule
                 }
             }
         }
-        val mediaType: MediaType<T> = MediaType(Schema.SchemaLitteral(DataType.string, DataFormat.binary), example)
+        val mediaType: MediaTypeModel<T> = MediaTypeModel(SchemaModel.SchemaModelLitteral(DataType.string, DataFormat.binary), example)
         return contentTypes.map(ContentType.Companion::parse).associateWith { mediaType.copy() }
     }
 

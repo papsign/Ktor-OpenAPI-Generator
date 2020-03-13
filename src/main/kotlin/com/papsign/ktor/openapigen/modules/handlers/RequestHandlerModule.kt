@@ -7,12 +7,12 @@ import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.SelectedParser
+import com.papsign.ktor.openapigen.model.operation.OperationModel
+import com.papsign.ktor.openapigen.model.operation.RequestBodyModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
 import com.papsign.ktor.openapigen.modules.providers.ParameterProvider
-import com.papsign.ktor.openapigen.openapi.Operation
-import com.papsign.ktor.openapigen.openapi.RequestBody
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
@@ -25,7 +25,7 @@ class RequestHandlerModule<T : Any>(
 
     private val log = classLogger()
 
-    override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: Operation) {
+    override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: OperationModel) {
         val map = provider.ofClass<BodyParser>().mapNotNull {
             val mediaType = it.getMediaType(requestType, apiGen, provider, requestExample, ContentTypeProvider.Usage.PARSE)
                     ?: return@mapNotNull null
@@ -46,11 +46,10 @@ class RequestHandlerModule<T : Any>(
             } else {
                 description = requestMeta?.description
             }
-        } ?: if (map.isNotEmpty()) RequestBody(map.toMutableMap(), description = requestMeta?.description) else null
+        } ?: if (map.isNotEmpty()) RequestBodyModel(map.toMutableMap(), description = requestMeta?.description) else null
     }
 
     companion object {
-        inline fun <reified T : Any> create(requestExample: T? = null) =
-                RequestHandlerModule(T::class, getKType<T>(), requestExample)
+        inline fun <reified T : Any> create(requestExample: T? = null) = RequestHandlerModule(T::class, getKType<T>(), requestExample)
     }
 }

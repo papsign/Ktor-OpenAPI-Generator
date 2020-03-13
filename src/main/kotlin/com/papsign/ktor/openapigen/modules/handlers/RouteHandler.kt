@@ -2,14 +2,14 @@ package com.papsign.ktor.openapigen.modules.handlers
 
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.content.type.SelectedModule
+import com.papsign.ktor.openapigen.model.base.PathItemModel
+import com.papsign.ktor.openapigen.model.operation.OperationModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
 import com.papsign.ktor.openapigen.modules.providers.MethodProvider
 import com.papsign.ktor.openapigen.modules.providers.PathProvider
-import com.papsign.ktor.openapigen.openapi.Operation
-import com.papsign.ktor.openapigen.openapi.PathItem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -23,11 +23,11 @@ object RouteHandler: HandlerModule {
         val paths = provider.ofClass<PathProvider>()
         val path = "/${paths.flatMap { it.path.split('/').filter(String::isNotEmpty) }.joinToString("/")}"
         val operationModules = provider.ofClass<OperationModule>()
-        apiGen.api.paths.getOrPut(path) { PathItem() }.also {pathItem ->
+        apiGen.api.paths.getOrPut(path) { PathItemModel() }.also {pathItem ->
             methods.forEach {
                 val name = it.method.value.toLowerCase()
                 //if (pathItem.containsKey(name)) error("$path::$name already defined")
-                val op = pathItem.getOrPut(name) { Operation() } as Operation
+                val op = pathItem.getOrPut(name) { OperationModel() } as OperationModel
                 operationModules.forEach {
                     it.configure(apiGen, provider, op)
                 }

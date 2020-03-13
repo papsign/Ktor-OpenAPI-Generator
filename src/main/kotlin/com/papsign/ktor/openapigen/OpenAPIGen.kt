@@ -1,12 +1,15 @@
 package com.papsign.ktor.openapigen
 
+import com.papsign.ktor.openapigen.model.base.OpenAPIModel
+import com.papsign.ktor.openapigen.model.info.ContactModel
+import com.papsign.ktor.openapigen.model.info.ExternalDocumentationModel
+import com.papsign.ktor.openapigen.model.info.InfoModel
+import com.papsign.ktor.openapigen.model.schema.SchemaModel
+import com.papsign.ktor.openapigen.model.server.ServerModel
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
+import com.papsign.ktor.openapigen.modules.OpenAPIModule
 import com.papsign.ktor.openapigen.modules.schema.*
-import com.papsign.ktor.openapigen.openapi.ExternalDocumentation
-import com.papsign.ktor.openapigen.openapi.OpenAPI
-import com.papsign.ktor.openapigen.openapi.Schema
-import com.papsign.ktor.openapigen.openapi.Schema.SchemaRef
-import com.papsign.ktor.openapigen.openapi.Server
+import com.sun.xml.internal.ws.protocol.soap.ServerMUTube
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
@@ -48,21 +51,21 @@ class OpenAPIGen(
         }
     }
 
-    class Configuration(val api: OpenAPI) {
-        inline fun info(crossinline configure: OpenAPI.Info.() -> Unit) {
-            api.info = OpenAPI.Info().apply(configure)
+    class Configuration(val api: OpenAPIModel) {
+        inline fun info(crossinline configure: InfoModel.() -> Unit) {
+            api.info = InfoModel().apply(configure)
         }
 
-        inline fun OpenAPI.Info.contact(crossinline configure: OpenAPI.Contact.() -> Unit) {
-            contact = OpenAPI.Contact().apply(configure)
+        inline fun InfoModel.contact(crossinline configure: ContactModel.() -> Unit) {
+            contact = ContactModel().apply(configure)
         }
 
-        inline fun server(url: String, crossinline configure: Server.() -> Unit = {}) {
-            api.servers.add(Server(url).apply(configure))
+        inline fun server(url: String, crossinline configure: ServerModel.() -> Unit = {}) {
+            api.servers.add(ServerModel(url).apply(configure))
         }
 
-        inline fun externalDocs(url: String, crossinline configure: ExternalDocumentation.() -> Unit = {}) {
-            api.externalDocs = ExternalDocumentation(url).apply(configure)
+        inline fun externalDocs(url: String, crossinline configure: ExternalDocumentationModel.() -> Unit = {}) {
+            api.externalDocs = ExternalDocumentationModel(url).apply(configure)
         }
 
         var swaggerUiPath = "swagger-ui"
@@ -89,15 +92,15 @@ class OpenAPIGen(
             val current = schemas[type]
             if (current != null) {
                 val name = names[type]!!
-                return NamedSchema(name, SchemaRef<Any>("#/components/schemas/$name"))
+                return NamedSchema(name, SchemaModel.SchemaModelRef<Any>("#/components/schemas/$name"))
             }
             val (name, schema) = super.get(type, master)
-            if (schema is Schema.SchemaArr<*>) return NamedSchema(name, schema)
+            if (schema is SchemaModel.SchemaModelArr<*>) return NamedSchema(name, schema)
 
             schemas[type] = schema
             names[type] = name
             api.components.schemas[name] = schema
-            return NamedSchema(name, SchemaRef<Any>("#/components/schemas/$name"))
+            return NamedSchema(name, SchemaModel.SchemaModelRef<Any>("#/components/schemas/$name"))
         }
     }
 
@@ -115,7 +118,7 @@ class OpenAPIGen(
         override val key = AttributeKey<OpenAPIGen>("OpenAPI Generator")
 
         override fun install(pipeline: ApplicationCallPipeline, configure: Configuration.() -> Unit): OpenAPIGen {
-            val api = OpenAPI()
+            val api = OpenAPIModel()
             val cfg = Configuration(api).apply(configure)
             if (cfg.serveSwaggerUi) {
                 val ui = SwaggerUi(cfg.swaggerUiPath)

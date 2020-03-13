@@ -1,4 +1,4 @@
-package com.papsign.ktor.openapigen.openapi
+package com.papsign.ktor.openapigen.model
 
 interface Described {
     val description: String

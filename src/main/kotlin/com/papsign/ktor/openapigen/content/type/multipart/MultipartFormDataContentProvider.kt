@@ -8,10 +8,14 @@ import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.exceptions.assertContent
+import com.papsign.ktor.openapigen.model.operation.MediaTypeEncodingModel
+import com.papsign.ktor.openapigen.model.operation.MediaTypeModel
+import com.papsign.ktor.openapigen.model.schema.DataFormat
+import com.papsign.ktor.openapigen.model.schema.DataType
+import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.schema.NamedSchema
 import com.papsign.ktor.openapigen.modules.schema.SchemaRegistrar
-import com.papsign.ktor.openapigen.openapi.*
 import io.ktor.application.ApplicationCall
 import io.ktor.http.ContentType
 import io.ktor.http.content.PartData
@@ -41,7 +45,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
         override fun get(type: KType, master: SchemaRegistrar): NamedSchema {
             return if (streamTypes.contains(type)) {
                 NamedSchema(
-                        "InputStream", Schema.SchemaLitteral(
+                        "InputStream", SchemaModel.SchemaModelLitteral(
                         DataType.string,
                         DataFormat.binary,
                         type.isMarkedNullable,
@@ -81,7 +85,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
 
     private val allowedTypes = nonNullTypes
 
-    private val typeContentTypes = HashMap<KType, Map<String, MediaTypeEncoding>>()
+    private val typeContentTypes = HashMap<KType, Map<String, MediaTypeEncodingModel>>()
 
 
     override suspend fun <T : Any> parseBody(clazz: KClass<T>, request: PipelineContext<Unit, ApplicationCall>): T {
@@ -127,7 +131,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
     }
 
 
-    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaType<T>>? {
+    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaTypeModel<T>>? {
         if (type == unitKType) return null
         type.jvmErasure.findAnnotation<FormDataRequest>() ?: return null
         when (usage) {
@@ -153,12 +157,12 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
                         .associateBy { it.name }
                         .mapValues { it.value.findAnnotation<PartEncoding>() }
                         .filterValues { it != null }
-                        .mapValues { MediaTypeEncoding(it.value!!.contentType) }
+                        .mapValues { MediaTypeEncodingModel(it.value!!.contentType) }
             }.toMap()
         }
         val schema = Registrar(apiGen.schemaRegistrar)[type]
 
         @Suppress("UNCHECKED_CAST")
-        return mapOf(ContentType.MultiPart.FormData to MediaType(schema.schema as Schema<T>, example, null, contentTypes))
+        return mapOf(ContentType.MultiPart.FormData to MediaTypeModel(schema.schema as SchemaModel<T>, example, null, contentTypes))
     }
 }

@@ -1,10 +1,9 @@
 package com.papsign.ktor.openapigen.modules.schema
 
 import com.papsign.kotlin.reflection.getKType
-import com.papsign.kotlin.reflection.toInvariantFlexibleProjection
 import com.papsign.kotlin.reflection.toKType
 import com.papsign.ktor.openapigen.classLogger
-import com.papsign.ktor.openapigen.openapi.Schema
+import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeParameter
 import kotlin.reflect.KVisibility
@@ -20,7 +19,7 @@ open class SimpleSchemaRegistrar(val namer: SchemaNamer) : SchemaRegistrar {
 
     override fun get(type: KType, master: SchemaRegistrar) = NamedSchema(namer[type], master.makeSchema(type))
 
-    private fun SchemaRegistrar.makeSchema(type: KType): Schema<*> {
+    private fun SchemaRegistrar.makeSchema(type: KType): SchemaModel<*> {
         val clazz = type.jvmErasure
         val jclazz = clazz.java
         return when {
@@ -34,30 +33,30 @@ open class SimpleSchemaRegistrar(val namer: SchemaNamer) : SchemaRegistrar {
         }
     }
 
-    private fun SchemaRegistrar.makeEnumSchema(type: KType): Schema<*> {
-        return Schema.SchemaEnum<Any>(
+    private fun SchemaRegistrar.makeEnumSchema(type: KType): SchemaModel<*> {
+        return SchemaModel.SchemaModelEnum<Any>(
             type.jvmErasure.java.enumConstants.map { (it as Enum<*>).name },
             type.isMarkedNullable
         )
     }
 
-    private fun SchemaRegistrar.makeListSchema(type: KType): Schema<*> {
-        return Schema.SchemaArr<Any>(
+    private fun SchemaRegistrar.makeListSchema(type: KType): SchemaModel<*> {
+        return SchemaModel.SchemaModelArr<Any>(
             get(type.arguments[0].type!!).schema
         )
     }
 
-    private fun SchemaRegistrar.makeArraySchema(type: KType): Schema<*> {
-        return Schema.SchemaArr<Any>(
+    private fun SchemaRegistrar.makeArraySchema(type: KType): SchemaModel<*> {
+        return SchemaModel.SchemaModelArr<Any>(
             get(type.jvmErasure.java.componentType.toKType()).schema
         )
     }
 
-    private fun SchemaRegistrar.makeObjectSchema(type: KType): Schema<*> {
+    private fun SchemaRegistrar.makeObjectSchema(type: KType): SchemaModel<*> {
         val erasure = type.jvmErasure
         val typeParameters = erasure.typeParameters.zip(type.arguments).associate { Pair(it.first.name, it.second.type) }
         if (erasure.isSealed) {
-            return Schema.OneSchemaOf(erasure.sealedSubclasses.map { get(it.starProjectedType).schema })
+            return SchemaModel.OneSchemaModelOf(erasure.sealedSubclasses.map { get(it.starProjectedType).schema })
         }
         val props = erasure.declaredMemberProperties.filter { it.visibility == KVisibility.PUBLIC }.associateWith {
             val retType = it.returnType
@@ -69,13 +68,13 @@ open class SimpleSchemaRegistrar(val namer: SchemaNamer) : SchemaRegistrar {
             Pair(key.name, get(value.withNullability(false)).schema)
         }.associate { it }
         if (properties.isEmpty()) log.warn("No public properties found in object $type")
-        return Schema.SchemaObj<Any>(
+        return SchemaModel.SchemaModelObj<Any>(
             properties,
             props.filterValues { value -> !value.isMarkedNullable }.map { it.key.name })
     }
 
-    private fun SchemaRegistrar.makeMapSchema(type: KType): Schema<*> {
+    private fun SchemaRegistrar.makeMapSchema(type: KType): SchemaModel<*> {
         val type = type.arguments[1].type ?: getKType<String>()
-        return Schema.SchemaMap(get(type).schema as Schema<Any>)
+        return SchemaModel.SchemaModelMap(get(type).schema as SchemaModel<Any>)
     }
 }
