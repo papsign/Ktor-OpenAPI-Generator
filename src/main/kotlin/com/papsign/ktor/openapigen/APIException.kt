@@ -1,7 +1,5 @@
 package com.papsign.ktor.openapigen
 
-import com.papsign.kotlin.reflection.getKType
-import com.papsign.kotlin.reflection.unitKType
 import io.ktor.http.HttpStatusCode
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -29,7 +27,8 @@ interface APIException<EX: Throwable, B> {
         }
 
         inline fun <reified EX: Throwable, reified B> apiException(status: HttpStatusCode, noinline gen: (EX)->B): APIException<EX, B> {
-            return APIExceptionProxy(status, EX::class, getKType<B>(), gen)
+            return APIExceptionProxy(status, EX::class,
+                getKType<B>(), gen)
         }
     }
 }

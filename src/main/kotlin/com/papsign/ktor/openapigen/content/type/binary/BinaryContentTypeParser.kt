@@ -1,10 +1,6 @@
 package com.papsign.ktor.openapigen.content.type.binary
 
-import com.papsign.kotlin.reflection.getKType
-import com.papsign.kotlin.reflection.getObjectSubtypes
-import com.papsign.kotlin.reflection.unitKType
-import com.papsign.ktor.openapigen.OpenAPIGen
-import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
+import com.papsign.ktor.openapigen.*
 import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
@@ -22,15 +18,16 @@ import io.ktor.request.receiveStream
 import io.ktor.response.respondBytes
 import io.ktor.util.pipeline.PipelineContext
 import java.io.InputStream
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KType
-import kotlin.reflect.KVisibility
+import kotlin.reflect.*
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmErasure
 
 object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModuleExtension {
+
+    private fun <T: Any> KClass<T>.getAcceptableConstructor(): KFunction<T> {
+        return constructors.first { it.parameters.size == 1 && acceptedTypes.contains(it.parameters[0].type) }
+    }
 
     override fun <T : Any> getParseableContentTypes(clazz: KClass<T>): List<ContentType> {
         return clazz.findAnnotation<BinaryRequest>()?.contentTypes?.map(ContentType.Companion::parse) ?: listOf()
@@ -54,7 +51,7 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModule
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun <T : Any> parseBody(clazz: KClass<T>, request: PipelineContext<Unit, ApplicationCall>): T {
-        return clazz.constructors.first { it.parameters.size == 1 && acceptedTypes.contains(it.parameters[0].type) }.call( request.context.receiveStream())
+        return clazz.getAcceptableConstructor().call( request.context.receiveStream())
     }
 
     override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaTypeModel<T>>? {
@@ -71,7 +68,7 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModule
         }.also {
             it.forEach { ContentType.parse(it) }
         }
-        val subtypes = type.getObjectSubtypes()
+        val subtypes = type.jvmErasure.getAcceptableConstructor().parameters.map { it.type.strip() }.toSet()
         assertContent (acceptedTypes.containsAll(subtypes)) {
             "${this::class.simpleName} can only be used with type ${acceptedTypes.joinToString()}, you are using ${subtypes.minus(acceptedTypes)}"
         }

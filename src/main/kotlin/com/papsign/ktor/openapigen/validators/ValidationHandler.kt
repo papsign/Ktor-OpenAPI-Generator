@@ -1,6 +1,6 @@
 package com.papsign.ktor.openapigen.validators
 
-import com.papsign.kotlin.reflection.getKType
+import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass

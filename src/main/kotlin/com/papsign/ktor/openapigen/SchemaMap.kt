@@ -2,7 +2,6 @@
 
 package com.papsign.ktor.openapigen
 
-import com.papsign.kotlin.reflection.getKType
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import kotlin.reflect.KType
 

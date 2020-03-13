@@ -1,6 +1,6 @@
 package com.papsign.ktor.openapigen.modules.handlers
 
-import com.papsign.kotlin.reflection.getKType
+import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.classLogger
@@ -44,6 +44,7 @@ class ResponseHandlerModule<T : Any>(val responseClass: KClass<T>, val responseT
     }
 
     companion object {
-        inline fun <reified T : Any> create(responseExample: T? = null) = ResponseHandlerModule(T::class, getKType<T>(), responseExample)
+        inline fun <reified T : Any> create(responseExample: T? = null) = ResponseHandlerModule(T::class,
+            getKType<T>(), responseExample)
     }
 }

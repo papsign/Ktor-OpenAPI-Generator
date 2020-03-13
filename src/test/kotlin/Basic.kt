@@ -61,7 +61,7 @@ object Basic {
             // normal Ktor routing
             routing {
                 get("/openapi.json") {
-                    call.respond(application.openAPIGen.api)
+                    call.respond(application.openAPIGen.api.build())
                 }
 
                 get("/") {

@@ -1,6 +1,6 @@
 package com.papsign.ktor.openapigen.modules.schema
 
-import com.papsign.kotlin.reflection.isNullable
+import com.papsign.ktor.openapigen.isNullable
 import com.papsign.ktor.openapigen.LinkedHashSchemaMap
 import com.papsign.ktor.openapigen.MutableSchemaMap
 import com.papsign.ktor.openapigen.model.schema.DataFormat

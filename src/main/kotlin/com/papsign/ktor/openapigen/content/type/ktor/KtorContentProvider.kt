@@ -1,11 +1,7 @@
 package com.papsign.ktor.openapigen.content.type.ktor
 
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.exc.InvalidDefinitionException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import com.papsign.kotlin.reflection.allTypes
-import com.papsign.kotlin.reflection.getKType
-import com.papsign.kotlin.reflection.unitKType
+import com.papsign.ktor.openapigen.getKType
+import com.papsign.ktor.openapigen.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
 import com.papsign.ktor.openapigen.annotations.encodings.APIRequestFormat
@@ -28,12 +24,12 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
-import io.ktor.request.receiveOrNull
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.jvmErasure
 
@@ -85,7 +81,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
             }
         }
         val contentTypes = initContentTypes(apiGen) ?: return null
-        val reg = if (type.allTypes().contains(arrayType)) {
+        val reg = if (type.isSubtypeOf(arrayType)) {
             Registrar(SimpleSchemaRegistrar(apiGen.schemaRegistrar.namer))
         } else apiGen.schemaRegistrar
 

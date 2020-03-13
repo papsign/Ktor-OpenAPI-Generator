@@ -1,7 +1,6 @@
 package com.papsign.ktor.openapigen.modules.schema
 
-import com.papsign.kotlin.reflection.getKType
-import com.papsign.kotlin.reflection.toKType
+import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import kotlin.reflect.KType
@@ -48,7 +47,7 @@ open class SimpleSchemaRegistrar(val namer: SchemaNamer) : SchemaRegistrar {
 
     private fun SchemaRegistrar.makeArraySchema(type: KType): SchemaModel<*> {
         return SchemaModel.SchemaModelArr<Any>(
-            get(type.jvmErasure.java.componentType.toKType()).schema
+            get(type.jvmErasure.java.componentType.kotlin.starProjectedType).schema
         )
     }
 

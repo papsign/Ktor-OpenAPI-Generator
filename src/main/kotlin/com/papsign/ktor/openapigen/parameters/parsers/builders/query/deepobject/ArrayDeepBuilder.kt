@@ -1,6 +1,5 @@
 package com.papsign.ktor.openapigen.parameters.parsers.builders.query.deepobject
 
-import com.papsign.kotlin.reflection.toKType
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderSelector
 import com.papsign.ktor.openapigen.parameters.util.ListToArray
 import kotlin.reflect.KType

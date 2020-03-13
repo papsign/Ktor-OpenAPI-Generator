@@ -1,6 +1,6 @@
 package com.papsign.ktor.openapigen.modules.handlers
 
-import com.papsign.kotlin.reflection.getKType
+import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.classLogger
@@ -50,6 +50,7 @@ class RequestHandlerModule<T : Any>(
     }
 
     companion object {
-        inline fun <reified T : Any> create(requestExample: T? = null) = RequestHandlerModule(T::class, getKType<T>(), requestExample)
+        inline fun <reified T : Any> create(requestExample: T? = null) = RequestHandlerModule(T::class,
+            getKType<T>(), requestExample)
     }
 }
