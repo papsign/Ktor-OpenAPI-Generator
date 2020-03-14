@@ -15,8 +15,22 @@ import kotlin.reflect.full.superclasses
 
 data class ThrowsInfo(override val exceptions: List<APIException<*, *>>) : ThrowInfoProvider
 
+/**
+ * exists for simpler syntax
+ */
+inline fun <T: OpenAPIRoute<T>, reified EX : Throwable> T.throws(status: HttpStatusCode, exClass: KClass<EX>, crossinline fn: T.() -> Unit = {}): T {
+    return throws<T, EX>(status, fn)
+}
+
 inline fun <T: OpenAPIRoute<T>, reified EX : Throwable> T.throws(status: HttpStatusCode, crossinline fn: T.() -> Unit = {}): T {
     return throws<T, EX, Unit>(status, fn = fn)
+}
+
+/**
+ * exists for simpler syntax
+ */
+inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(status: HttpStatusCode, example: B? = null, exClass: KClass<EX>, crossinline fn: T.() -> Unit = {}): T {
+    return throws<T, EX, B>(status, example, null, fn)
 }
 
 inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(status: HttpStatusCode, example: B? = null, noinline gen: ((EX) -> B)? = null, crossinline fn: T.() -> Unit = {}): T {

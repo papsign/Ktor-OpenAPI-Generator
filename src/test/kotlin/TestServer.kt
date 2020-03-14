@@ -19,6 +19,7 @@ import com.papsign.ktor.openapigen.model.Described
 import com.papsign.ktor.openapigen.model.server.ServerModel
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.route.*
+import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
@@ -165,9 +166,7 @@ object TestServer {
                 route("again") {
                     tag(TestServer.Tags.EXAMPLE) {
 
-                        throws(APIException.apiException(HttpStatusCode.BadRequest, "example") {ex: CustomException ->
-                            ex.toString()
-                        }) {
+                        throws(HttpStatusCode.BadRequest, "example", CustomException::class) {
                             get<StringParam, StringResponse>(
                                 info("String Param Endpoint", "This is a String Param Endpoint"),
                                 example = StringResponse("Hi")
