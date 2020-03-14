@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.route.util.createConstantChild
 import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
+import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import kotlinx.coroutines.coroutineScope
@@ -13,6 +14,14 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.superclasses
 
 data class ThrowsInfo(override val exceptions: List<APIException<*, *>>) : ThrowInfoProvider
+
+inline fun <T: OpenAPIRoute<T>, reified EX : Throwable> T.throws(status: HttpStatusCode, crossinline fn: T.() -> Unit = {}): T {
+    return throws<T, EX, Unit>(status, fn = fn)
+}
+
+inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(status: HttpStatusCode, example: B? = null, noinline gen: ((EX) -> B)? = null, crossinline fn: T.() -> Unit = {}): T {
+    return throws(APIException.apiException(status, example, gen), fn = fn)
+}
 
 inline fun <T: OpenAPIRoute<T>> T.throws(vararg responses: APIException<*, *>, crossinline fn: T.() -> Unit = {}): T {
     return child(ktorRoute.createConstantChild()).apply {
@@ -48,15 +57,22 @@ fun makeExceptionHandler(info: Array<out APIException<*, *>>): suspend PipelineC
     return { t: Throwable ->
         val handler: APIException<*, *> = findHandlerByType(t::class) ?: throw t
         val gen = handler.contentGen as ((Throwable) -> Any?)?
-        if (gen != null) {
-            val ret = gen(t)
-            if (ret != null) {
-                call.respond(handler.status, ret)
-            } else {
+        val ex = handler.example
+        when {
+            gen != null -> {
+                val ret = gen(t)
+                if (ret != null) {
+                    call.respond(handler.status, ret)
+                } else {
+                    call.respond(handler.status)
+                }
+            }
+            ex != null -> {
+                call.respond(handler.status, ex)
+            }
+            else -> {
                 call.respond(handler.status)
             }
-        } else {
-            call.respond(handler.status)
         }
     }
 }
