@@ -1,5 +1,6 @@
 # Ktor OpenAPI Generator
 [![](https://jitpack.io/v/papsign/Ktor-OpenAPI-Generator.svg)](https://jitpack.io/#papsign/Ktor-OpenAPI-Generator)
+[![build status badge](https://github.com/papsign/Ktor-OpenAPI-Generator/workflows/Build/badge.svg)](https://github.com/papsign/Ktor-OpenAPI-Generator/actions)
 
 The Ktor OpenAPI Generator is a library to automatically generate the descriptor as you route your ktor application.
 
