@@ -1,11 +1,11 @@
 package com.papsign.ktor.openapigen.model
 
-import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
 interface DataModel {
-    fun build(): Map<String, Any?> {
+
+    fun serialize(): Map<String, Any?> {
         fun Map<String, *>.clean(): Map<String, *> {
             return filterValues {
                 when (it) {
@@ -17,7 +17,7 @@ interface DataModel {
         }
         fun cvt(value: Any?): Any? {
             return when (value) {
-                is DataModel -> value.build()
+                is DataModel -> value.serialize()
                 is Map<*, *> -> value.entries.associate { (key, value) -> Pair(key.toString(), cvt(value)) }.clean()
                 is Iterable<*> -> value.map { cvt(it) }
                 else -> value

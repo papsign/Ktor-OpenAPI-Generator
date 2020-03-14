@@ -23,8 +23,8 @@ class OpenAPIGenStatusPagesInterop(val api: OpenAPIGen, val statusCfg: StatusPag
         }
     }
 
-    inline fun <reified EX : Throwable, reified B> exception(status: HttpStatusCode, noinline gen: (EX) -> B) {
-        val ex = apiException(status, gen)
+    inline fun <reified EX : Throwable, reified B> exception(status: HttpStatusCode, example: B? = null, noinline gen: (EX) -> B) {
+        val ex = apiException(status, example, gen)
         api.globalModuleProvider.registerModule(ThrowsInfo(listOf(ex)))
         statusCfg.exception<EX> { t ->
             val ret = gen(t)

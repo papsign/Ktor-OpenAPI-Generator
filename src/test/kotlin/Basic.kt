@@ -6,7 +6,6 @@ import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.parameters.PathParamStyle
-import com.papsign.ktor.openapigen.parameters.QueryParamStyle
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.get
@@ -61,7 +60,7 @@ object Basic {
             // normal Ktor routing
             routing {
                 get("/openapi.json") {
-                    call.respond(application.openAPIGen.api.build())
+                    call.respond(application.openAPIGen.api.serialize())
                 }
 
                 get("/") {

@@ -43,8 +43,7 @@ sealed class SchemaModel<T>: DataModel {
         var example: T? = null
     ) : SchemaModel<T>()
 
-    data class SchemaModelRef<T>(override val `$ref`: String) : SchemaModel<T>(),
-        RefModel<SchemaModel<T>>
+    data class SchemaModelRef<T>(override val `$ref`: String) : SchemaModel<T>(), RefModel<SchemaModel<T>>
 
     data class OneSchemaModelOf<T>(val oneOf: List<SchemaModel<out T>>) : SchemaModel<T>()
 }

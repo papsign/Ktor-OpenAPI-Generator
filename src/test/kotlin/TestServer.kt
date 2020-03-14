@@ -1,13 +1,13 @@
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.papsign.ktor.openapigen.APIException
 import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Path
@@ -18,13 +18,10 @@ import com.papsign.ktor.openapigen.interop.withAPI
 import com.papsign.ktor.openapigen.model.Described
 import com.papsign.ktor.openapigen.model.server.ServerModel
 import com.papsign.ktor.openapigen.openAPIGen
-import com.papsign.ktor.openapigen.route.apiRouting
-import com.papsign.ktor.openapigen.route.info
+import com.papsign.ktor.openapigen.route.*
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
-import com.papsign.ktor.openapigen.route.route
-import com.papsign.ktor.openapigen.route.tag
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -121,7 +118,7 @@ object TestServer {
                             ) "" else ":${call.request.port()}"
                     )
                     application.openAPIGen.api.servers.add(0, host)
-                    call.respond(application.openAPIGen.api.build())
+                    call.respond(application.openAPIGen.api.serialize())
                     application.openAPIGen.api.servers.remove(host)
                 }
 
@@ -168,6 +165,17 @@ object TestServer {
                 route("again") {
                     tag(TestServer.Tags.EXAMPLE) {
 
+                        throws(APIException.apiException(HttpStatusCode.BadRequest, "example") {ex: CustomException ->
+                            ex.toString()
+                        }) {
+                            get<StringParam, StringResponse>(
+                                info("String Param Endpoint", "This is a String Param Endpoint"),
+                                example = StringResponse("Hi")
+                            ) { params ->
+                                throw CustomException()
+                            }
+                        }
+
                         get<StringParam, StringResponse>(
                                 info("String Param Endpoint", "This is a String Param Endpoint"),
                                 example = StringResponse("Hi")
@@ -188,6 +196,8 @@ object TestServer {
             }
         }.start(true)
     }
+
+    class CustomException: Exception()
 
     @Path("string/{a}")
     data class StringParam(@PathParam("A simple String Param") val a: String)

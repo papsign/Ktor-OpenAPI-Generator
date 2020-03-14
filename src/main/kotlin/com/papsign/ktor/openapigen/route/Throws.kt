@@ -2,6 +2,7 @@ package com.papsign.ktor.openapigen.route
 
 import com.papsign.ktor.openapigen.APIException
 import com.papsign.ktor.openapigen.modules.providers.ThrowInfoProvider
+import com.papsign.ktor.openapigen.route.util.createConstantChild
 import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.call
@@ -14,25 +15,25 @@ import kotlin.reflect.full.superclasses
 data class ThrowsInfo(override val exceptions: List<APIException<*, *>>) : ThrowInfoProvider
 
 inline fun <T: OpenAPIRoute<T>> T.throws(vararg responses: APIException<*, *>, crossinline fn: T.() -> Unit = {}): T {
-    val next = child()
-    next.provider.registerModule(ThrowsInfo(responses.asList()))
-    val handler = makeExceptionHandler(responses)
-    next.ktorRoute.intercept(ApplicationCallPipeline.Monitoring) {
-        try {
-            coroutineScope {
-                proceed()
-            }
-        } catch (exception: Throwable) {
-            if (call.response.status() == null) {
-                handler(exception)
-                if (call.response.status() != null) {
-                    finish()
+    return child(ktorRoute.createConstantChild()).apply {
+        provider.registerModule(ThrowsInfo(responses.asList()))
+        val handler = makeExceptionHandler(responses)
+        ktorRoute.intercept(ApplicationCallPipeline.Monitoring) {
+            try {
+                coroutineScope {
+                    proceed()
                 }
-            } else throw exception
+            } catch (exception: Throwable) {
+                if (call.response.status() == null) {
+                    handler(exception)
+                    if (call.response.status() != null) {
+                        finish()
+                    }
+                } else throw exception
+            }
         }
+        fn()
     }
-    next.fn()
-    return next
 }
 
 fun makeExceptionHandler(info: Array<out APIException<*, *>>): suspend PipelineContext<*, ApplicationCall>.(t: Throwable) -> Unit {

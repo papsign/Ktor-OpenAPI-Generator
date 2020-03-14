@@ -24,7 +24,7 @@ object ThrowOperationHandler : OperationModule {
             val map: MutableMap<String, MediaTypeModel<*>> = exceptions.value.flatMap { ex ->
                 provider.ofClass<ResponseSerializer>().mapNotNull {
                     if (ex.contentType == unitKType) return@mapNotNull null
-                    val mediaType = it.getMediaType<Any>(ex.contentType, apiGen, provider, null, ContentTypeProvider.Usage.SERIALIZE) ?: return@mapNotNull null
+                    val mediaType = it.getMediaType(ex.contentType, apiGen, provider, ex.example, ContentTypeProvider.Usage.SERIALIZE) ?: return@mapNotNull null
                     provider.registerModule(SelectedExceptionSerializer(it))
                     mediaType.map { Pair(it.key.toString(), it.value) }
                 }

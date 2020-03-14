@@ -18,3 +18,7 @@ inline fun <reified T> getKType() = typeOf<T>()
 fun KType.strip(nullable: Boolean = isMarkedNullable): KType {
     return jvmErasure.createType(arguments, nullable)
 }
+
+fun KType.deepStrip(nullable: Boolean = isMarkedNullable): KType {
+    return jvmErasure.createType(arguments.map { it.copy(type = it.type?.deepStrip()) }, nullable)
+}
