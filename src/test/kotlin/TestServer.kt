@@ -166,7 +166,7 @@ object TestServer {
                 route("again") {
                     tag(TestServer.Tags.EXAMPLE) {
 
-                        throws(HttpStatusCode.BadRequest, "example", CustomException::class) {
+                        route("exception").throws(HttpStatusCode.ExpectationFailed, "example", CustomException::class) {
                             get<StringParam, StringResponse>(
                                 info("String Param Endpoint", "This is a String Param Endpoint"),
                                 example = StringResponse("Hi")
