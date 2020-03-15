@@ -1,9 +1,7 @@
 package com.papsign.ktor.openapigen
 
 import kotlin.reflect.KType
-import kotlin.reflect.KVisibility
 import kotlin.reflect.full.createType
-import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.typeOf
 

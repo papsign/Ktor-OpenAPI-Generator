@@ -12,6 +12,8 @@ import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
+import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
+import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -23,6 +25,7 @@ import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlin.reflect.KType
 
 object Basic {
 
@@ -46,11 +49,12 @@ object Basic {
                     description = "Test server"
                 }
                 //optional
-                schemaNamer = {
-                    //rename DTOs from java type name to generator compatible form
+                replaceModule(DefaultSchemaNamer, object: SchemaNamer {
                     val regex = Regex("[A-Za-z0-9_.]+")
-                    it.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
-                }
+                    override fun get(type: KType): String {
+                       return type.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
+                    }
+                })
             }
 
             install(ContentNegotiation) {

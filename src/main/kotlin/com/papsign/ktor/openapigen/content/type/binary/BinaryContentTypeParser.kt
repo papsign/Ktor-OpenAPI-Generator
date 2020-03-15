@@ -68,7 +68,7 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModule
         }.also {
             it.forEach { ContentType.parse(it) }
         }
-        val subtypes = type.jvmErasure.getAcceptableConstructor().parameters.map { it.type.strip() }.toSet()
+        val subtypes = type.jvmErasure.getAcceptableConstructor().parameters.map { it.type }.toSet()
         assertContent (acceptedTypes.containsAll(subtypes)) {
             "${this::class.simpleName} can only be used with type ${acceptedTypes.joinToString()}, you are using ${subtypes.minus(acceptedTypes)}"
         }

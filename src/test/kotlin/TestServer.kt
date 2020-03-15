@@ -23,6 +23,11 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
+import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
+import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
+import com.papsign.ktor.openapigen.schema.processor.number.integer.clamp.Clamp
+import com.papsign.ktor.openapigen.schema.processor.number.integer.max.Max
+import com.papsign.ktor.openapigen.schema.processor.number.integer.min.Min
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -39,6 +44,7 @@ import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlin.reflect.KType
 
 object TestServer {
 
@@ -63,19 +69,20 @@ object TestServer {
                 server("https://api.test.com/") {
                     description = "Main production server"
                 }
-                schemaNamer = {
-                    //rename DTOs from java type name to generator compatible form
+                replaceModule(DefaultSchemaNamer, object: SchemaNamer {
                     val regex = Regex("[A-Za-z0-9_.]+")
-                    it.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
-                }
+                    override fun get(type: KType): String {
+                        return type.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
+                    }
+                })
             }
 
             install(ContentNegotiation) {
                 jackson {
                     enable(
-                            DeserializationFeature.WRAP_EXCEPTIONS,
-                            DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,
-                            DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
+                        DeserializationFeature.WRAP_EXCEPTIONS,
+                        DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,
+                        DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
                     )
 
                     enable(SerializationFeature.WRAP_EXCEPTIONS, SerializationFeature.INDENT_OUTPUT)
@@ -112,11 +119,11 @@ object TestServer {
             routing {
                 get("/openapi.json") {
                     val host = ServerModel(
-                            call.request.origin.scheme + "://" + call.request.host() + if (setOf(
-                                            80,
-                                            443
-                                    ).contains(call.request.port())
-                            ) "" else ":${call.request.port()}"
+                        call.request.origin.scheme + "://" + call.request.host() + if (setOf(
+                                80,
+                                443
+                            ).contains(call.request.port())
+                        ) "" else ":${call.request.port()}"
                     )
                     application.openAPIGen.api.servers.add(0, host)
                     call.respond(application.openAPIGen.api.serialize())
@@ -131,8 +138,8 @@ object TestServer {
             apiRouting {
 
                 get<StringParam, StringResponse>(
-                        info("String Param Endpoint", "This is a String Param Endpoint"),
-                        example = StringResponse("Hi")
+                    info("String Param Endpoint", "This is a String Param Endpoint"),
+                    example = StringResponse("Hi")
                 ) { params ->
                     respond(StringResponse(params.a))
                 }
@@ -148,17 +155,17 @@ object TestServer {
 
                 route("sealed") {
                     post<Unit, Base, Base>(
-                            info("Sealed class Endpoint", "This is a Sealed class Endpoint"),
-                            exampleRequest = Base.A("Hi"),
-                            exampleResponse = Base.A("Hi")
+                        info("Sealed class Endpoint", "This is a Sealed class Endpoint"),
+                        exampleRequest = Base.A("Hi"),
+                        exampleResponse = Base.A("Hi")
                     ) { params, base ->
                         respond(base)
                     }
                 }
 
                 route("long").get<LongParam, LongResponse>(
-                        info("Long Param Endpoint", "This is a String Param Endpoint"),
-                        example = LongResponse(Long.MAX_VALUE)
+                    info("Long Param Endpoint", "This is a String Param Endpoint"),
+                    example = LongResponse(Long.MAX_VALUE)
                 ) { params ->
                     respond(LongResponse(params.a))
                 }
@@ -176,27 +183,25 @@ object TestServer {
                         }
 
                         get<StringParam, StringResponse>(
-                                info("String Param Endpoint", "This is a String Param Endpoint"),
-                                example = StringResponse("Hi")
+                            info("String Param Endpoint", "This is a String Param Endpoint"),
+                            example = StringResponse("Hi")
                         ) { params ->
                             respond(StringResponse(params.a))
                         }
 
                         route("long").get<LongParam, LongResponse>(
-                                info("Long Param Endpoint", "This is a String Param Endpoint"),
-                                example = LongResponse(Long.MAX_VALUE)
+                            info("Long Param Endpoint", "This is a String Param Endpoint"),
+                            example = LongResponse(Long.MAX_VALUE)
                         ) { params ->
                             respond(LongResponse(params.a))
                         }
                     }
-
-
                 }
             }
         }.start(true)
     }
 
-    class CustomException: Exception()
+    class CustomException : Exception()
 
     @Path("string/{a}")
     data class StringParam(@PathParam("A simple String Param") val a: String)
@@ -217,14 +222,14 @@ object TestServer {
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
     @JsonSubTypes(
-            JsonSubTypes.Type(Base.A::class, name = "a"),
-            JsonSubTypes.Type(Base.B::class, name = "b"),
-            JsonSubTypes.Type(Base.C::class, name = "c")
+        JsonSubTypes.Type(Base.A::class, name = "a"),
+        JsonSubTypes.Type(Base.B::class, name = "b"),
+        JsonSubTypes.Type(Base.C::class, name = "c")
     )
     sealed class Base {
         class A(val str: String) : Base()
-        class B(val i: Int) : Base()
-        class C(val l: Long) : Base()
+        class B(val i: @Min(0) @Max(2) Int) : Base()
+        class C(val l: @Clamp(0, 10) Long) : Base()
     }
 
 

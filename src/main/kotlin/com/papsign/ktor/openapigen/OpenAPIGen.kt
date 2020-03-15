@@ -4,22 +4,18 @@ import com.papsign.ktor.openapigen.model.base.OpenAPIModel
 import com.papsign.ktor.openapigen.model.info.ContactModel
 import com.papsign.ktor.openapigen.model.info.ExternalDocumentationModel
 import com.papsign.ktor.openapigen.model.info.InfoModel
-import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.model.server.ServerModel
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.OpenAPIModule
-import com.papsign.ktor.openapigen.modules.schema.*
-import com.sun.xml.internal.ws.protocol.soap.ServerMUTube
 import io.ktor.application.ApplicationCallPipeline
 import io.ktor.application.ApplicationFeature
 import io.ktor.application.call
 import io.ktor.request.path
 import io.ktor.util.AttributeKey
 import org.reflections.Reflections
-import kotlin.reflect.KType
 
 class OpenAPIGen(
-        private val config: Configuration,
+        config: Configuration,
         @Deprecated("Will be replaced with less dangerous alternative when the use case has been fleshed out.") val pipeline: ApplicationCallPipeline
 ) {
     private val log = classLogger()
@@ -27,15 +23,6 @@ class OpenAPIGen(
     val api = config.api
 
     private val tags = HashMap<String, APITag>()
-
-    val schemaNamer = object : SchemaNamer {
-        private val fn = config.schemaNamer
-
-        override fun get(type: KType): String = fn(type)
-    }
-
-    private val registrars: Array<out PartialSchemaRegistrar> = config.registrars.plus(PrimitiveSchemas(schemaNamer))
-    val schemaRegistrar = Schemas()
 
     val globalModuleProvider = CachingModuleProvider()
 
@@ -49,6 +36,8 @@ class OpenAPIGen(
                 it.onInit(this)
             }
         }
+        config.removeModules.forEach(globalModuleProvider::unRegisterModule)
+        config.addModules.forEach(globalModuleProvider::registerModule)
     }
 
     class Configuration(val api: OpenAPIModel) {
@@ -71,38 +60,33 @@ class OpenAPIGen(
         var swaggerUiPath = "swagger-ui"
         var serveSwaggerUi = true
 
-        var schemaNamer: (KType) -> String = KType::toString
-
-        var registrars: Array<PartialSchemaRegistrar> = arrayOf()
         var scanPackagesForModules: Array<String> = arrayOf()
-    }
 
+        var addModules = mutableListOf<OpenAPIModule>()
+        var removeModules = mutableListOf<OpenAPIModule>()
 
-    inner class Schemas : SimpleSchemaRegistrar(schemaNamer) {
+        fun addModules(vararg modules: OpenAPIModule) {
+            addModules.addAll(modules)
+        }
 
-        private val schemas = HashSchemaMap()
-        private val names = HashMap<KType, String>()
+        fun addModules(modules: Iterable<OpenAPIModule>) {
+            addModules.addAll(modules)
+        }
 
-        override fun get(type: KType, master: SchemaRegistrar): NamedSchema {
-            val predefined = registrars.fold(null as NamedSchema?) { acc, reg ->
-                acc ?: reg[type]
-            }
-            if (predefined != null)
-                return predefined
-            val current = schemas[type]
-            if (current != null) {
-                val name = names[type]!!
-                return NamedSchema(name, SchemaModel.SchemaModelRef<Any>("#/components/schemas/$name"))
-            }
-            val (name, schema) = super.get(type, master)
-            if (schema is SchemaModel.SchemaModelArr<*>) return NamedSchema(name, schema)
+        fun removeModules(vararg modules: OpenAPIModule) {
+            removeModules.addAll(modules)
+        }
 
-            schemas[type] = schema
-            names[type] = name
-            api.components.schemas[name] = schema
-            return NamedSchema(name, SchemaModel.SchemaModelRef<Any>("#/components/schemas/$name"))
+        fun removeModules(modules: Iterable<OpenAPIModule>) {
+            removeModules.addAll(modules)
+        }
+
+        fun replaceModule(delete: OpenAPIModule, add: OpenAPIModule) {
+            addModules.add(add)
+            removeModules.add(delete)
         }
     }
+
 
     fun getOrRegisterTag(tag: APITag): String {
         val other = tags.getOrPut(tag.name) {

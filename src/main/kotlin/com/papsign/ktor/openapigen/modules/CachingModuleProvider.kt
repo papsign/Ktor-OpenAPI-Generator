@@ -9,7 +9,7 @@ class CachingModuleProvider: ModuleProvider<CachingModuleProvider> {
 
     @Synchronized
     override fun <T : OpenAPIModule> ofClass(clazz: KClass<T>): Collection<T> {
-        return modules[clazz]?.let { it.toSet() as Collection<T> } ?: listOf()
+        return modules[clazz]?.let @Suppress("UNCHECKED_CAST") { it.toSet() as Set<T> } ?: setOf()
     }
 
     @Synchronized
@@ -41,7 +41,7 @@ class CachingModuleProvider: ModuleProvider<CachingModuleProvider> {
     @Synchronized
     override fun child(): CachingModuleProvider {
         val new = CachingModuleProvider()
-        modules.forEach { t: KClass<*>, u ->
+        modules.forEach { (t: KClass<*>, u) ->
             new.modules[t] = LinkedHashSet(u)
         }
         return new

@@ -8,7 +8,9 @@ import com.papsign.ktor.openapigen.model.operation.ParameterLocation
 import com.papsign.ktor.openapigen.model.operation.ParameterModel
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
+import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
+import com.papsign.ktor.openapigen.schema.builder.provider.FinalSchemaBuilderProviderModule
 import io.ktor.http.Parameters
 import io.ktor.util.toMap
 import kotlin.reflect.KFunction
@@ -24,6 +26,7 @@ class ModularParameterHander<T>(val parsers: Map<KParameter, Builder<*>>, val co
     }
 
     override fun getParameters(apiGen: OpenAPIGen, provider: ModuleProvider<*>): List<ParameterModel<*>> {
+        val schemaBuilder = provider.ofClass<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
 
         fun createParam(param: KParameter, `in`: ParameterLocation, config: (ParameterModel<*>) -> Unit): ParameterModel<*> {
             return ParameterModel<Any>(
@@ -31,7 +34,8 @@ class ModularParameterHander<T>(val parsers: Map<KParameter, Builder<*>>, val co
                 `in`,
                 !param.type.isMarkedNullable
             ).also {
-                it.schema = apiGen.schemaRegistrar[param.type.withNullability(false)].schema as SchemaModel<Any>
+                @Suppress("UNCHECKED_CAST")
+                it.schema = schemaBuilder.build(param.type.withNullability(false)) as SchemaModel<Any>
                 config(it)
             }
         }
