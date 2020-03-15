@@ -116,318 +116,219 @@ data class StringUsable(val str: String)
 Creates this openapi.json description:
 
 ```json
-{  
-   "info":{  
-      "title":"Test API",
-      "version":"0.0.1",
-      "description":"The Test API",
-      "termsOfService":null,
-      "contact":{  
-         "name":"Support",
-         "url":null,
-         "email":"support@test.com"
-      },
-      "license":null
-   },
-   "openapi":"3.0.0",
-   "servers":[  
-      {  
-         "url":"http://localhost:8080/",
-         "description":"Test server",
-         "variables":null
-      }
-   ],
-   "paths":{  
-      "/string/{a}":{  
-         "get":{  
-            "tags":null,
-            "summary":null,
-            "description":null,
-            "externalDocs":null,
-            "operationId":null,
-            "parameters":null,
-            "requestBody":null,
-            "responses":{  
-               "200":{  
-                  "description":"OK",
-                  "headers":{  
-
-                  },
-                  "content":{  
-                     "application/json":{  
-                        "schema":{  
-                           "$ref":"#/components/schemas/StringParam"
-                        },
-                        "example":null,
-                        "examples":null
-                     }
-                  }
-               }
-            },
-            "deprecated":null,
-            "security":null,
-            "servers":null
-         },
-         "parameters":[  
-            {  
-               "name":"a",
-               "in":"path",
-               "required":true,
-               "description":"A simple String Param",
-               "deprecated":false,
-               "allowEmptyValue":null,
-               "schema":{  
-                  "type":"string",
-                  "format":null,
-                  "nullable":false,
-                  "minimum":null,
-                  "maximum":null,
-                  "example":null
-               },
-               "example":null,
-               "examples":null
-            },
-            {  
-               "name":"optional",
-               "in":"query",
-               "required":false,
-               "description":"Optional String",
-               "deprecated":false,
-               "allowEmptyValue":false,
-               "schema":{  
-                  "type":"string",
-                  "format":null,
-                  "nullable":true,
-                  "minimum":null,
-                  "maximum":null,
-                  "example":null
-               },
-               "example":null,
-               "examples":null
-            }
-         ]
-      },
-      "/inine/string/{a}":{  
-         "get":{  
-            "tags":null,
-            "summary":"String Param Endpoint",
-            "description":"This is a String Param Endpoint",
-            "externalDocs":null,
-            "operationId":null,
-            "parameters":null,
-            "requestBody":null,
-            "responses":{  
-               "200":{  
-                  "description":"A String Response",
-                  "headers":{  
-
-                  },
-                  "content":{  
-                     "application/json":{  
-                        "schema":{  
-                           "$ref":"#/components/schemas/StringResponse"
-                        },
-                        "example":{  
-                           "str":"Hi"
-                        },
-                        "examples":null
-                     }
-                  }
-               }
-            },
-            "deprecated":null,
-            "security":null,
-            "servers":null
-         },
-         "parameters":[  
-            {  
-               "name":"a",
-               "in":"path",
-               "required":true,
-               "description":"A simple String Param",
-               "deprecated":false,
-               "allowEmptyValue":null,
-               "schema":{  
-                  "type":"string",
-                  "format":null,
-                  "nullable":false,
-                  "minimum":null,
-                  "maximum":null,
-                  "example":null
-               },
-               "example":null,
-               "examples":null
-            },
-            {  
-               "name":"optional",
-               "in":"query",
-               "required":false,
-               "description":"Optional String",
-               "deprecated":false,
-               "allowEmptyValue":false,
-               "schema":{  
-                  "type":"string",
-                  "format":null,
-                  "nullable":true,
-                  "minimum":null,
-                  "maximum":null,
-                  "example":null
-               },
-               "example":null,
-               "examples":null
-            }
-         ]
-      },
-      "/block":{  
-         "post":{  
-            "tags":null,
-            "summary":"String Post Endpoint",
-            "description":"This is a String Post Endpoint",
-            "externalDocs":null,
-            "operationId":null,
-            "parameters":null,
-            "requestBody":{  
-               "content":{  
-                  "application/json":{  
-                     "schema":{  
-                        "$ref":"#/components/schemas/StringUsable"
-                     },
-                     "example":{  
-                        "str":"Ho"
-                     },
-                     "examples":null
-                  }
-               },
-               "description":"A String Request",
-               "required":null
-            },
-            "responses":{  
-               "200":{  
-                  "description":"A String Response",
-                  "headers":{  
-
-                  },
-                  "content":{  
-                     "application/json":{  
-                        "schema":{  
-                           "$ref":"#/components/schemas/StringUsable"
-                        },
-                        "example":{  
-                           "str":"Ho"
-                        },
-                        "examples":null
-                     }
-                  }
-               }
-            },
-            "deprecated":null,
-            "security":null,
-            "servers":null
-         },
-         "parameters":[  
-
-         ]
-      }
-   },
-   "components":{  
-      "schemas":{  
-         "StringParam":{  
-            "properties":{  
-               "a":{  
-                  "type":"string",
-                  "format":null,
-                  "nullable":false,
-                  "minimum":null,
-                  "maximum":null,
-                  "example":null
-               },
-               "optional":{  
-                  "type":"string",
-                  "format":null,
-                  "nullable":true,
-                  "minimum":null,
-                  "maximum":null,
-                  "example":null
-               }
-            },
-            "required":[  
-               "a"
-            ],
+{
+   "components":{
+      "schemas":{
+         "StringResponse":{
             "nullable":false,
-            "example":null,
-            "type":"object"
-         },
-         "StringResponse":{  
-            "properties":{  
-               "str":{  
-                  "type":"string",
-                  "format":null,
+            "properties":{
+               "str":{
                   "nullable":false,
-                  "minimum":null,
-                  "maximum":null,
-                  "example":null
+                  "type":"string"
                }
             },
-            "required":[  
+            "required":[
                "str"
             ],
-            "nullable":false,
-            "example":null,
             "type":"object"
          },
-         "StringUsable":{  
-            "properties":{  
-               "str":{  
-                  "type":"string",
-                  "format":null,
+         "StringUsable":{
+            "nullable":false,
+            "properties":{
+               "str":{
                   "nullable":false,
-                  "minimum":null,
-                  "maximum":null,
-                  "example":null
+                  "type":"string"
                }
             },
-            "required":[  
+            "required":[
                "str"
             ],
-            "nullable":false,
-            "example":null,
             "type":"object"
          }
-      },
-      "responses":{  
-
-      },
-      "parameters":{  
-
-      },
-      "examples":{  
-
-      },
-      "requestBodies":{  
-
-      },
-      "headers":{  
-
-      },
-      "securitySchemes":{  
-
       }
    },
-   "security":[  
-
-   ],
-   "tags":[  
-
-   ],
-   "externalDocs":null
+   "info":{
+      "contact":{
+         "email":"support@test.com",
+         "name":"Support"
+      },
+      "description":"The Test API",
+      "title":"Test API",
+      "version":"0.0.1"
+   },
+   "openapi":"3.0.0",
+   "paths":{
+      "/string/{a}":{
+         "get":{
+            "parameters":[
+               {
+                  "deprecated":false,
+                  "description":"A simple String Param",
+                  "explode":false,
+                  "in":"path",
+                  "name":"a",
+                  "required":true,
+                  "schema":{
+                     "nullable":false,
+                     "type":"string"
+                  },
+                  "style":"simple"
+               },
+               {
+                  "allowEmptyValue":false,
+                  "deprecated":false,
+                  "description":"Optional String",
+                  "explode":false,
+                  "in":"query",
+                  "name":"optional",
+                  "required":false,
+                  "schema":{
+                     "nullable":false,
+                     "type":"string"
+                  },
+                  "style":"form"
+               }
+            ],
+            "responses":{
+               "200":{
+                  "content":{
+                     "application/json":{
+                        "schema":{
+                           "$ref":"#/components/schemas/StringResponse"
+                        }
+                     }
+                  },
+                  "description":"A String Response"
+               }
+            }
+         }
+      },
+      "/inine/string/{a}":{
+         "get":{
+            "description":"This is a String Param Endpoint",
+            "parameters":[
+               {
+                  "deprecated":false,
+                  "description":"A simple String Param",
+                  "explode":false,
+                  "in":"path",
+                  "name":"a",
+                  "required":true,
+                  "schema":{
+                     "nullable":false,
+                     "type":"string"
+                  },
+                  "style":"simple"
+               },
+               {
+                  "allowEmptyValue":false,
+                  "deprecated":false,
+                  "description":"Optional String",
+                  "explode":false,
+                  "in":"query",
+                  "name":"optional",
+                  "required":false,
+                  "schema":{
+                     "nullable":false,
+                     "type":"string"
+                  },
+                  "style":"form"
+               }
+            ],
+            "responses":{
+               "200":{
+                  "content":{
+                     "application/json":{
+                        "example":{
+                           "str":"Hi"
+                        },
+                        "schema":{
+                           "$ref":"#/components/schemas/StringResponse"
+                        }
+                     }
+                  },
+                  "description":"A String Response"
+               }
+            },
+            "summary":"String Param Endpoint"
+         }
+      },
+      "/block":{
+         "post":{
+            "description":"This is a String Post Endpoint",
+            "requestBody":{
+               "content":{
+                  "application/json":{
+                     "example":{
+                        "str":"Ho"
+                     },
+                     "schema":{
+                        "$ref":"#/components/schemas/StringUsable"
+                     }
+                  }
+               },
+               "description":"A String Request"
+            },
+            "responses":{
+               "200":{
+                  "content":{
+                     "application/json":{
+                        "example":{
+                           "str":"Ho"
+                        },
+                        "schema":{
+                           "$ref":"#/components/schemas/StringUsable"
+                        }
+                     }
+                  },
+                  "description":"A String Response"
+               }
+            },
+            "summary":"String Post Endpoint"
+         }
+      }
+   },
+   "servers":[
+      {
+         "description":"Test server",
+         "url":"http://localhost:8080/"
+      }
+   ]
 }
 ```
 
 Full Example:
 
 ```kotlin
+import com.papsign.ktor.openapigen.OpenAPIGen
+import com.papsign.ktor.openapigen.annotations.Path
+import com.papsign.ktor.openapigen.annotations.Request
+import com.papsign.ktor.openapigen.annotations.Response
+import com.papsign.ktor.openapigen.annotations.parameters.PathParam
+import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
+import com.papsign.ktor.openapigen.openAPIGen
+import com.papsign.ktor.openapigen.route.apiRouting
+import com.papsign.ktor.openapigen.route.info
+import com.papsign.ktor.openapigen.route.path.normal.get
+import com.papsign.ktor.openapigen.route.path.normal.post
+import com.papsign.ktor.openapigen.route.response.respond
+import com.papsign.ktor.openapigen.route.route
+import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
+import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
+import io.ktor.application.application
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.features.ContentNegotiation
+import io.ktor.jackson.jackson
+import io.ktor.response.respond
+import io.ktor.response.respondRedirect
+import io.ktor.routing.get
+import io.ktor.routing.routing
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import kotlin.reflect.KType
 
-object Basic {
+object Minimal {
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -449,11 +350,12 @@ object Basic {
                     description = "Test server"
                 }
                 //optional
-                schemaNamer = {
-                    //rename DTOs from java type name to generator compatible form
+                replaceModule(DefaultSchemaNamer, object: SchemaNamer {
                     val regex = Regex("[A-Za-z0-9_.]+")
-                    it.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
-                }
+                    override fun get(type: KType): String {
+                        return type.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
+                    }
+                })
             }
 
             install(ContentNegotiation) {
@@ -463,7 +365,7 @@ object Basic {
             // normal Ktor routing
             routing {
                 get("/openapi.json") {
-                    call.respond(application.openAPIGen.api)
+                    call.respond(application.openAPIGen.api.serialize())
                 }
 
                 get("/") {
@@ -478,7 +380,7 @@ object Basic {
                 get<StringParam, StringResponse> { params ->
                     respond(StringResponse(params.a))
                 }
-                
+
                 route("inine").get<StringParam, StringResponse>(
                     info("String Param Endpoint", "This is a String Param Endpoint"), // A Route module that describes an endpoint, it is optional
                     example = StringResponse("Hi")
@@ -511,7 +413,6 @@ object Basic {
     // A response can be any class, but a description will be generated from the annotation
     @Response("A String Response")
     data class StringResponse(val str: String)
-
 
     // DTOs can be requests and responses, annotations are optional
     @Response("A String Response")
