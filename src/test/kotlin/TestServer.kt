@@ -23,10 +23,10 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
 import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
-import com.papsign.ktor.openapigen.validation.number.ConstraintVialoation
-import com.papsign.ktor.openapigen.validation.number.integer.clamp.Clamp
-import com.papsign.ktor.openapigen.validation.number.integer.max.Max
-import com.papsign.ktor.openapigen.validation.number.integer.min.Min
+import com.papsign.ktor.openapigen.annotations.type.number.ConstraintVialoation
+import com.papsign.ktor.openapigen.annotations.type.number.integer.clamp.Clamp
+import com.papsign.ktor.openapigen.annotations.type.number.integer.max.Max
+import com.papsign.ktor.openapigen.annotations.type.number.integer.min.Min
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install

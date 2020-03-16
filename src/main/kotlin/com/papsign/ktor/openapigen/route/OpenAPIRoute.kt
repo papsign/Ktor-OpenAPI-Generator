@@ -12,7 +12,7 @@ import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.parameters.util.buildParameterHandler
 import com.papsign.ktor.openapigen.route.response.Responder
-import com.papsign.ktor.openapigen.validation.util.ValidationHandler
+import com.papsign.ktor.openapigen.validation.ValidationHandler
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.http.ContentType
