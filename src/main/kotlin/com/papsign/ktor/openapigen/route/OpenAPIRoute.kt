@@ -12,7 +12,7 @@ import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.parameters.util.buildParameterHandler
 import com.papsign.ktor.openapigen.route.response.Responder
-import com.papsign.ktor.openapigen.validators.ValidationHandler
+import com.papsign.ktor.openapigen.validation.util.ValidationHandler
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.http.ContentType
@@ -40,8 +40,8 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
             it.configure(apiGen, provider)
         }
 
-        val BHandler = ValidationHandler<B>(provider)
-        val PHandler = ValidationHandler<P>(provider)
+        val BHandler = ValidationHandler.build<B>()
+        val PHandler = ValidationHandler.build<P>()
 
         ktorRoute.apply {
             getAcceptMap(R::class).let {

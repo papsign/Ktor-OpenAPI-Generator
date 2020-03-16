@@ -7,6 +7,7 @@ import com.papsign.ktor.openapigen.model.schema.DataFormat
 import com.papsign.ktor.openapigen.model.schema.DataType
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
+import com.papsign.ktor.openapigen.schema.builder.FinalSchemaBuilder
 import com.papsign.ktor.openapigen.schema.builder.SchemaBuilder
 import java.io.InputStream
 import java.math.BigDecimal
@@ -19,7 +20,7 @@ object DefaultPrimitiveSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenMo
 
     private data class Builder(override val superType: KType, private val model: SchemaModel.SchemaModelLitteral<*>) :
         SchemaBuilder {
-        override fun build(type: KType, builder: SchemaBuilder): SchemaModel<*> {
+        override fun build(type: KType, builder: FinalSchemaBuilder): SchemaModel<*> {
             checkType(type)
             return model.copy(nullable = type.isMarkedNullable)
         }

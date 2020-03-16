@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.papsign.ktor.openapigen.APIException
 import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Path
@@ -19,15 +18,15 @@ import com.papsign.ktor.openapigen.model.Described
 import com.papsign.ktor.openapigen.model.server.ServerModel
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.route.*
-import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
 import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
-import com.papsign.ktor.openapigen.schema.processor.number.integer.clamp.Clamp
-import com.papsign.ktor.openapigen.schema.processor.number.integer.max.Max
-import com.papsign.ktor.openapigen.schema.processor.number.integer.min.Min
+import com.papsign.ktor.openapigen.validation.number.ConstraintVialoation
+import com.papsign.ktor.openapigen.validation.number.integer.clamp.Clamp
+import com.papsign.ktor.openapigen.validation.number.integer.max.Max
+import com.papsign.ktor.openapigen.validation.number.integer.min.Min
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -104,6 +103,9 @@ object TestServer {
                     exception<JsonMappingException, Error>(HttpStatusCode.BadRequest) {
                         it.printStackTrace()
                         Error("mapping.json", it.localizedMessage)
+                    }
+                    exception<ConstraintVialoation, Error>(HttpStatusCode.BadRequest) {
+                        Error("violation.constraint", it.localizedMessage)
                     }
                     exception<ProperException, Error>(HttpStatusCode.BadRequest) {
                         it.printStackTrace()

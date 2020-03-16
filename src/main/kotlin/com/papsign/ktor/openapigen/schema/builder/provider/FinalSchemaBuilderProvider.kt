@@ -24,8 +24,8 @@ object FinalSchemaBuilderProvider: FinalSchemaBuilderProviderModule, OpenAPIGenM
 
     override fun provide(apiGen: OpenAPIGen, provider: ModuleProvider<*>): FinalSchemaBuilder {
         return Builder(
-            provider.ofClass<SchemaBuilderProviderModule>()
-                .flatMap { it.provide(apiGen, provider) })
+            provider.ofClass<SchemaBuilderProviderModule>().flatMap { it.provide(apiGen, provider) }
+        )
     }
 
     private fun SchemaProcessorAnnotation.getHandlerInstance(): SchemaProcessor<*> {
@@ -63,17 +63,11 @@ object FinalSchemaBuilderProvider: FinalSchemaBuilderProviderModule, OpenAPIGenM
             })
         }
 
-        override val superType: KType = getKType<Any?>()
-
-        override fun build(type: KType, builder: SchemaBuilder): SchemaModel<*> {
+        override fun build(type: KType, annotations: List<Annotation>): SchemaModel<*> {
             return map.getOrPut(type) {
                 map.entries.firstOrNull { type.isSubtypeOf(it.key) }?.value
                     ?: error("Schema builder could not find declared builder for type $type, make sure it has a provider registered on the route")
-            }.build(type, builder).applyAnnotations(type, type.jvmErasure.annotations).applyAnnotations(type, type.annotations)
-        }
-
-        override fun build(type: KType): SchemaModel<*> {
-            return build(type, this)
+            }.build(type, this).applyAnnotations(type, type.jvmErasure.annotations).applyAnnotations(type, type.annotations).applyAnnotations(type, annotations)
         }
     }
 }

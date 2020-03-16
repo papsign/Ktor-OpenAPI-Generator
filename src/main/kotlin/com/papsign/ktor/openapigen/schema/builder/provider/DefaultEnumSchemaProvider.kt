@@ -5,6 +5,7 @@ import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
 import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
+import com.papsign.ktor.openapigen.schema.builder.FinalSchemaBuilder
 import com.papsign.ktor.openapigen.schema.builder.SchemaBuilder
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.jvmErasure
@@ -13,7 +14,7 @@ object DefaultEnumSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenModuleE
 
     private object Builder: SchemaBuilder {
         override val superType: KType = getKType<Enum<*>>()
-        override fun build(type: KType, builder: SchemaBuilder): SchemaModel<*> {
+        override fun build(type: KType, builder: FinalSchemaBuilder): SchemaModel<*> {
             checkType(type)
             return SchemaModel.SchemaModelEnum<Any?>(
                 type.jvmErasure.java.enumConstants.map { it.toString() },

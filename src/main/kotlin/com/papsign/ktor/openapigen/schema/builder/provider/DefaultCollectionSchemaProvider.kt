@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.DefaultOpenAPIModule
 import com.papsign.ktor.openapigen.modules.ModuleProvider
+import com.papsign.ktor.openapigen.schema.builder.FinalSchemaBuilder
 import com.papsign.ktor.openapigen.schema.builder.SchemaBuilder
 import kotlin.reflect.KType
 import kotlin.reflect.full.withNullability
@@ -39,9 +40,9 @@ object DefaultCollectionSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenM
 
     private data class Builder(override val superType: KType, private val getter: (KType) -> KType) :
         SchemaBuilder {
-        override fun build(type: KType, builder: SchemaBuilder): SchemaModel<*> {
+        override fun build(type: KType, builder: FinalSchemaBuilder): SchemaModel<*> {
             checkType(type)
-            return SchemaModel.SchemaModelArr<Any?>(builder.build(getter(type), builder), type.isMarkedNullable)
+            return SchemaModel.SchemaModelArr<Any?>(builder.build(getter(type)), type.isMarkedNullable)
         }
     }
 }

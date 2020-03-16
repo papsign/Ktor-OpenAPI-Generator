@@ -13,7 +13,7 @@ interface SchemaBuilder {
     /**
      * @throws error when type is unexpected
      */
-    fun build(type: KType, builder: SchemaBuilder): SchemaModel<*>
+    fun build(type: KType, builder: FinalSchemaBuilder): SchemaModel<*>
 
     fun checkType(type: KType) {
         if (!type.isSubtypeOf(superType)) error("${this::class} cannot build type $type, only subtypes of $superType are supported")
