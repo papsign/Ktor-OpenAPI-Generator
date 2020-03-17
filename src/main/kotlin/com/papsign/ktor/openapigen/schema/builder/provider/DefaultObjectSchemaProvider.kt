@@ -33,7 +33,7 @@ object DefaultObjectSchemaProvider : SchemaBuilderProviderModule, OpenAPIGenModu
 
         private val refs = HashMap<KType, SchemaModel.SchemaModelRef<*>>()
 
-        override fun build(type: KType, builder: FinalSchemaBuilder): SchemaModel<*> {
+        override fun build(type: KType, builder: FinalSchemaBuilder, finalize: (SchemaModel<*>)->SchemaModel<*>): SchemaModel<*> {
             checkType(type)
             val nonNullType = type.withNullability(false)
             return refs[nonNullType] ?: {
@@ -54,9 +54,10 @@ object DefaultObjectSchemaProvider : SchemaBuilderProviderModule, OpenAPIGenModu
                         }.map { it.name }
                     )
                 }
+                val final = finalize(new)
                 val existing = apiGen.api.components.schemas[name]
-                if (existing != null && existing != new) log.error("Schema with name $name already exists, and is not the same as the new one, replacing...")
-                apiGen.api.components.schemas[name] = new
+                if (existing != null && existing != final) log.error("Schema with name $name already exists, and is not the same as the new one, replacing...")
+                apiGen.api.components.schemas[name] = final
                 ref
             }()
         }

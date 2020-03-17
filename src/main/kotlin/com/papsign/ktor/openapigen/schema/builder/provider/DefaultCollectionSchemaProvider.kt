@@ -40,9 +40,9 @@ object DefaultCollectionSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenM
 
     private data class Builder(override val superType: KType, private val getter: (KType) -> KType) :
         SchemaBuilder {
-        override fun build(type: KType, builder: FinalSchemaBuilder): SchemaModel<*> {
+        override fun build(type: KType, builder: FinalSchemaBuilder, finalize: (SchemaModel<*>)->SchemaModel<*>): SchemaModel<*> {
             checkType(type)
-            return SchemaModel.SchemaModelArr<Any?>(builder.build(getter(type)), type.isMarkedNullable)
+            return finalize(SchemaModel.SchemaModelArr<Any?>(builder.build(getter(type)), type.isMarkedNullable))
         }
     }
 }

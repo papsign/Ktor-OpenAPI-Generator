@@ -14,12 +14,17 @@ object DefaultEnumSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenModuleE
 
     private object Builder: SchemaBuilder {
         override val superType: KType = getKType<Enum<*>>()
-        override fun build(type: KType, builder: FinalSchemaBuilder): SchemaModel<*> {
+
+        override fun build(
+            type: KType,
+            builder: FinalSchemaBuilder,
+            finalize: (SchemaModel<*>) -> SchemaModel<*>
+        ): SchemaModel<*> {
             checkType(type)
-            return SchemaModel.SchemaModelEnum<Any?>(
+            return finalize(SchemaModel.SchemaModelEnum<Any?>(
                 type.jvmErasure.java.enumConstants.map { it.toString() },
                 type.isMarkedNullable
-            )
+            ))
         }
     }
 

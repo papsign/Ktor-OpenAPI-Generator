@@ -18,11 +18,10 @@ import kotlin.reflect.KType
 
 object DefaultPrimitiveSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenModuleExtension {
 
-    private data class Builder(override val superType: KType, private val model: SchemaModel.SchemaModelLitteral<*>) :
-        SchemaBuilder {
-        override fun build(type: KType, builder: FinalSchemaBuilder): SchemaModel<*> {
+    private data class Builder(override val superType: KType, private val model: SchemaModel.SchemaModelLitteral<*>) : SchemaBuilder {
+        override fun build(type: KType, builder: FinalSchemaBuilder, finalize: (SchemaModel<*>)->SchemaModel<*>): SchemaModel<*> {
             checkType(type)
-            return model.copy(nullable = type.isMarkedNullable)
+            return finalize(model.copy(nullable = type.isMarkedNullable))
         }
 
         companion object {

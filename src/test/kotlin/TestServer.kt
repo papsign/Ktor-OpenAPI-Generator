@@ -13,6 +13,8 @@ import com.papsign.ktor.openapigen.annotations.Path
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
+import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
+import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
 import com.papsign.ktor.openapigen.interop.withAPI
 import com.papsign.ktor.openapigen.model.Described
 import com.papsign.ktor.openapigen.model.server.ServerModel
@@ -229,9 +231,17 @@ object TestServer {
         JsonSubTypes.Type(Base.C::class, name = "c")
     )
     sealed class Base {
+
         class A(val str: String) : Base()
+
         class B(val i: @Min(0) @Max(2) Int) : Base()
-        class C(val l: @Clamp(0, 10) Long) : Base()
+
+        @WithExample
+        class C(val l: @Clamp(0, 10) Long) : Base() {
+            companion object: ExampleProvider<C> {
+                override val example: C? = C(5)
+            }
+        }
     }
 
 

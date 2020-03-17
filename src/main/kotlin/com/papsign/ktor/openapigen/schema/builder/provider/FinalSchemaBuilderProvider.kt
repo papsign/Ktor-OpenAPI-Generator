@@ -67,7 +67,7 @@ object FinalSchemaBuilderProvider: FinalSchemaBuilderProviderModule, OpenAPIGenM
             return map.getOrPut(type) {
                 map.entries.firstOrNull { type.isSubtypeOf(it.key) }?.value
                     ?: error("Schema builder could not find declared builder for type $type, make sure it has a provider registered on the route")
-            }.build(type, this).applyAnnotations(type, type.jvmErasure.annotations).applyAnnotations(type, type.annotations).applyAnnotations(type, annotations)
+            }.build(type, this) { it.applyAnnotations(type, type.jvmErasure.annotations).applyAnnotations(type, type.annotations).applyAnnotations(type, annotations) }
         }
     }
 }
