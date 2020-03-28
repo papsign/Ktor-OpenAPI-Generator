@@ -42,7 +42,7 @@ sealed class SchemaModel<T>: DataModel {
     ) : SchemaModel<T>()
 
     data class SchemaModelLitteral<T>(
-        var type: DataType,
+        var type: DataType? = null,
         var format: DataFormat? = null,
         var nullable: Boolean = false,
         var minimum: T? = null,
