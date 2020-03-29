@@ -14,8 +14,14 @@ import kotlin.reflect.jvm.jvmErasure
 
 object NothingSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenModuleExtension {
 
+    private object NothingNullableProvider {
+        private val value: Nothing? = null
+        val type: KType = this::value.returnType
+    }
+
     private object Builder: SchemaBuilder {
-        override val superType: KType = Nothing::class.createType()
+        // Currently we can't do it in a more concise way because of https://youtrack.jetbrains.com/issue/KT-37848
+        override val superType: KType = NothingNullableProvider.type
 
         override fun build(
             type: KType,
