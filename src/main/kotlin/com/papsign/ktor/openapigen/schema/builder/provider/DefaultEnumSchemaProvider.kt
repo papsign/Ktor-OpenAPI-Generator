@@ -13,7 +13,7 @@ import kotlin.reflect.jvm.jvmErasure
 object DefaultEnumSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenModuleExtension {
 
     private object Builder: SchemaBuilder {
-        override val superType: KType = getKType<Enum<*>>()
+        override val superType: KType = getKType<Enum<*>?>()
 
         override fun build(
             type: KType,

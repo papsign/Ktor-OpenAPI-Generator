@@ -46,6 +46,7 @@ class GeneralBehaviorTest {
         assert(!getKType<FloatArray>().isSubtypeOf(getKType<Array<Any>>()))
         assert(!getKType<Array<Any>>().isSubtypeOf(getKType<Iterable<Any>>()))
         assert(getKType<List<Any>>().isSubtypeOf(getKType<Iterable<Any>>()))
+        assert(getKType<List<Any>>().isSubtypeOf(getKType<Iterable<Any?>>()))
     }
 
     @Test
@@ -59,5 +60,20 @@ class GeneralBehaviorTest {
     @Test
     fun testEnumSubtypes() {
         assert(getKType<TestEnum>().isSubtypeOf(getKType<Enum<*>>()))
+    }
+
+
+    lateinit var nothing: Nothing
+    val nullableNothing: Nothing? = null
+
+    val nothingType =  ::nothing.returnType
+    val nullNothingType =  ::nullableNothing.returnType
+
+    @Test
+    fun testNothingSubtypes() {
+        println(nothingType)
+        println(nullNothingType)
+        assert(nothingType.isSubtypeOf(nullNothingType))
+        assert(!nullNothingType.isSubtypeOf(nothingType))
     }
 }
