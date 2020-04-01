@@ -12,6 +12,7 @@ import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Path
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.Response
+import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
@@ -148,6 +149,15 @@ object TestServer {
                     respond(StringResponse(params.a))
                 }
 
+                route("header") {
+                    get<NameParam, NameGreetingResponse>(
+                        info("Header Param Endpoint", "This is a Header Param Endpoint"),
+                        example = NameGreetingResponse("Hi, openapi!")
+                    ) { params ->
+                        respond(NameGreetingResponse("Hi, ${params.`X-Name`}!"))
+                    }
+                }
+
                 route("list") {
                     get<StringParam, List<StringResponse>>(
                         info("String Param Endpoint", "This is a String Param Endpoint"),
@@ -212,6 +222,11 @@ object TestServer {
 
     @Response("A String Response")
     data class StringResponse(val str: String)
+
+    data class NameParam(@HeaderParam("A simple Header Param") val `X-Name`: String)
+
+    @Response("A Response for header param example")
+    data class NameGreetingResponse(val str: String)
 
 
     @Response("A String Response")
