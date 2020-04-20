@@ -67,6 +67,7 @@ class OpenAPIGen(
 
         var swaggerUiPath = "swagger-ui"
         var serveSwaggerUi = true
+        var swaggerUiVersion = "3.25.0"
 
         var schemaNamer: (KType) -> String = KType::toString
 
@@ -118,7 +119,7 @@ class OpenAPIGen(
             val api = OpenAPI()
             val cfg = Configuration(api).apply(configure)
             if (cfg.serveSwaggerUi) {
-                val ui = SwaggerUi(cfg.swaggerUiPath)
+                val ui = SwaggerUi(cfg.swaggerUiPath, cfg.swaggerUiVersion)
                 pipeline.intercept(ApplicationCallPipeline.Call) {
                     val cmp = "/${cfg.swaggerUiPath.trim('/')}/"
                     if (call.request.path().startsWith(cmp))
