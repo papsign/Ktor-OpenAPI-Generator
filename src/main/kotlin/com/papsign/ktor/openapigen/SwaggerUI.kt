@@ -14,7 +14,7 @@ import io.ktor.request.port
 import io.ktor.response.respond
 import java.net.URL
 
-class SwaggerUi(val basePath: String) {
+class SwaggerUi(private val basePath: String, private val version: String) {
     private val notFound = mutableListOf<String>()
     private val content = mutableMapOf<String, ResourceContent>()
     suspend fun serve(filename: String?, call: ApplicationCall) {
@@ -22,7 +22,7 @@ class SwaggerUi(val basePath: String) {
             in notFound -> return
             null -> return
             else -> {
-                val resource = this::class.java.getResource("/META-INF/resources/webjars/swagger-ui/3.18.2/$filename")
+                val resource = this::class.java.getResource("/META-INF/resources/webjars/swagger-ui/$version/$filename")
                 if (resource == null) {
                     notFound.add(filename)
                     return

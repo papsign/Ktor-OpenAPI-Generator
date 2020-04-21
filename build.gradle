@@ -20,7 +20,7 @@ dependencies {
     
     implementation "io.ktor:ktor-jackson:$ktor_version" // needed for parameter parsing and multipart parsing
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.8" // needed for multipart parsing
-    implementation 'org.webjars:swagger-ui:3.18.2'
+    implementation 'org.webjars:swagger-ui:3.25.0'
  
     implementation "org.reflections:reflections:0.9.11" // only used while initializing
     
