@@ -1,11 +1,7 @@
 package com.papsign.ktor.openapigen.content.type.ktor
 
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.exc.InvalidDefinitionException
-import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import com.papsign.kotlin.reflection.allTypes
-import com.papsign.kotlin.reflection.getKType
-import com.papsign.kotlin.reflection.unitKType
+import com.papsign.ktor.openapigen.getKType
+import com.papsign.ktor.openapigen.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
 import com.papsign.ktor.openapigen.annotations.encodings.APIRequestFormat
@@ -13,14 +9,11 @@ import com.papsign.ktor.openapigen.annotations.encodings.APIResponseFormat
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
+import com.papsign.ktor.openapigen.model.operation.MediaTypeModel
+import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.schema.NamedSchema
-import com.papsign.ktor.openapigen.modules.schema.SchemaRegistrar
-import com.papsign.ktor.openapigen.modules.schema.SimpleSchemaRegistrar
-import com.papsign.ktor.openapigen.openapi.DataFormat
-import com.papsign.ktor.openapigen.openapi.DataType
-import com.papsign.ktor.openapigen.openapi.MediaType
-import com.papsign.ktor.openapigen.openapi.Schema
+import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.schema.builder.provider.FinalSchemaBuilderProviderModule
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.featureOrNull
@@ -28,13 +21,11 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
-import io.ktor.request.receiveOrNull
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.jvmErasure
 
 /**
@@ -42,7 +33,6 @@ import kotlin.reflect.jvm.jvmErasure
  */
 object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer, OpenAPIGenModuleExtension {
 
-    private val arrayType = getKType<ByteArray>()
     private var contentNegotiation: ContentNegotiation? = null
     private var contentTypes: Set<ContentType>? = null
 
@@ -52,24 +42,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
         return contentTypes
     }
 
-    private class Registrar(val previous: SchemaRegistrar) : SchemaRegistrar {
-
-        override fun get(type: KType, master: SchemaRegistrar): NamedSchema {
-            return if (type == arrayType.withNullability(type.isMarkedNullable)) {
-                NamedSchema(
-                    "Base64ByteArray", Schema.SchemaLitteral(
-                        DataType.string,
-                        DataFormat.byte,
-                        type.isMarkedNullable,
-                        null,
-                        null
-                    )
-                )
-            } else previous[type, master]
-        }
-    }
-
-    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage):Map<ContentType, MediaType<T>>? {
+    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage):Map<ContentType, MediaTypeModel<T>>? {
         if (type == unitKType) return null
         val clazz = type.jvmErasure
         when (usage) { // check if it is explicitly declared or none is present
@@ -85,12 +58,9 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
             }
         }
         val contentTypes = initContentTypes(apiGen) ?: return null
-        val reg = if (type.allTypes().contains(arrayType)) {
-            Registrar(SimpleSchemaRegistrar(apiGen.schemaRegistrar.namer))
-        } else apiGen.schemaRegistrar
-
-        val media =  MediaType(reg[type].schema as Schema<T>, example)
+        val schemaBuilder = provider.ofClass<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
         @Suppress("UNCHECKED_CAST")
+        val media =  MediaTypeModel(schemaBuilder.build(type) as SchemaModel<T>, example)
         return contentTypes.associateWith { media.copy() }
     }
 

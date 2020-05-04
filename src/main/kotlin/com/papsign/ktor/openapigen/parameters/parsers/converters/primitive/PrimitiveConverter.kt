@@ -1,6 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.parsers.converters.primitive
 
-import com.papsign.kotlin.reflection.getKType
+import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.parameters.parsers.converters.Converter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.ConverterSelector
 import java.math.BigDecimal

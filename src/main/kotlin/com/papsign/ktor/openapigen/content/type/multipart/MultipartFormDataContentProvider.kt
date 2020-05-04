@@ -1,17 +1,15 @@
 package com.papsign.ktor.openapigen.content.type.multipart
 
-import com.papsign.kotlin.reflection.getKType
-import com.papsign.kotlin.reflection.getObjectSubtypes
-import com.papsign.kotlin.reflection.unitKType
-import com.papsign.ktor.openapigen.OpenAPIGen
-import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
+import com.papsign.ktor.openapigen.*
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.exceptions.assertContent
+import com.papsign.ktor.openapigen.model.operation.MediaTypeEncodingModel
+import com.papsign.ktor.openapigen.model.operation.MediaTypeModel
+import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.schema.NamedSchema
-import com.papsign.ktor.openapigen.modules.schema.SchemaRegistrar
-import com.papsign.ktor.openapigen.openapi.*
+import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.schema.builder.provider.FinalSchemaBuilderProviderModule
 import io.ktor.application.ApplicationCall
 import io.ktor.http.ContentType
 import io.ktor.http.content.PartData
@@ -36,34 +34,19 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
         return listOf(ContentType.MultiPart.FormData)
     }
 
-    private class Registrar(val previous: SchemaRegistrar) : SchemaRegistrar {
-
-        override fun get(type: KType, master: SchemaRegistrar): NamedSchema {
-            return if (streamTypes.contains(type)) {
-                NamedSchema(
-                        "InputStream", Schema.SchemaLitteral(
-                        DataType.string,
-                        DataFormat.binary,
-                        type.isMarkedNullable,
-                        null,
-                        null
-                )
-                )
-            } else previous[type, master]
-        }
-    }
-
     data class MultipartCVT<T>(val default: T?, val type: KType, val clazz: KClass<*>, val serializer: (T) -> String, val parser: (String) -> T)
 
-    inline fun <reified T> cvt(noinline serializer: (T) -> String, noinline parser: (String) -> T, default: T? = null) = MultipartCVT(default, getKType<T>(), T::class, serializer, parser)
+    inline fun <reified T> cvt(noinline serializer: (T) -> String, noinline parser: (String) -> T, default: T? = null) = MultipartCVT(default,
+        getKType<T>(), T::class, serializer, parser)
 
     private val streamTypes = setOf(
-            getKType<InputStream>(),
-            getKType<ContentInputStream>(),
-            getKType<NamedFileInputStream>(),
-            getKType<InputStream?>(),
-            getKType<ContentInputStream?>(),
-            getKType<NamedFileInputStream?>())
+        getKType<InputStream>(),
+        getKType<ContentInputStream>(),
+        getKType<NamedFileInputStream>(),
+        getKType<InputStream?>(),
+        getKType<ContentInputStream?>(),
+        getKType<NamedFileInputStream?>()
+    )
 
     private val conversions = setOf(
             cvt({ it }, { it }, ""),
@@ -81,7 +64,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
 
     private val allowedTypes = nonNullTypes
 
-    private val typeContentTypes = HashMap<KType, Map<String, MediaTypeEncoding>>()
+    private val typeContentTypes = HashMap<KType, Map<String, MediaTypeEncodingModel>>()
 
 
     override suspend fun <T : Any> parseBody(clazz: KClass<T>, request: PipelineContext<Unit, ApplicationCall>): T {
@@ -127,21 +110,21 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
     }
 
 
-    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaType<T>>? {
+    override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaTypeModel<T>>? {
         if (type == unitKType) return null
         type.jvmErasure.findAnnotation<FormDataRequest>() ?: return null
+        val ctor = type.jvmErasure.primaryConstructor
         when (usage) {
             ContentTypeProvider.Usage.PARSE -> {
-                val ctor = type.jvmErasure.primaryConstructor
                 assertContent(ctor != null) {
                     "${this::class.simpleName} requires a primary constructor"
                 }
-                assertContent(allowedTypes.containsAll(ctor!!.parameters.map { it.type })) {
+                assertContent(allowedTypes.containsAll(ctor!!.parameters.map { it.type.withNullability(false) })) {
                     "${this::class.simpleName} all constructor parameters must be of types: $allowedTypes"
                 }
             }
             ContentTypeProvider.Usage.SERIALIZE -> {
-                assertContent(type.getObjectSubtypes().all { allowedTypes.contains(it.withNullability(false)) }) {
+                assertContent(allowedTypes.containsAll(ctor!!.parameters.map { it.type.withNullability(false) })) {
                     "${this::class.simpleName} only supports DTOs containing following types: ${allowedTypes.joinToString()}"
                 }
             }
@@ -153,12 +136,11 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
                         .associateBy { it.name }
                         .mapValues { it.value.findAnnotation<PartEncoding>() }
                         .filterValues { it != null }
-                        .mapValues { MediaTypeEncoding(it.value!!.contentType) }
+                        .mapValues { MediaTypeEncodingModel(it.value!!.contentType) }
             }.toMap()
         }
-        val schema = Registrar(apiGen.schemaRegistrar)[type]
-
+        val schemaBuilder = provider.ofClass<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
         @Suppress("UNCHECKED_CAST")
-        return mapOf(ContentType.MultiPart.FormData to MediaType(schema.schema as Schema<T>, example, null, contentTypes))
+        return mapOf(ContentType.MultiPart.FormData to MediaTypeModel(schemaBuilder.build(type) as SchemaModel<T>, example, null, contentTypes))
     }
 }

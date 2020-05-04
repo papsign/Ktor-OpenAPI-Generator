@@ -1,15 +1,15 @@
 package com.papsign.ktor.openapigen.parameters.handlers
 
 import com.papsign.ktor.openapigen.OpenAPIGen
+import com.papsign.ktor.openapigen.model.operation.ParameterModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.openapi.Parameter
-import com.papsign.ktor.openapigen.parameters.handlers.ParameterHandler
+import io.ktor.http.Headers
 import io.ktor.http.Parameters
 
 object UnitParameterHandler :
     ParameterHandler<Unit> {
-    override fun parse(parameters: Parameters) = Unit
-    override fun getParameters(apiGen: OpenAPIGen, provider: ModuleProvider<*>): List<Parameter<*>> {
+    override fun parse(parameters: Parameters, headers: Headers) = Unit
+    override fun getParameters(apiGen: OpenAPIGen, provider: ModuleProvider<*>): List<ParameterModel<*>> {
         return listOf()
     }
 }

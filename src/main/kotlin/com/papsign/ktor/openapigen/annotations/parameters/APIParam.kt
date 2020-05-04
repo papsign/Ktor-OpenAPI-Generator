@@ -1,6 +1,7 @@
 package com.papsign.ktor.openapigen.annotations.parameters
 
-import com.papsign.ktor.openapigen.openapi.ParameterLocation
+import com.papsign.ktor.openapigen.model.operation.ParameterLocation
+
 
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.RUNTIME)

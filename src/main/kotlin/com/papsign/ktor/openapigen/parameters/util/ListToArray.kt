@@ -1,7 +1,7 @@
 package com.papsign.ktor.openapigen.parameters.util
 
-import com.papsign.kotlin.reflection.toKType
 import kotlin.reflect.KType
+import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 
 class ListToArray(arrayType: KType) {
@@ -18,11 +18,11 @@ class ListToArray(arrayType: KType) {
 
     companion object {
         fun arrayComponentKType(arrayType: KType): KType {
-            return arrayType.arguments.firstOrNull()?.type ?: arrayType.jvmErasure.java.componentType.toKType()
+            return arrayType.arguments.firstOrNull()?.type ?: arrayType.jvmErasure.java.componentType.kotlin.starProjectedType
         }
         fun arrayComponentClass(arrayType: KType): Class<*> {
             return arrayType.arguments.firstOrNull()?.type?.jvmErasure?.javaObjectType ?:
-            arrayType.jvmErasure.java.componentType.toKType().jvmErasure.javaPrimitiveType ?:
+            arrayType.jvmErasure.java.componentType.kotlin.javaPrimitiveType ?:
             Any::class.java
         }
     }

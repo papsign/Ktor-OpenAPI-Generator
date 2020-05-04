@@ -6,13 +6,14 @@ import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.parameters.PathParamStyle
-import com.papsign.ktor.openapigen.parameters.QueryParamStyle
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.info
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
+import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
+import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -24,6 +25,7 @@ import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlin.reflect.KType
 
 object Basic {
 
@@ -47,11 +49,12 @@ object Basic {
                     description = "Test server"
                 }
                 //optional
-                schemaNamer = {
-                    //rename DTOs from java type name to generator compatible form
+                replaceModule(DefaultSchemaNamer, object: SchemaNamer {
                     val regex = Regex("[A-Za-z0-9_.]+")
-                    it.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
-                }
+                    override fun get(type: KType): String {
+                       return type.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
+                    }
+                })
             }
 
             install(ContentNegotiation) {
@@ -61,7 +64,7 @@ object Basic {
             // normal Ktor routing
             routing {
                 get("/openapi.json") {
-                    call.respond(application.openAPIGen.api)
+                    call.respond(application.openAPIGen.api.serialize())
                 }
 
                 get("/") {
@@ -86,12 +89,12 @@ object Basic {
 
                 route("block") {
                     // use Unit if there are no parameters / body / response
-                    post<Unit, StringUsable,  StringUsable>(
+                    post<Unit, StringUsable,  Set<StringUsable>>(
                         info("String Post Endpoint", "This is a String Post Endpoint"),
-                        exampleRequest = StringUsable("Ho"),
+                        exampleRequest = setOf(StringUsable("Ho")),
                         exampleResponse = StringUsable("Ho")
                     ) { params, body ->
-                        respond(body)
+                        respond(body.first())
                     }
                 }
 

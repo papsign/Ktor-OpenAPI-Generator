@@ -1,17 +1,17 @@
 package com.papsign.ktor.openapigen.modules.handlers
 
-import com.papsign.kotlin.reflection.getKType
+import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
 import com.papsign.ktor.openapigen.content.type.SelectedSerializer
+import com.papsign.ktor.openapigen.model.operation.OperationModel
+import com.papsign.ktor.openapigen.model.operation.StatusResponseModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
-import com.papsign.ktor.openapigen.openapi.Operation
-import com.papsign.ktor.openapigen.openapi.StatusResponse
 import io.ktor.http.HttpStatusCode
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
@@ -19,7 +19,7 @@ import kotlin.reflect.full.findAnnotation
 
 class ResponseHandlerModule<T : Any>(val responseClass: KClass<T>, val responseType: KType, val responseExample: T? = null) : OperationModule {
     private val log = classLogger()
-    override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: Operation) {
+    override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: OperationModel) {
 
         val responseMeta = responseClass.findAnnotation<Response>()
         val statusCode = responseMeta?.statusCode?.let { HttpStatusCode.fromValue(it) } ?: HttpStatusCode.OK
@@ -40,10 +40,11 @@ class ResponseHandlerModule<T : Any>(val responseClass: KClass<T>, val responseT
             } else {
                 description = responseMeta?.description ?: statusCode.description
             }
-        } ?: StatusResponse(descstr, content = map.toMutableMap())
+        } ?: StatusResponseModel(descstr, content = map.toMutableMap())
     }
 
     companion object {
-        inline fun <reified T : Any> create(responseExample: T? = null) = ResponseHandlerModule(T::class, getKType<T>(), responseExample)
+        inline fun <reified T : Any> create(responseExample: T? = null) = ResponseHandlerModule(T::class,
+            getKType<T>(), responseExample)
     }
 }

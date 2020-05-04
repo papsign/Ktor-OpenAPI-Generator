@@ -1,6 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.parsers
 
-import com.papsign.kotlin.reflection.getKType
+import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.parameters.ParameterStyle
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderFactory

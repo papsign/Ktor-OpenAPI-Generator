@@ -1,8 +1,11 @@
 import com.papsign.ktor.openapigen.OpenAPIGen
+import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
+import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
+import kotlin.reflect.KType
 
 fun Application.installOpenAPI(): OpenAPIGen {
     return install(OpenAPIGen) {
@@ -21,11 +24,12 @@ fun Application.installOpenAPI(): OpenAPIGen {
             description = "Test server"
         }
         //optional
-        schemaNamer = {
-            //rename DTOs from java type name to generator compatible form
+        replaceModule(DefaultSchemaNamer, object: SchemaNamer {
             val regex = Regex("[A-Za-z0-9_.]+")
-            it.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
-        }
+            override fun get(type: KType): String {
+                return type.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
+            }
+        })
     }
 }
 
@@ -34,3 +38,4 @@ fun Application.installJackson() {
         jackson()
     }
 }
+

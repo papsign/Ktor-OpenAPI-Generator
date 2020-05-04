@@ -1,7 +1,6 @@
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
-import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.core.util.DefaultIndenter
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -13,18 +12,24 @@ import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Path
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.annotations.Response
+import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
+import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
+import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
 import com.papsign.ktor.openapigen.interop.withAPI
+import com.papsign.ktor.openapigen.model.Described
+import com.papsign.ktor.openapigen.model.server.ServerModel
 import com.papsign.ktor.openapigen.openAPIGen
-import com.papsign.ktor.openapigen.openapi.Described
-import com.papsign.ktor.openapigen.openapi.Server
-import com.papsign.ktor.openapigen.route.apiRouting
-import com.papsign.ktor.openapigen.route.info
+import com.papsign.ktor.openapigen.route.*
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
-import com.papsign.ktor.openapigen.route.route
-import com.papsign.ktor.openapigen.route.tag
+import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
+import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
+import com.papsign.ktor.openapigen.annotations.type.number.ConstraintVialoation
+import com.papsign.ktor.openapigen.annotations.type.number.integer.clamp.Clamp
+import com.papsign.ktor.openapigen.annotations.type.number.integer.max.Max
+import com.papsign.ktor.openapigen.annotations.type.number.integer.min.Min
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -41,6 +46,7 @@ import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlin.reflect.KType
 
 object TestServer {
 
@@ -65,19 +71,20 @@ object TestServer {
                 server("https://api.test.com/") {
                     description = "Main production server"
                 }
-                schemaNamer = {
-                    //rename DTOs from java type name to generator compatible form
+                replaceModule(DefaultSchemaNamer, object: SchemaNamer {
                     val regex = Regex("[A-Za-z0-9_.]+")
-                    it.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
-                }
+                    override fun get(type: KType): String {
+                        return type.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
+                    }
+                })
             }
 
             install(ContentNegotiation) {
                 jackson {
                     enable(
-                            DeserializationFeature.WRAP_EXCEPTIONS,
-                            DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,
-                            DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
+                        DeserializationFeature.WRAP_EXCEPTIONS,
+                        DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,
+                        DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
                     )
 
                     enable(SerializationFeature.WRAP_EXCEPTIONS, SerializationFeature.INDENT_OUTPUT)
@@ -100,6 +107,9 @@ object TestServer {
                         it.printStackTrace()
                         Error("mapping.json", it.localizedMessage)
                     }
+                    exception<ConstraintVialoation, Error>(HttpStatusCode.BadRequest) {
+                        Error("violation.constraint", it.localizedMessage)
+                    }
                     exception<ProperException, Error>(HttpStatusCode.BadRequest) {
                         it.printStackTrace()
                         Error(it.id, it.localizedMessage)
@@ -113,15 +123,15 @@ object TestServer {
             // serve OpenAPI and redirect from root
             routing {
                 get("/openapi.json") {
-                    val host = Server(
-                            call.request.origin.scheme + "://" + call.request.host() + if (setOf(
-                                            80,
-                                            443
-                                    ).contains(call.request.port())
-                            ) "" else ":${call.request.port()}"
+                    val host = ServerModel(
+                        call.request.origin.scheme + "://" + call.request.host() + if (setOf(
+                                80,
+                                443
+                            ).contains(call.request.port())
+                        ) "" else ":${call.request.port()}"
                     )
                     application.openAPIGen.api.servers.add(0, host)
-                    call.respond(application.openAPIGen.api)
+                    call.respond(application.openAPIGen.api.serialize())
                     application.openAPIGen.api.servers.remove(host)
                 }
 
@@ -133,10 +143,19 @@ object TestServer {
             apiRouting {
 
                 get<StringParam, StringResponse>(
-                        info("String Param Endpoint", "This is a String Param Endpoint"),
-                        example = StringResponse("Hi")
+                    info("String Param Endpoint", "This is a String Param Endpoint"),
+                    example = StringResponse("Hi")
                 ) { params ->
                     respond(StringResponse(params.a))
+                }
+
+                route("header") {
+                    get<NameParam, NameGreetingResponse>(
+                        info("Header Param Endpoint", "This is a Header Param Endpoint"),
+                        example = NameGreetingResponse("Hi, openapi!")
+                    ) { params ->
+                        respond(NameGreetingResponse("Hi, ${params.`X-Name`}!"))
+                    }
                 }
 
                 route("list") {
@@ -150,17 +169,17 @@ object TestServer {
 
                 route("sealed") {
                     post<Unit, Base, Base>(
-                            info("Sealed class Endpoint", "This is a Sealed class Endpoint"),
-                            exampleRequest = Base.A("Hi"),
-                            exampleResponse = Base.A("Hi")
+                        info("Sealed class Endpoint", "This is a Sealed class Endpoint"),
+                        exampleRequest = Base.A("Hi"),
+                        exampleResponse = Base.A("Hi")
                     ) { params, base ->
                         respond(base)
                     }
                 }
 
                 route("long").get<LongParam, LongResponse>(
-                        info("Long Param Endpoint", "This is a String Param Endpoint"),
-                        example = LongResponse(Long.MAX_VALUE)
+                    info("Long Param Endpoint", "This is a String Param Endpoint"),
+                    example = LongResponse(Long.MAX_VALUE)
                 ) { params ->
                     respond(LongResponse(params.a))
                 }
@@ -168,32 +187,46 @@ object TestServer {
                 route("again") {
                     tag(TestServer.Tags.EXAMPLE) {
 
-                        get<StringParam, StringResponse>(
+                        route("exception").throws(HttpStatusCode.ExpectationFailed, "example", CustomException::class) {
+                            get<StringParam, StringResponse>(
                                 info("String Param Endpoint", "This is a String Param Endpoint"),
                                 example = StringResponse("Hi")
+                            ) { params ->
+                                throw CustomException()
+                            }
+                        }
+
+                        get<StringParam, StringResponse>(
+                            info("String Param Endpoint", "This is a String Param Endpoint"),
+                            example = StringResponse("Hi")
                         ) { params ->
                             respond(StringResponse(params.a))
                         }
 
                         route("long").get<LongParam, LongResponse>(
-                                info("Long Param Endpoint", "This is a String Param Endpoint"),
-                                example = LongResponse(Long.MAX_VALUE)
+                            info("Long Param Endpoint", "This is a String Param Endpoint"),
+                            example = LongResponse(Long.MAX_VALUE)
                         ) { params ->
                             respond(LongResponse(params.a))
                         }
                     }
-
-
                 }
             }
         }.start(true)
     }
+
+    class CustomException : Exception()
 
     @Path("string/{a}")
     data class StringParam(@PathParam("A simple String Param") val a: String)
 
     @Response("A String Response")
     data class StringResponse(val str: String)
+
+    data class NameParam(@HeaderParam("A simple Header Param") val `X-Name`: String)
+
+    @Response("A Response for header param example")
+    data class NameGreetingResponse(val str: String)
 
 
     @Response("A String Response")
@@ -208,14 +241,22 @@ object TestServer {
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
     @JsonSubTypes(
-            JsonSubTypes.Type(Base.A::class, name = "a"),
-            JsonSubTypes.Type(Base.B::class, name = "b"),
-            JsonSubTypes.Type(Base.C::class, name = "c")
+        JsonSubTypes.Type(Base.A::class, name = "a"),
+        JsonSubTypes.Type(Base.B::class, name = "b"),
+        JsonSubTypes.Type(Base.C::class, name = "c")
     )
     sealed class Base {
+
         class A(val str: String) : Base()
-        class B(val i: Int) : Base()
-        class C(val l: Long) : Base()
+
+        class B(val i: @Min(0) @Max(2) Int) : Base()
+
+        @WithExample
+        class C(val l: @Clamp(0, 10) Long) : Base() {
+            companion object: ExampleProvider<C> {
+                override val example: C? = C(5)
+            }
+        }
     }
 
 
