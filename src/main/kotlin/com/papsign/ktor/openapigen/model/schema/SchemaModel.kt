@@ -38,6 +38,9 @@ sealed class SchemaModel<T>: DataModel {
         var nullable: Boolean = false,
         override var example: T? = null,
         override var examples: List<T>? = null,
+        var uniqueItems: Boolean? = null,
+        var minItems: Int? = null,
+        var maxItems: Int? = null,
         var type: DataType = DataType.array
     ) : SchemaModel<T>()
 

@@ -3,6 +3,7 @@ package com.papsign.ktor.openapigen.schema.builder.provider
 import com.papsign.ktor.openapigen.*
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
+import com.papsign.ktor.openapigen.modules.DefaultOpenAPIModule
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofClass
 import com.papsign.ktor.openapigen.schema.builder.FinalSchemaBuilder
@@ -15,7 +16,7 @@ import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.jvmErasure
 
-object DefaultObjectSchemaProvider : SchemaBuilderProviderModule, OpenAPIGenModuleExtension {
+object DefaultObjectSchemaProvider : SchemaBuilderProviderModule, OpenAPIGenModuleExtension, DefaultOpenAPIModule {
     private val log = classLogger()
 
     override fun provide(apiGen: OpenAPIGen, provider: ModuleProvider<*>): List<SchemaBuilder> {

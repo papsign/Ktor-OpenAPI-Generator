@@ -89,12 +89,12 @@ object Basic {
 
                 route("block") {
                     // use Unit if there are no parameters / body / response
-                    post<Unit, StringUsable,  StringUsable>(
+                    post<Unit, StringUsable,  Set<StringUsable>>(
                         info("String Post Endpoint", "This is a String Post Endpoint"),
-                        exampleRequest = StringUsable("Ho"),
+                        exampleRequest = setOf(StringUsable("Ho")),
                         exampleResponse = StringUsable("Ho")
                     ) { params, body ->
-                        respond(body)
+                        respond(body.first())
                     }
                 }
 
