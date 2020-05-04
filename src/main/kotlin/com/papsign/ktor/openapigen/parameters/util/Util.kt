@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.util
 
+import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.parameters.handlers.ModularParameterHander
@@ -18,6 +19,7 @@ inline fun <reified T : Any> buildParameterHandler(): ParameterHandler<T> {
     val constructor = t.primaryConstructor ?: error("API routes with ${t.simpleName} must have a primary constructor.")
     val parsers: Map<KParameter, Builder<*>> = constructor.parameters.associateWith { param ->
         val type = param.type
+        param.findAnnotation<HeaderParam>()?.let { a -> a.style.factory.buildBuilderForced(type, a.explode) } ?:
         param.findAnnotation<PathParam>()?.let { a -> a.style.factory.buildBuilderForced(type, a.explode) } ?:
         param.findAnnotation<QueryParam>()?.let { a -> a.style.factory.buildBuilderForced(type, a.explode) } ?:
         error("Parameters must be annotated with @PathParam or @QueryParam")

@@ -51,7 +51,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                 accept(acceptType) {
                     if (Unit is B) {
                         handle {
-                            val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters)
+                            val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters, call.request.headers)
                             pass(this, responder, PHandler.handle(params), Unit)
                         }
                     } else {
@@ -59,7 +59,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                             contentType(contentType) {
                                 handle {
                                     val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(B::class, this)
-                                    val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters)
+                                    val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters, call.request.headers)
                                     pass(this, responder, PHandler.handle(params), BHandler.handle(receive))
                                 }
                             }
