@@ -69,16 +69,3 @@ dependencies {
     ...
 }
 ```
-
-## Expose the OpenAPI.json and swager-ui
-
-```kotlin
-application.routing {
-    get("/openapi.json") {
-        call.respond(application.openAPIGen.api.serialize())
-    }
-    get("/") {
-        call.respondRedirect("/swagger-ui/index.html?url=/openapi.json", true)
-    }
-}
-```
