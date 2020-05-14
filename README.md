@@ -23,7 +23,7 @@ Extra Features:
 
 It is inspired by ktor Locations, but makes no use of it.
 
-Take a look at the [A few examples](https://github.com/papsign/Ktor-OpenAPI-Generator/wiki/A-few-examples)
+Take a look at [a few examples](https://github.com/papsign/Ktor-OpenAPI-Generator/wiki/A-few-examples)
 
 ## Installation
 
