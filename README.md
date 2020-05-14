@@ -32,7 +32,7 @@ Take a look at [a few examples](https://github.com/papsign/Ktor-OpenAPI-Generato
 ### Gradle
 
 Step 1. Add the JitPack repository to your build file:
-```
+```groovy
 allprojects {
     repositories {
         ...
@@ -41,7 +41,7 @@ allprojects {
 }
 ```
 Step 2. Add the dependency:
-```
+```groovy
 dependencies {
         implementation 'com.github.papsign:Ktor-OpenAPI-Generator:-SNAPSHOT'
 }
@@ -49,17 +49,17 @@ dependencies {
 
 ### Git Submodule
 Install the submodule:
-```
+```shell
 git submodule add https://github.com/papsign/Ktor-OpenAPI-Generator.git openapigen
 ```
 
 Declare the folder in settings.gradle:
-```
+```groovy
 ...
 include 'openapigen'
 ```
 Declare the dependency in the main build.gradle
-```
+```groovy
 apply plugin: 'kotlin'
 
 ...
@@ -72,7 +72,7 @@ dependencies {
 
 ## Expose the OpenAPI.json and swager-ui
 
-```
+```kotlin
 application.routing {
     get("/openapi.json") {
         call.respond(application.openAPIGen.api.serialize())
