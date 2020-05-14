@@ -21,8 +21,6 @@ Currently Supported:
 Extra Features:
 - Includes Swagger-UI (enabled by default, can be managed in the `install(OpenAPIGen) { ... }` section)
 
-It is inspired by ktor Locations, but makes no use of it.
-
 ## Examples
 
 Take a look at [a few examples](https://github.com/papsign/Ktor-OpenAPI-Generator/wiki/A-few-examples)
