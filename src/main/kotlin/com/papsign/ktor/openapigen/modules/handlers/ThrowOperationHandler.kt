@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.content.type.ResponseSerializer
 import com.papsign.ktor.openapigen.content.type.SelectedExceptionSerializer
+import com.papsign.ktor.openapigen.model.info.ExampleModel
 import com.papsign.ktor.openapigen.model.operation.MediaTypeModel
 import com.papsign.ktor.openapigen.model.operation.OperationModel
 import com.papsign.ktor.openapigen.model.operation.StatusResponseModel
@@ -35,9 +36,11 @@ object ThrowOperationHandler : OperationModule {
                     schemas.size == 1 -> schemas.first()
                     else -> SchemaModel.OneSchemaModelOf(schemas)
                 }
-                val examples =  it.value.mapNotNull { (_, second) -> second.example }.withIndex().associate { (idx, value) -> "Example $idx" to value }.toMutableMap()
+                val examples =  it.value.mapNotNull { (_, second) ->
+                    second.example
+                }.withIndex().associate { (idx, value) -> "Example $idx" to ExampleModel(value) }.toMutableMap()
                 if (examples.size <= 1) {
-                    MediaTypeModel(schema, example = examples.values.firstOrNull())
+                    MediaTypeModel(schema, example = examples.values.firstOrNull()?.value)
                 } else {
                     MediaTypeModel(schema, examples = examples)
                 }
