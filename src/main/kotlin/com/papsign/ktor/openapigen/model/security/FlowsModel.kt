@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.model.security
 
+import com.papsign.ktor.openapigen.annotations.mapping.openAPIName
 import com.papsign.ktor.openapigen.model.DataModel
 import com.papsign.ktor.openapigen.model.Described
 import java.util.*

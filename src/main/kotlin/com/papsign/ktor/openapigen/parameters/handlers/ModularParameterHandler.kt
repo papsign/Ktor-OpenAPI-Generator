@@ -1,6 +1,8 @@
 package com.papsign.ktor.openapigen.parameters.handlers
 
 import com.papsign.ktor.openapigen.OpenAPIGen
+import com.papsign.ktor.openapigen.annotations.mapping.remapOpenAPINames
+import com.papsign.ktor.openapigen.annotations.mapping.openAPIName
 import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
@@ -20,11 +22,11 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.withNullability
 
-class ModularParameterHander<T>(val parsers: Map<KParameter, Builder<*>>, val constructor: KFunction<T>) :
+class ModularParameterHandler<T>(val parsers: Map<KParameter, Builder<*>>, val constructor: KFunction<T>) :
     ParameterHandler<T> {
 
     override fun parse(parameters: Parameters, headers: Headers): T {
-        return constructor.callBy(parsers.mapValues { it.value.build(it.key.name!!, parameters.toMap() + headers.toMap()) })
+        return constructor.callBy(parsers.mapValues { it.value.build(it.key.name.toString(), it.key.remapOpenAPINames(parameters.toMap() + headers.toMap())) })
     }
 
     override fun getParameters(apiGen: OpenAPIGen, provider: ModuleProvider<*>): List<ParameterModel<*>> {
@@ -32,7 +34,7 @@ class ModularParameterHander<T>(val parsers: Map<KParameter, Builder<*>>, val co
 
         fun createParam(param: KParameter, `in`: ParameterLocation, config: (ParameterModel<*>) -> Unit): ParameterModel<*> {
             return ParameterModel<Any>(
-                param.name.toString(),
+                param.openAPIName.toString(),
                 `in`,
                 !param.type.isMarkedNullable
             ).also {

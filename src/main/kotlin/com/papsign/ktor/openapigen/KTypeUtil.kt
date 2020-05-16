@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen
 
+import com.papsign.ktor.openapigen.annotations.mapping.openAPIName
 import java.lang.reflect.Field
 import kotlin.reflect.*
 import kotlin.reflect.full.createType

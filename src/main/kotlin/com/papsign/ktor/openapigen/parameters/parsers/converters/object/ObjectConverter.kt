@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.parsers.converters.`object`
 
+import com.papsign.ktor.openapigen.annotations.mapping.openAPIName
 import com.papsign.ktor.openapigen.parameters.parsers.converters.Converter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.ConverterSelector
 import com.papsign.ktor.openapigen.parameters.parsers.converters.primitive.PrimitiveConverterFactory
@@ -30,7 +31,7 @@ class ObjectConverter(type: KType): MappedConverter {
     }
 
     override fun convert(map: Map<String, String>): Any? {
-        return try { constructor.callBy(builderMap.mapValues { (key, value) -> map[key.name]?.let { value.convert(it) }  }) } catch (e: InvocationTargetException) { null }
+        return try { constructor.callBy(builderMap.mapValues { (key, value) -> map[key.openAPIName]?.let { value.convert(it) }  }) } catch (e: InvocationTargetException) { null }
     }
 
     companion object: ConverterSelector {

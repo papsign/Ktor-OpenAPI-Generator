@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.parsers.builders.query.deepobject
 
+import com.papsign.ktor.openapigen.annotations.mapping.openAPIName
 import com.papsign.ktor.openapigen.parameters.QueryParamStyle
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderSelector
@@ -32,7 +33,7 @@ class ObjectDeepBuilder(val type: KType) : DeepBuilder {
 
     override fun build(key: String, parameters: Map<String, List<String>>): Any? {
         return try {
-            constructor.callBy(builderMap.mapValues { it.value.build("$key[${it.key.name}]", parameters) })
+            constructor.callBy(builderMap.mapValues { it.value.build("$key[${it.key.openAPIName}]", parameters) })
         } catch (e: InvocationTargetException) {
             null
         }

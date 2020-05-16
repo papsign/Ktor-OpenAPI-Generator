@@ -1,6 +1,7 @@
 package com.papsign.ktor.openapigen.content.type.multipart
 
 import com.papsign.ktor.openapigen.*
+import com.papsign.ktor.openapigen.annotations.mapping.openAPIName
 import com.papsign.ktor.openapigen.content.type.BodyParser
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.exceptions.assertContent
@@ -87,7 +88,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
         }
         val ctor = clazz.primaryConstructor!!
         return ctor.callBy(ctor.parameters.associateWith {
-            val raw = objectMap[it.name]
+            val raw = objectMap[it.openAPIName]
             if ((raw == null || (raw !is InputStream && streamTypes.contains(it.type))) && it.type.isMarkedNullable) {
                 null
             } else {
@@ -97,7 +98,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
                     val cvt = conversionsByType[it.type] ?: error("Unhandled Type ${it.type}")
                     when (raw) {
                         null -> {
-                            cvt.default ?: error("No provided value for field ${it.name}")
+                            cvt.default ?: error("No provided value for field ${it.openAPIName}")
                         }
                         is String -> {
                             cvt.parser(raw)

@@ -3,7 +3,7 @@ package com.papsign.ktor.openapigen.parameters.util
 import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
-import com.papsign.ktor.openapigen.parameters.handlers.ModularParameterHander
+import com.papsign.ktor.openapigen.parameters.handlers.ModularParameterHandler
 import com.papsign.ktor.openapigen.parameters.handlers.ParameterHandler
 import com.papsign.ktor.openapigen.parameters.handlers.UnitParameterHandler
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
@@ -24,7 +24,7 @@ inline fun <reified T : Any> buildParameterHandler(): ParameterHandler<T> {
         param.findAnnotation<QueryParam>()?.let { a -> a.style.factory.buildBuilderForced(type, a.explode) } ?:
         error("Parameters must be annotated with @PathParam or @QueryParam")
     }
-    return ModularParameterHander(
+    return ModularParameterHandler(
         parsers,
         constructor
     )

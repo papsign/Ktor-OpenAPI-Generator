@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.model
 
+import com.papsign.ktor.openapigen.annotations.mapping.openAPIName
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
