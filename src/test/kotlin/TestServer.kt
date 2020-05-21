@@ -32,6 +32,7 @@ import com.papsign.ktor.openapigen.annotations.type.number.ConstraintVialoation
 import com.papsign.ktor.openapigen.annotations.type.number.integer.clamp.Clamp
 import com.papsign.ktor.openapigen.annotations.type.number.integer.max.Max
 import com.papsign.ktor.openapigen.annotations.type.number.integer.min.Min
+import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -228,7 +229,7 @@ object TestServer {
     data class NameParam(@HeaderParam("A simple Header Param") @OpenAPIName("X-NAME") val name: String)
 
     @Response("A Response for header param example")
-    data class NameGreetingResponse(val str: String)
+    data class NameGreetingResponse(@StringExample("Hi, John!") val str: String)
 
 
     @Response("A String Response")
