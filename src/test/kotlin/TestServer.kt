@@ -15,6 +15,7 @@ import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.annotations.mapping.OpenAPIName
 import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
+import com.papsign.ktor.openapigen.annotations.properties.description.Description
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
 import com.papsign.ktor.openapigen.interop.withAPI
@@ -222,7 +223,7 @@ object TestServer {
     data class StringParam(@PathParam("A simple String Param") val a: String)
 
     @Response("A String Response")
-    data class StringResponse(val str: String)
+    data class StringResponse(@Description("The string value") val str: String)
 
     data class NameParam(@HeaderParam("A simple Header Param") @OpenAPIName("X-NAME") val name: String)
 
