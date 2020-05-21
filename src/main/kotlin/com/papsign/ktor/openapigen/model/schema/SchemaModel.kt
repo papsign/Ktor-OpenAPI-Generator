@@ -7,6 +7,7 @@ sealed class SchemaModel<T>: DataModel {
 
     abstract var example: T?
     abstract var examples: List<T>?
+    abstract var description: String?
 
     data class SchemaModelObj<T>(
         var properties: Map<String, SchemaModel<*>>,
@@ -14,7 +15,8 @@ sealed class SchemaModel<T>: DataModel {
         var nullable: Boolean = false,
         override var example: T? = null,
         override var examples: List<T>? = null,
-        var type: DataType = DataType.`object`
+        var type: DataType = DataType.`object`,
+        override var description: String? = null
     ) : SchemaModel<T>()
 
     data class SchemaModelMap<T : Map<String, U>, U>(
@@ -22,7 +24,8 @@ sealed class SchemaModel<T>: DataModel {
         var nullable: Boolean = false,
         override var example: T? = null,
         override var examples: List<T>? = null,
-        var type: DataType = DataType.`object`
+        var type: DataType = DataType.`object`,
+        override var description: String? = null
     ) : SchemaModel<T>()
 
     data class SchemaModelEnum<T>(
@@ -30,7 +33,8 @@ sealed class SchemaModel<T>: DataModel {
         var nullable: Boolean = false,
         override var example: T? = null,
         override var examples: List<T>? = null,
-        var type: DataType = DataType.string
+        var type: DataType = DataType.string,
+        override var description: String? = null
     ) : SchemaModel<T>()
 
     data class SchemaModelArr<T>(
@@ -41,7 +45,8 @@ sealed class SchemaModel<T>: DataModel {
         var uniqueItems: Boolean? = null,
         var minItems: Int? = null,
         var maxItems: Int? = null,
-        var type: DataType = DataType.array
+        var type: DataType = DataType.array,
+        override var description: String? = null
     ) : SchemaModel<T>()
 
     data class SchemaModelLitteral<T>(
@@ -51,16 +56,19 @@ sealed class SchemaModel<T>: DataModel {
         var minimum: T? = null,
         var maximum: T? = null,
         override var example: T? = null,
-        override var examples: List<T>? = null
+        override var examples: List<T>? = null,
+        override var description: String? = null
     ) : SchemaModel<T>()
 
     data class SchemaModelRef<T>(override val `$ref`: String) : SchemaModel<T>(), RefModel<SchemaModel<T>> {
         override var example: T? = null
         override var examples: List<T>? = null
+        override var description: String? = null
     }
 
     data class OneSchemaModelOf<T>(val oneOf: List<SchemaModel<out T>>) : SchemaModel<T>() {
         override var example: T? = null
         override var examples: List<T>? = null
+        override var description: String? = null
     }
 }
