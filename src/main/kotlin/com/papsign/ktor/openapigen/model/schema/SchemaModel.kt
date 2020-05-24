@@ -60,6 +60,18 @@ sealed class SchemaModel<T>: DataModel {
         override var description: String? = null
     ) : SchemaModel<T>()
 
+    data class SchemaModelString(
+        var type: DataType? = null,
+        var format: DataFormat? = null,
+        var nullable: Boolean = false,
+        var minLength: Int? = null,
+        var maxLength: Int? = null,
+        var pattern: String? = null,
+        override var example: String? = null,
+        override var examples: List<String>? = null,
+        override var description: String? = null
+    ) : SchemaModel<String>()
+
     data class SchemaModelRef<T>(override val `$ref`: String) : SchemaModel<T>(), RefModel<SchemaModel<T>> {
         override var example: T? = null
         override var examples: List<T>? = null
