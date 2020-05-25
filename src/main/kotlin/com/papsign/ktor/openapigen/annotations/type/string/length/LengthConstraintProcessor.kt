@@ -16,7 +16,7 @@ abstract class LengthConstraintProcessor<A: Annotation>(): SchemaProcessor<A>, V
 
     val types = listOf(getKType<String>().withNullability(true), getKType<String>().withNullability(false))
 
-    abstract fun process(model: SchemaModel.SchemaModelString, annotation: A): SchemaModel.SchemaModelString
+    abstract fun process(model: SchemaModel.SchemaModelLitteral<*>, annotation: A): SchemaModel.SchemaModelLitteral<*>
 
     abstract fun getConstraint(annotation: A): LengthConstraint
 
@@ -46,7 +46,7 @@ abstract class LengthConstraintProcessor<A: Annotation>(): SchemaProcessor<A>, V
     }
 
     override fun process(model: SchemaModel<*>, type: KType, annotation: A): SchemaModel<*> {
-        return if (model is SchemaModel.SchemaModelString && types.contains(type)) {
+        return if (model is SchemaModel.SchemaModelLitteral<*> && types.contains(type)) {
             process(model, annotation)
         } else {
             log.warn("${annotation::class} can only be used on types: $types")
