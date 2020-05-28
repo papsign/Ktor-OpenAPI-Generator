@@ -19,6 +19,8 @@ import com.papsign.ktor.openapigen.annotations.properties.description.Descriptio
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
 import com.papsign.ktor.openapigen.annotations.type.common.ConstraintViolation
+import com.papsign.ktor.openapigen.annotations.type.number.floating.clamp.FClamp
+import com.papsign.ktor.openapigen.annotations.type.number.floating.max.FMax
 import com.papsign.ktor.openapigen.annotations.type.number.integer.clamp.Clamp
 import com.papsign.ktor.openapigen.annotations.type.number.integer.max.Max
 import com.papsign.ktor.openapigen.annotations.type.number.integer.min.Min
@@ -271,8 +273,8 @@ object TestServer {
     data class NumberValidatorsExample(
             @Min(0) val intWithMin: Int,
             @Clamp( 1, 90 ) val intBetween: Int,
-            @Max(100 ) val floatMax: Float,
-            @Clamp(0, 1) val floatBetween: Float
+            @FMax(100.0 ) val floatMax: Float,
+            @FClamp(0.0, 1.0) val floatBetween: Float
     )
 
     @Response("A String Response")
