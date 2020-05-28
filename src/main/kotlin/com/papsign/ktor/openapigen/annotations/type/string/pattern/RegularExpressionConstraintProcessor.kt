@@ -1,12 +1,13 @@
 package com.papsign.ktor.openapigen.annotations.type.string.pattern
 
+import com.papsign.ktor.openapigen.annotations.type.common.ConstraintViolation
+import com.papsign.ktor.openapigen.annotations.type.string.NotAStringViolation
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.schema.processor.SchemaProcessor
 import com.papsign.ktor.openapigen.validation.Validator
 import com.papsign.ktor.openapigen.validation.ValidatorBuilder
-import java.lang.Exception
 import kotlin.reflect.KType
 import kotlin.reflect.full.withNullability
 
@@ -51,11 +52,7 @@ abstract class RegularExpressionConstraintProcessor<A: Annotation>(): SchemaProc
     }
 }
 
-data class RegularExpressionConstraint(val pattern: String, val errorMessage: String? = null)
+data class RegularExpressionConstraint(val pattern: String, val errorMessage: String)
 
-open class ConstraintViolation(message: String, cause: Throwable? = null): Exception(message, cause)
-
-class RegularExpressionConstraintViolation(val actual: String?, val constraint: RegularExpressionConstraint): ConstraintViolation(constraint.errorMessage ?: "Constraint violation: the string " +
-"\'$actual\' does not match the regular expression ${constraint.pattern}")
-
-class NotAStringViolation(val value: Any?): ConstraintViolation("Constraint violation: $value is not a string")
+class RegularExpressionConstraintViolation(val actual: String?, val constraint: RegularExpressionConstraint): ConstraintViolation("Constraint violation: the string " +
+"'$actual' does not match the regular expression ${constraint.pattern}", constraint.errorMessage)

@@ -12,7 +12,6 @@ object LengthProcessor : LengthConstraintProcessor<Length>() {
     }
 
     override fun getConstraint(annotation: Length): LengthConstraint {
-        val errorMessage = if (annotation.message.isNotEmpty()) annotation.message else null
-        return LengthConstraint(min = annotation.min, max = annotation.max, errorMessage = errorMessage)
+        return LengthConstraint(min = annotation.min, max = annotation.max, errorMessage = annotation.message)
     }
 }

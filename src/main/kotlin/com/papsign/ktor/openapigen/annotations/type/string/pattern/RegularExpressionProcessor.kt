@@ -11,7 +11,6 @@ object RegularExpressionProcessor : RegularExpressionConstraintProcessor<Regular
     }
 
     override fun getConstraint(annotation: RegularExpression): RegularExpressionConstraint {
-        val errorMessage = if (annotation.message.isNotEmpty()) annotation.message else null
-        return RegularExpressionConstraint(annotation.pattern, errorMessage)
+        return RegularExpressionConstraint(annotation.pattern, annotation.message)
     }
 }

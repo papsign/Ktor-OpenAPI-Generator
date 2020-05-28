@@ -1,12 +1,13 @@
 package com.papsign.ktor.openapigen.annotations.type.string.length
 
+import com.papsign.ktor.openapigen.annotations.type.common.ConstraintViolation
+import com.papsign.ktor.openapigen.annotations.type.string.NotAStringViolation
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.schema.processor.SchemaProcessor
 import com.papsign.ktor.openapigen.validation.Validator
 import com.papsign.ktor.openapigen.validation.ValidatorBuilder
-import java.lang.Exception
 import kotlin.reflect.KType
 import kotlin.reflect.full.withNullability
 
@@ -55,11 +56,9 @@ abstract class LengthConstraintProcessor<A: Annotation>(): SchemaProcessor<A>, V
     }
 }
 
-data class LengthConstraint(val min: Int? = null, val max: Int? = null, val errorMessage: String? = null)
+data class LengthConstraint(val min: Int? = null, val max: Int? = null, val errorMessage: String)
 
-open class ConstraintViolation(message: String, cause: Throwable? = null): Exception(message, cause)
-
-class LengthConstraintViolation(val actual: Number?, val constraint: LengthConstraint): ConstraintViolation(constraint.errorMessage ?: "Constraint violation: the length of the string should be ${
+class LengthConstraintViolation(val actual: Number?, val constraint: LengthConstraint): ConstraintViolation("Constraint violation: the length of the string should be ${
 {
     val min = "${constraint.min}"
     val max = "${constraint.max}"
@@ -70,6 +69,4 @@ class LengthConstraintViolation(val actual: Number?, val constraint: LengthConst
         else -> "anything"
     }
 }()
-}, but it is $actual")
-
-class NotAStringViolation(val value: Any?): ConstraintViolation("Constraint violation: $value is not a string")
+}, but it is $actual", constraint.errorMessage)

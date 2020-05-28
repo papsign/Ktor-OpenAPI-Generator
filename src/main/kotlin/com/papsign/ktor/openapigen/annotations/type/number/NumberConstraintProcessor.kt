@@ -1,11 +1,11 @@
 package com.papsign.ktor.openapigen.annotations.type.number
 
+import com.papsign.ktor.openapigen.annotations.type.common.ConstraintViolation
 import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.schema.processor.SchemaProcessor
 import com.papsign.ktor.openapigen.validation.Validator
 import com.papsign.ktor.openapigen.validation.ValidatorBuilder
-import java.lang.Exception
 import java.math.BigDecimal
 import kotlin.reflect.KType
 import kotlin.reflect.full.withNullability
@@ -61,9 +61,7 @@ abstract class NumberConstraintProcessor<A: Annotation>(allowedTypes: Iterable<K
 
 data class NumberConstraint(val min: BigDecimal? = null, val max: BigDecimal? = null, val minInclusive: Boolean = true, val maxInclusive: Boolean = true)
 
-open class ConstraintVialoation(message: String, cause: Throwable? = null): Exception(message, cause)
-
-class NumberConstraintViolation(val actual: Number?, val constraint: NumberConstraint): ConstraintVialoation("Constraint violation: $actual should be ${
+class NumberConstraintViolation(val actual: Number?, val constraint: NumberConstraint): ConstraintViolation("Constraint violation: $actual should be ${
 {
     val min = "${constraint.min} ${if (constraint.minInclusive) "inclusive" else "exclusive"}"
     val max = "${constraint.max} ${if (constraint.maxInclusive) "inclusive" else "exclusive"}"
@@ -76,4 +74,4 @@ class NumberConstraintViolation(val actual: Number?, val constraint: NumberConst
 }()
 }")
 
-class NotANumberViolationViolation(val value: Any?): ConstraintVialoation("Constraint violation: $value is not a number")
+class NotANumberViolationViolation(val value: Any?): ConstraintViolation("Constraint violation: $value is not a number")
