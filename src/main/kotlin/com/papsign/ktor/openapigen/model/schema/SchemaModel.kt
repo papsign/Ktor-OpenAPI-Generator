@@ -57,6 +57,7 @@ sealed class SchemaModel<T>: DataModel {
         var maximum: T? = null,
         var minLength: Int? = null,
         var maxLength: Int? = null,
+        var pattern: String? = null,
         override var example: T? = null,
         override var examples: List<T>? = null,
         override var description: String? = null
