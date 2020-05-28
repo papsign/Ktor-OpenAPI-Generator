@@ -33,6 +33,11 @@ import com.papsign.ktor.openapigen.annotations.type.number.integer.clamp.Clamp
 import com.papsign.ktor.openapigen.annotations.type.number.integer.max.Max
 import com.papsign.ktor.openapigen.annotations.type.number.integer.min.Min
 import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
+import com.papsign.ktor.openapigen.annotations.type.string.length.ConstraintViolation
+import com.papsign.ktor.openapigen.annotations.type.string.length.Length
+import com.papsign.ktor.openapigen.annotations.type.string.length.MaxLength
+import com.papsign.ktor.openapigen.annotations.type.string.length.MinLength
+import com.papsign.ktor.openapigen.annotations.type.string.pattern.RegularExpression
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -113,6 +118,12 @@ object TestServer {
                     exception<ConstraintVialoation, Error>(HttpStatusCode.BadRequest) {
                         Error("violation.constraint", it.localizedMessage)
                     }
+                    exception<ConstraintViolation, Error>(HttpStatusCode.BadRequest) {
+                        Error("violation.constraint", it.localizedMessage)
+                    }
+                    exception<com.papsign.ktor.openapigen.annotations.type.string.pattern.ConstraintViolation, Error>(HttpStatusCode.BadRequest) {
+                        Error("violation.constraint", it.localizedMessage)
+                    }
                     exception<ProperException, Error>(HttpStatusCode.BadRequest) {
                         it.printStackTrace()
                         Error(it.id, it.localizedMessage)
@@ -187,6 +198,18 @@ object TestServer {
                     respond(LongResponse(params.a))
                 }
 
+                route("validate-string").post<Unit, StringResponse, StringValidatorsExample>(
+                        info("This endpoint demonstrates the usage of String validators", "This endpoint demonstrates the usage of String validators"),
+                        exampleRequest = StringValidatorsExample(
+                                "A string that is at least 2 characters long",
+                        "A short string",
+                        "Between 2 and 20",
+                        "5a21be2"),
+                        exampleResponse = StringResponse("All of the fields were valid")
+                ) { params, body ->
+                    respond(StringResponse("All of the fields were valid"))
+                }
+
                 route("again") {
                     tag(TestServer.Tags.EXAMPLE) {
 
@@ -231,6 +254,13 @@ object TestServer {
     @Response("A Response for header param example")
     data class NameGreetingResponse(@StringExample("Hi, John!") val str: String)
 
+    @Request("A Request with String fields validated for length or pattern")
+    data class StringValidatorsExample(
+            @MinLength(2,"Optional custom error message") val strWithMinLength: String,
+            @MaxLength( 20 ) val strWithMaxLength: String,
+            @Length(2, 20 ) val strWithLength: String,
+            @RegularExpression("^[0-9a-fA-F]*$", "The field strHexaDec should only contain hexadecimal digits") val strHexaDec: String
+    )
 
     @Response("A String Response")
     @Request("A String Request")
