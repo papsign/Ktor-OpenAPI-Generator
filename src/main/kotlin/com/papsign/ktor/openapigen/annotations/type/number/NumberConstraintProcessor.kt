@@ -59,7 +59,7 @@ abstract class NumberConstraintProcessor<A: Annotation>(allowedTypes: Iterable<K
     }
 }
 
-data class NumberConstraint(val min: BigDecimal? = null, val max: BigDecimal? = null, val minInclusive: Boolean = true, val maxInclusive: Boolean = true)
+data class NumberConstraint(val min: BigDecimal? = null, val max: BigDecimal? = null, val minInclusive: Boolean = true, val maxInclusive: Boolean = true, val errorMessage: String)
 
 class NumberConstraintViolation(val actual: Number?, val constraint: NumberConstraint): ConstraintViolation("Constraint violation: $actual should be ${
 {
@@ -72,6 +72,6 @@ class NumberConstraintViolation(val actual: Number?, val constraint: NumberConst
         else -> "anything"
     }
 }()
-}")
+}", constraint.errorMessage)
 
 class NotANumberViolationViolation(val value: Any?): ConstraintViolation("Constraint violation: $value is not a number")

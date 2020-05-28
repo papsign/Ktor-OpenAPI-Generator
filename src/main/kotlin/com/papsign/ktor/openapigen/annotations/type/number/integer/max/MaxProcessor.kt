@@ -16,6 +16,6 @@ object MaxProcessor: IntegerNumberConstraintProcessor<Max>() {
         }
     }
     override fun getConstraint(annotation: Max): NumberConstraint {
-        return NumberConstraint(max= BigDecimal(annotation.value))
+        return NumberConstraint(max= BigDecimal(annotation.value), errorMessage = annotation.errorMessage)
     }
 }

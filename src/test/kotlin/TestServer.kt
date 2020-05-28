@@ -271,10 +271,10 @@ object TestServer {
 
     @Request("A Request with validated number fields")
     data class NumberValidatorsExample(
-            @Min(0) val intWithMin: Int,
+            @Min(0, "The value of field intWithMin should be a positive integer") val intWithMin: Int,
             @Clamp( 1, 90 ) val intBetween: Int,
-            @FMax(100.0 ) val floatMax: Float,
-            @FClamp(0.0, 1.0) val floatBetween: Float
+            @FMax(100.0) val floatMax: Float,
+            @FClamp(0.0, 1.0, "The value of field floatBetween should be a between 0 and 1") val floatBetween: Float
     )
 
     @Response("A String Response")
@@ -297,10 +297,10 @@ object TestServer {
 
         class A(val str: String) : Base()
 
-        class B(val i: @Min(0) @Max(2) Int) : Base()
+        class B(@Min(0) @Max(2) val i: Int) : Base()
 
         @WithExample
-        class C(val l: @Clamp(0, 10) Long) : Base() {
+        class C( @Clamp(0, 10) val l: Long) : Base() {
             companion object: ExampleProvider<C> {
                 override val example: C? = C(5)
             }

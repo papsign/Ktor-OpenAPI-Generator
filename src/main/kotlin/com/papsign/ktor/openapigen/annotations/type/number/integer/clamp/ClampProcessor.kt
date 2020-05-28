@@ -18,6 +18,6 @@ object ClampProcessor: IntegerNumberConstraintProcessor<Clamp>() {
     }
 
     override fun getConstraint(annotation: Clamp): NumberConstraint {
-        return NumberConstraint(BigDecimal(annotation.min), BigDecimal(annotation.max))
+        return NumberConstraint(BigDecimal(annotation.min), BigDecimal(annotation.max), errorMessage = annotation.errorMessage)
     }
 }
