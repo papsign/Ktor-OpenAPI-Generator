@@ -11,6 +11,6 @@ object RegularExpressionProcessor : RegularExpressionConstraintProcessor<Regular
     }
 
     override fun getConstraint(annotation: RegularExpression): RegularExpressionConstraint {
-        return RegularExpressionConstraint(annotation.pattern, annotation.message)
+        return RegularExpressionConstraint(annotation.pattern, annotation.errorMessage)
     }
 }

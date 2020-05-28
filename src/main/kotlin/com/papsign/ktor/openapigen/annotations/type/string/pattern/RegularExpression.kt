@@ -6,4 +6,4 @@ import com.papsign.ktor.openapigen.validation.ValidatorAnnotation
 @Target(AnnotationTarget.TYPE, AnnotationTarget.PROPERTY)
 @SchemaProcessorAnnotation(RegularExpressionProcessor::class)
 @ValidatorAnnotation(RegularExpressionProcessor::class)
-annotation class RegularExpression(val pattern: String, val message: String = "")
+annotation class RegularExpression(val pattern: String, val errorMessage: String = "")
