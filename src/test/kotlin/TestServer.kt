@@ -18,6 +18,17 @@ import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.properties.description.Description
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
+import com.papsign.ktor.openapigen.annotations.type.common.ConstraintViolation
+import com.papsign.ktor.openapigen.annotations.type.number.floating.clamp.FClamp
+import com.papsign.ktor.openapigen.annotations.type.number.floating.max.FMax
+import com.papsign.ktor.openapigen.annotations.type.number.integer.clamp.Clamp
+import com.papsign.ktor.openapigen.annotations.type.number.integer.max.Max
+import com.papsign.ktor.openapigen.annotations.type.number.integer.min.Min
+import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
+import com.papsign.ktor.openapigen.annotations.type.string.length.Length
+import com.papsign.ktor.openapigen.annotations.type.string.length.MaxLength
+import com.papsign.ktor.openapigen.annotations.type.string.length.MinLength
+import com.papsign.ktor.openapigen.annotations.type.string.pattern.RegularExpression
 import com.papsign.ktor.openapigen.interop.withAPI
 import com.papsign.ktor.openapigen.model.Described
 import com.papsign.ktor.openapigen.model.server.ServerModel
@@ -28,11 +39,6 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
 import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
-import com.papsign.ktor.openapigen.annotations.type.number.ConstraintVialoation
-import com.papsign.ktor.openapigen.annotations.type.number.integer.clamp.Clamp
-import com.papsign.ktor.openapigen.annotations.type.number.integer.max.Max
-import com.papsign.ktor.openapigen.annotations.type.number.integer.min.Min
-import com.papsign.ktor.openapigen.annotations.type.string.example.StringExample
 import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -110,7 +116,7 @@ object TestServer {
                         it.printStackTrace()
                         Error("mapping.json", it.localizedMessage)
                     }
-                    exception<ConstraintVialoation, Error>(HttpStatusCode.BadRequest) {
+                    exception<ConstraintViolation, Error>(HttpStatusCode.BadRequest) {
                         Error("violation.constraint", it.localizedMessage)
                     }
                     exception<ProperException, Error>(HttpStatusCode.BadRequest) {
@@ -187,6 +193,30 @@ object TestServer {
                     respond(LongResponse(params.a))
                 }
 
+                route("validate-string").post<Unit, StringResponse, StringValidatorsExample>(
+                        info("This endpoint demonstrates the usage of String validators", "This endpoint demonstrates the usage of String validators"),
+                        exampleRequest = StringValidatorsExample(
+                                "A string that is at least 2 characters long",
+                        "A short string",
+                        "Between 2 and 20",
+                        "5a21be2"),
+                        exampleResponse = StringResponse("All of the fields were valid")
+                ) { params, body ->
+                    respond(StringResponse("All of the fields were valid"))
+                }
+
+                route("validate-number").post<Unit, StringResponse, NumberValidatorsExample>(
+                        info("This endpoint demonstrates the usage of number validators", "This endpoint demonstrates the usage of number validators"),
+                        exampleRequest = NumberValidatorsExample(
+                                1,
+                                56,
+                                15.02f,
+                                0.023f),
+                        exampleResponse = StringResponse("All of the fields were valid")
+                ) { params, body ->
+                    respond(StringResponse("All of the fields were valid"))
+                }
+
                 route("again") {
                     tag(TestServer.Tags.EXAMPLE) {
 
@@ -231,6 +261,21 @@ object TestServer {
     @Response("A Response for header param example")
     data class NameGreetingResponse(@StringExample("Hi, John!") val str: String)
 
+    @Request("A Request with String fields validated for length or pattern")
+    data class StringValidatorsExample(
+            @MinLength(2,"Optional custom error message") val strWithMinLength: String,
+            @MaxLength( 20 ) val strWithMaxLength: String,
+            @Length(2, 20 ) val strWithLength: String,
+            @RegularExpression("^[0-9a-fA-F]*$", "The field strHexaDec should only contain hexadecimal digits") val strHexaDec: String
+    )
+
+    @Request("A Request with validated number fields")
+    data class NumberValidatorsExample(
+            @Min(0, "The value of field intWithMin should be a positive integer") val intWithMin: Int,
+            @Clamp( 1, 90 ) val intBetween: Int,
+            @FMax(100.0) val floatMax: Float,
+            @FClamp(0.0, 1.0, "The value of field floatBetween should be a between 0 and 1") val floatBetween: Float
+    )
 
     @Response("A String Response")
     @Request("A String Request")
@@ -252,10 +297,10 @@ object TestServer {
 
         class A(val str: String) : Base()
 
-        class B(val i: @Min(0) @Max(2) Int) : Base()
+        class B(@Min(0) @Max(2) val i: Int) : Base()
 
         @WithExample
-        class C(val l: @Clamp(0, 10) Long) : Base() {
+        class C( @Clamp(0, 10) val l: Long) : Base() {
             companion object: ExampleProvider<C> {
                 override val example: C? = C(5)
             }

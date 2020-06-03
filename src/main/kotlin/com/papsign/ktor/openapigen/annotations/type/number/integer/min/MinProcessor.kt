@@ -17,6 +17,6 @@ object MinProcessor: IntegerNumberConstraintProcessor<Min>() {
     }
 
     override fun getConstraint(annotation: Min): NumberConstraint {
-        return NumberConstraint(min = BigDecimal(annotation.value))
+        return NumberConstraint(min = BigDecimal(annotation.value), errorMessage = annotation.errorMessage)
     }
 }

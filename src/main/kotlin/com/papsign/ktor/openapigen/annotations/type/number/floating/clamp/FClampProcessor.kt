@@ -18,6 +18,6 @@ object FClampProcessor : FloatingNumberConstraintProcessor<FClamp>() {
     }
 
     override fun getConstraint(annotation: FClamp): NumberConstraint {
-        return NumberConstraint(BigDecimal(annotation.min), BigDecimal(annotation.max))
+        return NumberConstraint(BigDecimal(annotation.min), BigDecimal(annotation.max), errorMessage = annotation.errorMessage)
     }
 }

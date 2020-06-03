@@ -16,6 +16,6 @@ object FMaxProcessor: FloatingNumberConstraintProcessor<FMax>() {
         }
     }
     override fun getConstraint(annotation: FMax): NumberConstraint {
-        return NumberConstraint(max= BigDecimal(annotation.value))
+        return NumberConstraint(max= BigDecimal(annotation.value), errorMessage = annotation.errorMessage)
     }
 }

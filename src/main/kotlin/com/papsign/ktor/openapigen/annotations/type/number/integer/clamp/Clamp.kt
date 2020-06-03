@@ -6,4 +6,4 @@ import com.papsign.ktor.openapigen.validation.ValidatorAnnotation
 @Target(AnnotationTarget.TYPE, AnnotationTarget.PROPERTY)
 @SchemaProcessorAnnotation(ClampProcessor::class)
 @ValidatorAnnotation(ClampProcessor::class)
-annotation class Clamp(val min: Long, val max: Long)
+annotation class Clamp(val min: Long, val max: Long, val errorMessage: String = "")

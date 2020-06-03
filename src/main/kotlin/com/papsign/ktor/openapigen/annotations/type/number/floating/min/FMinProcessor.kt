@@ -17,6 +17,6 @@ object FMinProcessor: FloatingNumberConstraintProcessor<FMin>() {
     }
 
     override fun getConstraint(annotation: FMin): NumberConstraint {
-        return NumberConstraint(min = BigDecimal(annotation.value))
+        return NumberConstraint(min = BigDecimal(annotation.value), errorMessage = annotation.errorMessage)
     }
 }
