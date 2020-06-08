@@ -23,6 +23,7 @@ import io.ktor.routing.application
 import io.ktor.routing.contentType
 import io.ktor.util.pipeline.PipelineContext
 import kotlin.reflect.KClass
+import kotlin.reflect.typeOf
 
 abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provider: CachingModuleProvider) {
     private val log = classLogger()
@@ -58,7 +59,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                         getContentTypesMap(B::class).forEach { (contentType, parsers) ->
                             contentType(contentType) {
                                 handle {
-                                    val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(B::class, this)
+                                    val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(typeOf<B>(), this)
                                     val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters, call.request.headers)
                                     pass(this, responder, PHandler.handle(params), BHandler.handle(receive))
                                 }

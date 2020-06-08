@@ -50,8 +50,8 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModule
     }
 
     @Suppress("UNCHECKED_CAST")
-    override suspend fun <T : Any> parseBody(clazz: KClass<T>, request: PipelineContext<Unit, ApplicationCall>): T {
-        return clazz.getAcceptableConstructor().call( request.context.receiveStream())
+    override suspend fun <T : Any> parseBody(clazz: KType, request: PipelineContext<Unit, ApplicationCall>): T {
+        return (clazz.classifier as KClass<T>).getAcceptableConstructor().call( request.context.receiveStream())
     }
 
     override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaTypeModel<T>>? {
