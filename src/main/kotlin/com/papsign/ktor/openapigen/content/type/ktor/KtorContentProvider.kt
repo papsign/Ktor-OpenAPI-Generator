@@ -68,7 +68,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
         return contentTypes!!.toList()
     }
 
-    override suspend fun <T: Any> parseBody(clazz: KClass<T>, request: PipelineContext<Unit, ApplicationCall>): T {
+    override suspend fun <T: Any> parseBody(clazz: KType, request: PipelineContext<Unit, ApplicationCall>): T {
         return request.call.receive(clazz)
     }
 
