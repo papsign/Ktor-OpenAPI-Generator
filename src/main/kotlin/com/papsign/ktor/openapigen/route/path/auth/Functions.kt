@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.route.preHandle
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineAuthContext
 import io.ktor.http.HttpMethod
 import io.ktor.util.pipeline.ContextDsl
+import kotlin.reflect.full.starProjectedType
 
 @ContextDsl
 inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.get(
@@ -60,7 +61,7 @@ inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthent
     exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
 ) {
-    method(method).apply { modules.forEach(provider::registerModule) }.handle(exampleResponse, exampleRequest, body)
+    method(method).apply { modules.forEach { provider.registerModule(it, it::class.starProjectedType) } }.handle(exampleResponse, exampleRequest, body)
 }
 
 @ContextDsl
@@ -70,7 +71,7 @@ inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.ro
     exampleResponse: R? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
 ) {
-    method(method).apply { modules.forEach(provider::registerModule) }.handle(exampleResponse, body)
+    method(method).apply { modules.forEach { provider.registerModule(it, it::class.starProjectedType) } }.handle(exampleResponse, body)
 }
 
 @ContextDsl

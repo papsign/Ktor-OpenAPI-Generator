@@ -2,6 +2,7 @@ package com.papsign.ktor.openapigen.route.path.auth
 
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.providers.AuthProvider
+import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.route.OpenAPIRoute
 import com.papsign.ktor.openapigen.route.response.AuthResponseContextImpl
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineAuthContext

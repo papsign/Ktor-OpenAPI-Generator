@@ -1,6 +1,5 @@
 package com.papsign.ktor.openapigen.content.type.ktor
 
-import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.unitKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
@@ -12,7 +11,7 @@ import com.papsign.ktor.openapigen.content.type.ResponseSerializer
 import com.papsign.ktor.openapigen.model.operation.MediaTypeModel
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.schema.builder.provider.FinalSchemaBuilderProviderModule
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -58,7 +57,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
             }
         }
         val contentTypes = initContentTypes(apiGen) ?: return null
-        val schemaBuilder = provider.ofClass<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
+        val schemaBuilder = provider.ofType<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
         @Suppress("UNCHECKED_CAST")
         val media =  MediaTypeModel(schemaBuilder.build(type) as SchemaModel<T>, example)
         return contentTypes.associateWith { media.copy() }

@@ -13,6 +13,7 @@ import io.ktor.application.call
 import io.ktor.request.path
 import io.ktor.util.AttributeKey
 import org.reflections.Reflections
+import kotlin.reflect.full.starProjectedType
 
 class OpenAPIGen(
         config: Configuration,
@@ -37,7 +38,7 @@ class OpenAPIGen(
             }
         }
         config.removeModules.forEach(globalModuleProvider::unRegisterModule)
-        config.addModules.forEach(globalModuleProvider::registerModule)
+        config.addModules.forEach { globalModuleProvider.registerModule(it, it::class.starProjectedType) }
     }
 
     class Configuration(val api: OpenAPIModel) {

@@ -217,6 +217,35 @@ object TestServer {
                     respond(StringResponse("All of the fields were valid"))
                 }
 
+                route("status/codes") {
+                    route("201").status(201) {
+                        // all endpoints in this block respond a 201 status code unless specified otherwise
+
+                        get<StringParam, StringResponse>(
+                            info("201 String Param Endpoint", "This is a String Param Endpoint that has a 201 status code"),
+                            example = StringResponse("Hi")
+                        ) { params ->
+                            respond(StringResponse(params.a))
+                        }
+
+                        route("reset").get<StringParam, StringResponse>(
+                            info("String Param Endpoint with @response based status code", "This is a String Param Endpoint that resets the status code back to the one provided by @Response"),
+                            responseAnnotationStatus(),
+                            example = StringResponse("Hi")
+                        ) { params ->
+                            respond(StringResponse(params.a))
+                        }
+                    }
+
+                    route("202").get<StringParam, StringResponse>(
+                        info("String Param Endpoint with inline 202 response", "This is a String Param Endpoint that has a 202 response code"),
+                        status(HttpStatusCode.Accepted),
+                        example = StringResponse("Hi")
+                    ) { params ->
+                        respond(StringResponse(params.a))
+                    }
+                }
+
                 route("again") {
                     tag(TestServer.Tags.EXAMPLE) {
 

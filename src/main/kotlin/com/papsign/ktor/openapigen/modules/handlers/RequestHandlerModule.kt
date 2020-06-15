@@ -10,9 +10,10 @@ import com.papsign.ktor.openapigen.content.type.SelectedParser
 import com.papsign.ktor.openapigen.model.operation.OperationModel
 import com.papsign.ktor.openapigen.model.operation.RequestBodyModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
 import com.papsign.ktor.openapigen.modules.providers.ParameterProvider
+import com.papsign.ktor.openapigen.modules.registerModule
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
@@ -26,7 +27,7 @@ class RequestHandlerModule<T : Any>(
     private val log = classLogger()
 
     override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: OperationModel) {
-        val map = provider.ofClass<BodyParser>().mapNotNull {
+        val map = provider.ofType<BodyParser>().mapNotNull {
             val mediaType = it.getMediaType(requestType, apiGen, provider, requestExample, ContentTypeProvider.Usage.PARSE)
                     ?: return@mapNotNull null
             provider.registerModule(SelectedParser(it))
@@ -35,7 +36,7 @@ class RequestHandlerModule<T : Any>(
 
         val requestMeta = requestClass.findAnnotation<Request>()
 
-        val parameters = provider.ofClass<ParameterProvider>().flatMap { it.getParameters(apiGen, provider) }
+        val parameters = provider.ofType<ParameterProvider>().flatMap { it.getParameters(apiGen, provider) }
         operation.parameters = operation.parameters?.let { (it + parameters).distinct() } ?: parameters
         operation.requestBody = operation.requestBody?.apply {
             map.forEach { (key, value) ->

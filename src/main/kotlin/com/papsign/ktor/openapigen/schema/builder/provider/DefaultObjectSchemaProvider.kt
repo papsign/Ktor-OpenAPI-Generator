@@ -5,7 +5,7 @@ import com.papsign.ktor.openapigen.classLogger
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.DefaultOpenAPIModule
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.schema.builder.FinalSchemaBuilder
 import com.papsign.ktor.openapigen.schema.builder.SchemaBuilder
 import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
@@ -20,7 +20,7 @@ object DefaultObjectSchemaProvider : SchemaBuilderProviderModule, OpenAPIGenModu
     private val log = classLogger()
 
     override fun provide(apiGen: OpenAPIGen, provider: ModuleProvider<*>): List<SchemaBuilder> {
-        val namer = provider.ofClass<SchemaNamer>().let {
+        val namer = provider.ofType<SchemaNamer>().let {
             val last = it.lastOrNull() ?: DefaultSchemaNamer.also { log.debug("No ${SchemaNamer::class} provided, using ${it::class}") }
             if (it.size > 1) log.warn("Multiple ${SchemaNamer::class} provided, choosing last: ${last::class}")
             last

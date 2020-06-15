@@ -1,14 +1,19 @@
 package com.papsign.ktor.openapigen.modules
 
-import kotlin.reflect.KClass
+import com.papsign.ktor.openapigen.getKType
+import kotlin.reflect.KType
 
 interface ModuleProvider<THIS: ModuleProvider<THIS>> {
-    fun <T: OpenAPIModule> ofClass(clazz: KClass<T>): Collection<T>
-    fun registerModule(module: OpenAPIModule)
+    fun ofType(type: KType): Collection<Any>
+    fun registerModule(module: OpenAPIModule, type: KType)
     fun unRegisterModule(module: OpenAPIModule)
     fun child(): THIS
 }
 
-inline fun <reified T: OpenAPIModule> ModuleProvider<*>.ofClass(): Collection<T> {
-    return ofClass(T::class)
+inline fun <reified T: OpenAPIModule> ModuleProvider<*>.ofType(): Collection<T> {
+    return ofType(getKType<T>()) as Collection<T>
+}
+
+inline fun <reified T: OpenAPIModule> ModuleProvider<*>.registerModule(module: T) {
+    return registerModule(module, getKType<T>())
 }

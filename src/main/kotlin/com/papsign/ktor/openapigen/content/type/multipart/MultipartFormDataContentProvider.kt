@@ -9,7 +9,7 @@ import com.papsign.ktor.openapigen.model.operation.MediaTypeEncodingModel
 import com.papsign.ktor.openapigen.model.operation.MediaTypeModel
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.schema.builder.provider.FinalSchemaBuilderProviderModule
 import io.ktor.application.ApplicationCall
 import io.ktor.http.ContentType
@@ -140,7 +140,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
                         .mapValues { MediaTypeEncodingModel(it.value!!.contentType) }
             }.toMap()
         }
-        val schemaBuilder = provider.ofClass<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
+        val schemaBuilder = provider.ofType<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
         @Suppress("UNCHECKED_CAST")
         return mapOf(ContentType.MultiPart.FormData to MediaTypeModel(schemaBuilder.build(type) as SchemaModel<T>, example, null, contentTypes))
     }

@@ -1,6 +1,7 @@
 package com.papsign.ktor.openapigen
 
 import com.papsign.ktor.openapigen.modules.OpenAPIModule
+import kotlin.reflect.full.starProjectedType
 
 /**
  * implement this to automatically register an object as [OpenAPIModule] in the global context
@@ -8,6 +9,6 @@ import com.papsign.ktor.openapigen.modules.OpenAPIModule
  */
 interface OpenAPIGenModuleExtension: OpenAPIModule, OpenAPIGenExtension {
     override fun onInit(gen: OpenAPIGen) {
-        gen.globalModuleProvider.registerModule(this)
+        gen.globalModuleProvider.registerModule(this, this::class.starProjectedType)
     }
 }

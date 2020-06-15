@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.route.preHandle
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
 import io.ktor.http.HttpMethod
 import io.ktor.util.pipeline.ContextDsl
+import kotlin.reflect.full.starProjectedType
 
 
 @ContextDsl
@@ -61,7 +62,7 @@ inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRout
     exampleRequest: B? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit
 ) {
-    method(method).apply { modules.forEach(provider::registerModule) }.handle(exampleResponse, exampleRequest, body)
+    method(method).apply { modules.forEach { provider.registerModule(it, it::class.starProjectedType) } }.handle(exampleResponse, exampleRequest, body)
 }
 
 @ContextDsl
@@ -71,7 +72,7 @@ inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.route(
     exampleResponse: R? = null,
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
 ) {
-    method(method).apply { modules.forEach(provider::registerModule) }.handle(exampleResponse, body)
+    method(method).apply { modules.forEach { provider.registerModule(it, it::class.starProjectedType) } }.handle(exampleResponse, body)
 }
 
 @ContextDsl

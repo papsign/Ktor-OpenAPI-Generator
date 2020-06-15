@@ -5,6 +5,7 @@ import com.papsign.ktor.openapigen.annotations.Path
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
 import com.papsign.ktor.openapigen.modules.handlers.RequestHandlerModule
 import com.papsign.ktor.openapigen.modules.handlers.ResponseHandlerModule
+import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.route.modules.HttpMethodProviderModule
 import com.papsign.ktor.openapigen.route.modules.PathProviderModule
 import io.ktor.http.HttpMethod

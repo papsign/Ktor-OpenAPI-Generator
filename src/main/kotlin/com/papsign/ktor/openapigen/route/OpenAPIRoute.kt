@@ -7,8 +7,9 @@ import com.papsign.ktor.openapigen.exceptions.OpenAPINoParserException
 import com.papsign.ktor.openapigen.exceptions.OpenAPINoSerializerException
 import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.OpenAPIModule
-import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
+import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.parameters.util.buildParameterHandler
 import com.papsign.ktor.openapigen.route.response.Responder
@@ -37,7 +38,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
         provider.registerModule(parameterHandler)
 
         val apiGen = ktorRoute.application.openAPIGen
-        provider.ofClass<HandlerModule>().forEach {
+        provider.ofType<HandlerModule>().forEach {
             it.configure(apiGen, provider)
         }
 
@@ -86,7 +87,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
     fun <R : Any> getAcceptMap(clazz: KClass<R>) = mapContentTypes<SelectedSerializer> { module.getSerializableContentTypes(clazz) }
 
     inline fun <reified T : OpenAPIModule> mapContentTypes(noinline fn: T.() -> List<ContentType>): List<Pair<ContentType, List<T>>> {
-        return provider.ofClass<T>().flatMap { parser ->
+        return provider.ofType<T>().flatMap { parser ->
             parser.fn().map { Pair(it, parser) }
         }.groupBy { it.first }.mapValues { it.value.map { it.second } }.map { Pair(it.key, it.value) }.sortedBy {
             val ct = it.first

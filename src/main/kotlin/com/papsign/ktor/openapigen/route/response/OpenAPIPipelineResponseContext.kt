@@ -1,7 +1,10 @@
 package com.papsign.ktor.openapigen.route.response
 
 import com.papsign.ktor.openapigen.annotations.Response
+import com.papsign.ktor.openapigen.getKType
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.providers.AuthProvider
+import com.papsign.ktor.openapigen.modules.providers.StatusProvider
 import com.papsign.ktor.openapigen.route.OpenAPIRoute
 import io.ktor.application.ApplicationCall
 import io.ktor.http.HttpStatusCode
@@ -39,10 +42,6 @@ class AuthResponseContextImpl<A, R>(
 
 
 suspend inline fun <reified R : Any> OpenAPIPipelineResponseContext<R>.respond(response: R) {
-    val statusCode = R::class.findAnnotation<Response>()?.statusCode?.let { HttpStatusCode.fromValue(it) }
-    if (statusCode == null) {
-        responder.respond(response as Any, pipeline)
-    } else {
-        responder.respond(statusCode, response as Any, pipeline)
-    }
+    val statusCode = route.provider.ofType<StatusProvider>().lastOrNull()?.getStatusForType(getKType<R>()) ?: R::class.findAnnotation<Response>()?.statusCode?.let { HttpStatusCode.fromValue(it) } ?: HttpStatusCode.OK
+    responder.respond(statusCode, response as Any, pipeline)
 }

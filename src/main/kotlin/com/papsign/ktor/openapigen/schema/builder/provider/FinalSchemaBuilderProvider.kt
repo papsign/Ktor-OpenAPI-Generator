@@ -3,10 +3,9 @@ package com.papsign.ktor.openapigen.schema.builder.provider
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.OpenAPIGenModuleExtension
 import com.papsign.ktor.openapigen.classLogger
-import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.schema.builder.FinalSchemaBuilder
 import com.papsign.ktor.openapigen.schema.builder.SchemaBuilder
 import com.papsign.ktor.openapigen.schema.processor.SchemaProcessor
@@ -24,7 +23,7 @@ object FinalSchemaBuilderProvider: FinalSchemaBuilderProviderModule, OpenAPIGenM
 
     override fun provide(apiGen: OpenAPIGen, provider: ModuleProvider<*>): FinalSchemaBuilder {
         return Builder(
-            provider.ofClass<SchemaBuilderProviderModule>().flatMap { it.provide(apiGen, provider) }
+            provider.ofType<SchemaBuilderProviderModule>().flatMap { it.provide(apiGen, provider) }
         )
     }
 

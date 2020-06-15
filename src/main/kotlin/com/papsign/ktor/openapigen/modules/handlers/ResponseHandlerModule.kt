@@ -10,21 +10,23 @@ import com.papsign.ktor.openapigen.content.type.SelectedSerializer
 import com.papsign.ktor.openapigen.model.operation.OperationModel
 import com.papsign.ktor.openapigen.model.operation.StatusResponseModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
+import com.papsign.ktor.openapigen.modules.providers.StatusProvider
+import com.papsign.ktor.openapigen.modules.registerModule
 import io.ktor.http.HttpStatusCode
-import kotlin.reflect.KClass
+import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 
-class ResponseHandlerModule<T : Any>(val responseClass: KClass<T>, val responseType: KType, val responseExample: T? = null) : OperationModule {
+class ResponseHandlerModule<T>(val responseType: KType, val responseExample: T? = null) : OperationModule {
     private val log = classLogger()
     override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: OperationModel) {
-
-        val responseMeta = responseClass.findAnnotation<Response>()
-        val statusCode = responseMeta?.statusCode?.let { HttpStatusCode.fromValue(it) } ?: HttpStatusCode.OK
+        val responseMeta = (responseType.classifier as? KAnnotatedElement)?.findAnnotation<Response>()
+        val statusCode =  provider.ofType<StatusProvider>().lastOrNull()?.getStatusForType(responseType) ?: responseMeta?.statusCode?.let { HttpStatusCode.fromValue(it) }
+        ?: HttpStatusCode.OK
         val status = statusCode.value.toString()
-        val map = provider.ofClass<ResponseSerializer>().mapNotNull {
+        val map = provider.ofType<ResponseSerializer>().mapNotNull {
             val mediaType = it.getMediaType(responseType, apiGen, provider, responseExample, ContentTypeProvider.Usage.SERIALIZE)
                     ?: return@mapNotNull null
             provider.registerModule(SelectedSerializer(it))
@@ -44,7 +46,6 @@ class ResponseHandlerModule<T : Any>(val responseClass: KClass<T>, val responseT
     }
 
     companion object {
-        inline fun <reified T : Any> create(responseExample: T? = null) = ResponseHandlerModule(T::class,
-            getKType<T>(), responseExample)
+        inline fun <reified T : Any> create(responseExample: T? = null) = ResponseHandlerModule(getKType<T>(), responseExample)
     }
 }

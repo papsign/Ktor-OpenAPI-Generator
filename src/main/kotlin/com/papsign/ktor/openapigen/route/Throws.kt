@@ -2,6 +2,7 @@ package com.papsign.ktor.openapigen.route
 
 import com.papsign.ktor.openapigen.APIException
 import com.papsign.ktor.openapigen.modules.providers.ThrowInfoProvider
+import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.route.util.createConstantChild
 import io.ktor.application.ApplicationCall
 import io.ktor.application.ApplicationCallPipeline

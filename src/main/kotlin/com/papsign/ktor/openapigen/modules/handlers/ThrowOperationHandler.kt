@@ -12,18 +12,19 @@ import com.papsign.ktor.openapigen.model.operation.OperationModel
 import com.papsign.ktor.openapigen.model.operation.StatusResponseModel
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
-import com.papsign.ktor.openapigen.modules.ofClass
+import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
 import com.papsign.ktor.openapigen.modules.providers.ThrowInfoProvider
+import com.papsign.ktor.openapigen.modules.registerModule
 
 object ThrowOperationHandler : OperationModule {
     private val log = classLogger()
     override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: OperationModel) {
 
-        val exceptions = provider.ofClass<ThrowInfoProvider>().flatMap { it.exceptions }
+        val exceptions = provider.ofType<ThrowInfoProvider>().flatMap { it.exceptions }
         exceptions.groupBy { it.status }.forEach { exceptions ->
             val map: MutableMap<String, MediaTypeModel<*>> = exceptions.value.flatMap { ex ->
-                provider.ofClass<ResponseSerializer>().mapNotNull {
+                provider.ofType<ResponseSerializer>().mapNotNull {
                     if (ex.contentType == unitKType) return@mapNotNull null
                     val mediaType = it.getMediaType(ex.contentType, apiGen, provider, ex.example, ContentTypeProvider.Usage.SERIALIZE) ?: return@mapNotNull null
                     provider.registerModule(SelectedExceptionSerializer(it))
