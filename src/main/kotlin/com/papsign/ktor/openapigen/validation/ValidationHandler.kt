@@ -281,8 +281,8 @@ class ValidationHandler private constructor(
                 get() = classAnnotation + typeAnnotation + additionalAnnotations
 
             companion object {
-                inline operator fun <reified T> invoke(annotations: List<Annotation> = listOf()): AnnotatedKType {
-                    val type = getKType<T>()
+                operator fun <T:Any> invoke(tClass: KClass<T>, annotations: List<Annotation> = listOf()): AnnotatedKType {
+                    val type = tClass.starProjectedType
                     return AnnotatedKType(
                         type,
                         annotations
@@ -313,9 +313,10 @@ class ValidationHandler private constructor(
             }()
         }
 
-        inline fun <reified T> build(annotations: List<Annotation> = listOf()): ValidationHandler {
+        inline fun <T:Any> build(tClass: KClass<T>, annotations: List<Annotation> = listOf()): ValidationHandler {
             return build(
-                AnnotatedKType<T>(
+                AnnotatedKType(
+                    tClass.starProjectedType,
                     annotations
                 )
             )

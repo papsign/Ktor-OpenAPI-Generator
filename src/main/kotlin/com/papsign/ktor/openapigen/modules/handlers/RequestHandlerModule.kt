@@ -17,6 +17,7 @@ import com.papsign.ktor.openapigen.modules.registerModule
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.starProjectedType
 
 class RequestHandlerModule<T : Any>(
         val requestClass: KClass<T>,
@@ -51,7 +52,7 @@ class RequestHandlerModule<T : Any>(
     }
 
     companion object {
-        inline fun <reified T : Any> create(requestExample: T? = null) = RequestHandlerModule(T::class,
-            getKType<T>(), requestExample)
+        inline fun <reified T : Any> create(requestExample: T? = null) = RequestHandlerModule(T::class, getKType<T>(), requestExample)
+        fun <T : Any> create(tClass: KClass<T>, requestExample: T? = null) = RequestHandlerModule(tClass, tClass.starProjectedType, requestExample)
     }
 }

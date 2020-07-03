@@ -24,6 +24,7 @@ import io.ktor.routing.application
 import io.ktor.routing.contentType
 import io.ktor.util.pipeline.PipelineContext
 import kotlin.reflect.KClass
+import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.typeOf
 
 abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provider: CachingModuleProvider) {
@@ -31,10 +32,13 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
 
     abstract fun child(route: Route = this.ktorRoute): T
 
-    inline fun <reified P : Any, reified R : Any, reified B : Any> handle(
+    inline fun <P : Any, R : Any, B : Any> handle(
+            paramsClass: KClass<P>,
+            responseClass: KClass<R>,
+            bodyClass: KClass<B>,
             crossinline pass: suspend OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>, responder: Responder, P, B) -> Unit
     ) {
-        val parameterHandler = buildParameterHandler<P>()
+        val parameterHandler = buildParameterHandler<P>(paramsClass)
         provider.registerModule(parameterHandler)
 
         val apiGen = ktorRoute.application.openAPIGen
@@ -42,26 +46,30 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
             it.configure(apiGen, provider)
         }
 
-        val BHandler = ValidationHandler.build<B>()
-        val PHandler = ValidationHandler.build<P>()
+        val BHandler = ValidationHandler.build(bodyClass)
+        val PHandler = ValidationHandler.build(paramsClass)
 
         ktorRoute.apply {
-            getAcceptMap(R::class).let {
+            getAcceptMap(responseClass).let {
                 if (it.isNotEmpty()) it else listOf(ContentType.Any to listOf(SelectedSerializer(KtorContentProvider)))
             }.forEach { (acceptType, serializers) ->
                 val responder = ContentTypeResponder(serializers.getResponseSerializer(acceptType), acceptType)
                 accept(acceptType) {
-                    if (Unit is B) {
+                    if (bodyClass == Unit::class) {
                         handle {
-                            val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters, call.request.headers)
-                            pass(this, responder, PHandler.handle(params), Unit)
+                            @Suppress("UNCHECKED_CAST")
+                            val params: P = if (paramsClass == Unit::class) Unit as P else parameterHandler.parse(call.parameters, call.request.headers)
+                            @Suppress("UNCHECKED_CAST")
+                            pass(this, responder, PHandler.handle(params), Unit as B)
                         }
                     } else {
-                        getContentTypesMap(B::class).forEach { (contentType, parsers) ->
+                        if(paramsClass == Unit::class)
+                        getContentTypesMap(bodyClass).forEach { (contentType, parsers) ->
                             contentType(contentType) {
                                 handle {
-                                    val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(typeOf<B>(), this)
-                                    val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters, call.request.headers)
+                                    val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(bodyClass.starProjectedType, this)
+                                    @Suppress("UNCHECKED_CAST")
+                                    val params: P = if (paramsClass == Unit::class) Unit as P else parameterHandler.parse(call.parameters, call.request.headers)
                                     pass(this, responder, PHandler.handle(params), BHandler.handle(receive))
                                 }
                             }

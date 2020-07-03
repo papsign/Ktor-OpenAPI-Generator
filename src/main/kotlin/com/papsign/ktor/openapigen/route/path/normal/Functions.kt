@@ -82,7 +82,7 @@ inline fun <reified P : Any, reified R : Any, reified B : Any> NormalOpenAPIRout
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit
 ) {
     preHandle<P, R, B, NormalOpenAPIRoute>(exampleResponse, exampleRequest) {
-        handle(body)
+        handle(P::class, R::class, B::class, body)
     }
 }
 
@@ -92,6 +92,6 @@ inline fun <reified P : Any, reified R : Any> NormalOpenAPIRoute.handle(
     crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
 ) {
     preHandle<P, R, Unit, NormalOpenAPIRoute>(exampleResponse, Unit) {
-        handle(body)
+        handle(P::class, R::class, body)
     }
 }

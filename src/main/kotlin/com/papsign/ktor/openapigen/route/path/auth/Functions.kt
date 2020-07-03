@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.route.preHandle
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineAuthContext
 import io.ktor.http.HttpMethod
 import io.ktor.util.pipeline.ContextDsl
+import kotlin.reflect.KClass
 import kotlin.reflect.full.starProjectedType
 
 @ContextDsl
@@ -81,17 +82,29 @@ inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthent
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
 ) {
     preHandle<P, R, B, OpenAPIAuthenticatedRoute<A>>(exampleResponse, exampleRequest) {
-        handle(body)
+        handle(P::class, R::class, B::class, body)
     }
 }
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any,  A> OpenAPIAuthenticatedRoute<A>.handle(
+inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.handle(
     exampleResponse: R? = null,
     crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
 ) {
     preHandle<P, R, Unit, OpenAPIAuthenticatedRoute<A>>(exampleResponse, Unit) {
-        handle(body)
+        handle(P::class, R::class, body)
+    }
+}
+
+@ContextDsl
+inline fun <P : Any, R : Any, A> OpenAPIAuthenticatedRoute<A>.handle(
+    pClass: KClass<P>,
+    rClass: KClass<R>,
+    exampleResponse: R? = null,
+    crossinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+) {
+    preHandle<P, R, Unit, OpenAPIAuthenticatedRoute<A>>(pClass, rClass, Unit::class, exampleResponse, Unit) {
+        handle(pClass, rClass, body)
     }
 }
 
