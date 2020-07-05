@@ -63,7 +63,6 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
                             pass(this, responder, PHandler.handle(params), Unit as B)
                         }
                     } else {
-                        if(paramsClass == Unit::class)
                         getContentTypesMap(bodyClass).forEach { (contentType, parsers) ->
                             contentType(contentType) {
                                 handle {
