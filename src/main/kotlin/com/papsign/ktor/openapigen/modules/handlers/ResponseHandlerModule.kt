@@ -1,6 +1,5 @@
 package com.papsign.ktor.openapigen.modules.handlers
 
-import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.classLogger
@@ -16,10 +15,8 @@ import com.papsign.ktor.openapigen.modules.providers.StatusProvider
 import com.papsign.ktor.openapigen.modules.registerModule
 import io.ktor.http.HttpStatusCode
 import kotlin.reflect.KAnnotatedElement
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.starProjectedType
 
 class ResponseHandlerModule<T>(val responseType: KType, val responseExample: T? = null) : OperationModule {
     private val log = classLogger()
@@ -48,7 +45,6 @@ class ResponseHandlerModule<T>(val responseType: KType, val responseExample: T? 
     }
 
     companion object {
-        inline fun <reified T : Any> create(responseExample: T? = null) = ResponseHandlerModule(getKType<T>(), responseExample)
-        fun <T : Any> create(tClass: KClass<T>, responseExample: T? = null) = ResponseHandlerModule(tClass.starProjectedType, responseExample)
+        fun <T : Any> create(tType: KType, responseExample: T? = null) = ResponseHandlerModule(tType, responseExample)
     }
 }

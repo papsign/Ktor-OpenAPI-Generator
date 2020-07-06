@@ -31,7 +31,7 @@ import kotlin.reflect.jvm.jvmErasure
 
 object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension {
 
-    override fun <T : Any> getParseableContentTypes(clazz: KClass<T>): List<ContentType> {
+    override fun <T : Any> getParseableContentTypes(type: KType): List<ContentType> {
         return listOf(ContentType.MultiPart.FormData)
     }
 
@@ -68,7 +68,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
     private val typeContentTypes = HashMap<KType, Map<String, MediaTypeEncodingModel>>()
 
 
-    override suspend fun <T : Any> parseBody(clazz: KType, request: PipelineContext<Unit, ApplicationCall>): T {
+    override suspend fun <T : Any> parseBody(type: KType, request: PipelineContext<Unit, ApplicationCall>): T {
         val objectMap = HashMap<String, Any>()
         request.context.receiveMultipart().forEachPart {
             val name = it.name
@@ -86,7 +86,8 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
                 }
             }
         }
-        val ctor = (clazz.classifier as KClass<T>).primaryConstructor!!
+        @Suppress("UNCHECKED_CAST")
+        val ctor = (type.classifier as KClass<T>).primaryConstructor!!
         return ctor.callBy(ctor.parameters.associateWith {
             val raw = objectMap[it.openAPIName]
             if ((raw == null || (raw !is InputStream && streamTypes.contains(it.type))) && it.type.isMarkedNullable) {

@@ -1,27 +1,24 @@
 package com.papsign.ktor.openapigen
 
-import com.papsign.ktor.openapigen.annotations.mapping.openAPIName
-import java.lang.reflect.Field
 import kotlin.reflect.*
 import kotlin.reflect.full.createType
-import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.jvmErasure
 
 val unitKType = getKType<Unit>()
 
-inline fun <reified T> isNullable(): Boolean {
+internal inline fun <reified T> isNullable(): Boolean {
     return null is T
 }
 
-inline fun <reified T> getKType() = typeOf<T>()
+@PublishedApi
+internal inline fun <reified T> getKType() = typeOf<T>()
 
-fun KType.strip(nullable: Boolean = isMarkedNullable): KType {
+internal fun KType.strip(nullable: Boolean = isMarkedNullable): KType {
     return jvmErasure.createType(arguments, nullable)
 }
 
-fun KType.deepStrip(nullable: Boolean = isMarkedNullable): KType {
+internal fun KType.deepStrip(nullable: Boolean = isMarkedNullable): KType {
     return jvmErasure.createType(arguments.map { it.copy(type = it.type?.deepStrip()) }, nullable)
 }
 
@@ -44,4 +41,4 @@ val KType.memberProperties: List<KTypeProperty>
         }
     }
 
-val KClass<*>.isInterface get() = java.isInterface
+internal val KClass<*>.isInterface get() = java.isInterface

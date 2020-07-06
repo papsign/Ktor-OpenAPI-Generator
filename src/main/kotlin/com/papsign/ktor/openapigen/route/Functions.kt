@@ -12,8 +12,10 @@ import io.ktor.http.HttpMethod
 import io.ktor.routing.HttpMethodRouteSelector
 import io.ktor.routing.createRouteFromPath
 import io.ktor.util.pipeline.ContextDsl
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.jvmErasure
+import kotlin.reflect.typeOf
 
 fun <T : OpenAPIRoute<T>> T.route(path: String): T {
     return child(ktorRoute.createRouteFromPath(path)).apply {
@@ -66,31 +68,40 @@ inline fun <T : OpenAPIRoute<T>> T.tag(tag: APITag, crossinline fn: T.() -> Unit
 inline fun <reified P : Any, reified R : Any, reified B : Any, T : OpenAPIRoute<T>> T.preHandle(
     exampleResponse: R? = null,
     exampleRequest: B? = null,
-    handle: T.() -> Unit
+    noinline handle: T.() -> Unit
 ) {
-    preHandle(P::class, R::class, B::class, exampleResponse, exampleRequest, handle)
+    preHandle<P, R, B, T>(
+        typeOf<P>(),
+        typeOf<R>(),
+        typeOf<B>(),
+        exampleResponse,
+        exampleRequest,
+        handle
+    )
 }
 
-inline fun <P : Any, R : Any, B : Any, T : OpenAPIRoute<T>> T.preHandle(
-    pClass: KClass<P>,
-    rClass: KClass<R>,
-    bClass: KClass<B>,
+// hide this function from public api as it can be "misused" easily but make it accessible to inlined functions from this package
+@PublishedApi
+internal fun <P : Any, R : Any, B : Any, T : OpenAPIRoute<T>> T.preHandle(
+    pType: KType,
+    rType: KType,
+    bType: KType,
     exampleResponse: R? = null,
     exampleRequest: B? = null,
     handle: T.() -> Unit
 ) {
-    val path = pClass.findAnnotation<Path>()
+    val path = pType.jvmErasure.findAnnotation<Path>()
     val new = if (path != null) child(ktorRoute.createRouteFromPath(path.path)) else child()
     new.apply {
         provider.registerModule(
             RequestHandlerModule.create(
-                bClass,
+                bType,
                 exampleRequest
             )
         )
         provider.registerModule(
             ResponseHandlerModule.create(
-                rClass,
+                rType,
                 exampleResponse
             )
         )

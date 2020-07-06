@@ -237,6 +237,7 @@ class ValidationHandler private constructor(
                         transformFun = { t: Any? ->
                             if (t != null) {
                                 handled.forEach { (handler, field) ->
+                                    // TODO convert this to canAccess and only change status if false
                                     val accessible = field.isAccessible
                                     field.isAccessible = true
                                     field.set(t, handler.handle(field.get(t)))
@@ -313,7 +314,7 @@ class ValidationHandler private constructor(
             }()
         }
 
-        inline fun <T:Any> build(tClass: KClass<T>, annotations: List<Annotation> = listOf()): ValidationHandler {
+        fun <T:Any> build(tClass: KClass<T>, annotations: List<Annotation> = listOf()): ValidationHandler {
             return build(
                 AnnotatedKType(
                     tClass.starProjectedType,

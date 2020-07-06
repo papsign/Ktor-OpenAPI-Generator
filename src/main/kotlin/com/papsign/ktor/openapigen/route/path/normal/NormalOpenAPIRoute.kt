@@ -5,7 +5,8 @@ import com.papsign.ktor.openapigen.route.OpenAPIRoute
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
 import com.papsign.ktor.openapigen.route.response.ResponseContextImpl
 import io.ktor.routing.Route
-import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 class NormalOpenAPIRoute(route: Route, provider: CachingModuleProvider = CachingModuleProvider()) :
     OpenAPIRoute<NormalOpenAPIRoute>(route, provider) {
@@ -14,23 +15,25 @@ class NormalOpenAPIRoute(route: Route, provider: CachingModuleProvider = Caching
         return NormalOpenAPIRoute(route, provider.child())
     }
 
-    inline fun <P : Any, R : Any, B : Any> handle(
-        pClass: KClass<P>,
-        rClass: KClass<R>,
-        bClass: KClass<B>,
-        crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit
+    @PublishedApi
+    internal fun <P : Any, R : Any, B : Any> handle(
+        pType: KType,
+        rType: KType,
+        bType: KType,
+        body: suspend OpenAPIPipelineResponseContext<R>.(P, B) -> Unit
     ) {
-        handle<P, R, B>(pClass, rClass, bClass) { pipeline, responder, p, b ->
+        handle<P, R, B>(pType, rType, bType) { pipeline, responder, p, b ->
             ResponseContextImpl<R>(pipeline, this, responder).body(p, b)
         }
     }
 
-    inline fun <P : Any, R : Any> handle(
-        pClass: KClass<P>,
-        rClass: KClass<R>,
-        crossinline body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
+    @PublishedApi
+    internal fun <P : Any, R : Any> handle(
+        pType: KType,
+        rType: KType,
+        body: suspend OpenAPIPipelineResponseContext<R>.(P) -> Unit
     ) {
-        handle<P, R, Unit>(pClass, rClass, Unit::class) { pipeline, responder, p, _ ->
+        handle<P, R, Unit>(pType, rType, typeOf<Unit>()) { pipeline, responder, p, _ ->
             ResponseContextImpl<R>(pipeline, this, responder).body(p)
         }
     }
