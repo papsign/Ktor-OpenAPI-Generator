@@ -10,92 +10,92 @@ import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.typeOf
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.get(
+inline fun <reified TParams : Any, reified TResponse : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.get(
     vararg modules: RouteOpenAPIModule,
-    example: R? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+    example: TResponse? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
 ) = route(HttpMethod.Get, modules, example, body)
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.post(
+inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.post(
     vararg modules: RouteOpenAPIModule,
-    exampleResponse: R? = null,
-    exampleRequest: B? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
+    exampleResponse: TResponse? = null,
+    exampleRequest: TRequest? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
 ) = route(HttpMethod.Post, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.put(
+inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.put(
     vararg modules: RouteOpenAPIModule,
-    exampleResponse: R? = null,
-    exampleRequest: B? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
+    exampleResponse: TResponse? = null,
+    exampleRequest: TRequest? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
 ) = route(HttpMethod.Put, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.patch(
+inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.patch(
     vararg modules: RouteOpenAPIModule,
-    exampleResponse: R? = null,
-    exampleRequest: B? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
+    exampleResponse: TResponse? = null,
+    exampleRequest: TRequest? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
 ) = route(HttpMethod.Patch, modules, exampleResponse, exampleRequest, body)
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.delete(
+inline fun <reified TParams : Any, reified TResponse : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.delete(
     vararg modules: RouteOpenAPIModule,
-    example: R? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+    example: TResponse? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
 ) = route(HttpMethod.Delete, modules, example, body)
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.head(
+inline fun <reified TParams : Any, reified TResponse : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.head(
     vararg modules: RouteOpenAPIModule,
-    example: R? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+    example: TResponse? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
 ) = route(HttpMethod.Head, modules, example, body)
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.route(
+inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.route(
     method: HttpMethod,
     modules: Array<out RouteOpenAPIModule>,
-    exampleResponse: R? = null,
-    exampleRequest: B? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
+    exampleResponse: TResponse? = null,
+    exampleRequest: TRequest? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
 ) {
     method(method).apply { modules.forEach { provider.registerModule(it, it::class.starProjectedType) } }
         .handle(exampleResponse, exampleRequest, body)
 }
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.route(
+inline fun <reified TParams : Any, reified TResponse : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.route(
     method: HttpMethod,
     modules: Array<out RouteOpenAPIModule>,
-    exampleResponse: R? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+    exampleResponse: TResponse? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
 ) {
     method(method).apply { modules.forEach { provider.registerModule(it, it::class.starProjectedType) } }
         .handle(exampleResponse, body)
 }
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, reified B : Any, A> OpenAPIAuthenticatedRoute<A>.handle(
-    exampleResponse: R? = null,
-    exampleRequest: B? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
+inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.handle(
+    exampleResponse: TResponse? = null,
+    exampleRequest: TRequest? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
 ) {
-    preHandle<P, R, B, OpenAPIAuthenticatedRoute<A>>(exampleResponse, exampleRequest) {
-        handle(typeOf<P>(), typeOf<R>(), typeOf<B>(), body)
+    preHandle<TParams, TResponse, TRequest, OpenAPIAuthenticatedRoute<TAuth>>(exampleResponse, exampleRequest) {
+        handle(typeOf<TParams>(), typeOf<TResponse>(), typeOf<TRequest>(), body)
     }
 }
 
 @ContextDsl
-inline fun <reified P : Any, reified R : Any, A> OpenAPIAuthenticatedRoute<A>.handle(
-    exampleResponse: R? = null,
-    noinline body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+inline fun <reified TParams : Any, reified TResponse : Any, TAuth> OpenAPIAuthenticatedRoute<TAuth>.handle(
+    exampleResponse: TResponse? = null,
+    noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
 ) {
-    preHandle<P, R, Unit, OpenAPIAuthenticatedRoute<A>>(exampleResponse, Unit) {
-        handle(typeOf<P>(), typeOf<R>(), body)
+    preHandle<TParams, TResponse, Unit, OpenAPIAuthenticatedRoute<TAuth>>(exampleResponse, Unit) {
+        handle(typeOf<TParams>(), typeOf<TResponse>(), body)
     }
 }
 
-suspend fun <A> OpenAPIPipelineAuthContext<A, *>.principal() = authProvider.getAuth(pipeline)
+suspend fun <TAuth> OpenAPIPipelineAuthContext<TAuth, *>.principal() = authProvider.getAuth(pipeline)

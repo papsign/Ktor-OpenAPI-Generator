@@ -6,19 +6,19 @@ import com.papsign.ktor.openapigen.model.Described
 import java.util.*
 import kotlin.reflect.KProperty
 
-class FlowsModel<T> : MutableMap<String, FlowsModel.FlowModel<T>> by HashMap<String, FlowModel<T>>()
-        where T : Enum<T>, T : Described {
+class FlowsModel<TScope> : MutableMap<String, FlowsModel.FlowModel<TScope>> by HashMap<String, FlowModel<TScope>>()
+        where TScope : Enum<TScope>, TScope : Described {
 
-    private var implicit: FlowModel<T>? by this
-    private var password: FlowModel<T>? by this
-    private var clientCredentials: FlowModel<T>? by this
-    private var authorizationCode: FlowModel<T>? by this
+    private var implicit: FlowModel<TScope>? by this
+    private var password: FlowModel<TScope>? by this
+    private var clientCredentials: FlowModel<TScope>? by this
+    private var authorizationCode: FlowModel<TScope>? by this
 
     fun implicit(
-        scopes: Iterable<T>,
+        scopes: Iterable<TScope>,
         authorizationUrl: String,
         refreshUrl: String? = null
-    ): FlowsModel<T> {
+    ): FlowsModel<TScope> {
         implicit =
             FlowModel.implicit(
                 scopes,
@@ -29,8 +29,8 @@ class FlowsModel<T> : MutableMap<String, FlowsModel.FlowModel<T>> by HashMap<Str
     }
 
     fun password(
-        scopes: Iterable<T>, tokenUrl: String, refreshUrl: String? = null
-    ): FlowsModel<T> {
+        scopes: Iterable<TScope>, tokenUrl: String, refreshUrl: String? = null
+    ): FlowsModel<TScope> {
         password =
             FlowModel.password(
                 scopes,
@@ -41,10 +41,10 @@ class FlowsModel<T> : MutableMap<String, FlowsModel.FlowModel<T>> by HashMap<Str
     }
 
     fun clientCredentials(
-        scopes: Iterable<T>,
+        scopes: Iterable<TScope>,
         tokenUrl: String,
         refreshUrl: String? = null
-    ): FlowsModel<T> {
+    ): FlowsModel<TScope> {
         clientCredentials =
             FlowModel.clientCredentials(
                 scopes,
@@ -55,11 +55,11 @@ class FlowsModel<T> : MutableMap<String, FlowsModel.FlowModel<T>> by HashMap<Str
     }
 
     fun authorizationCode(
-        scopes: Iterable<T>,
+        scopes: Iterable<TScope>,
         authorizationUrl: String,
         tokenUrl: String,
         refreshUrl: String? = null
-    ): FlowsModel<T> {
+    ): FlowsModel<TScope> {
         authorizationCode =
             FlowModel.authorizationCode(
                 scopes,
@@ -70,14 +70,14 @@ class FlowsModel<T> : MutableMap<String, FlowsModel.FlowModel<T>> by HashMap<Str
         return this
     }
 
-    private operator fun setValue(any: Any, property: KProperty<*>, any1: FlowModel<T>?) {
+    private operator fun setValue(any: Any, property: KProperty<*>, any1: FlowModel<TScope>?) {
         if (any1 == null)
             this.remove(property.name)
         else
             this[property.name] = any1
     }
 
-    private operator fun getValue(any: Any, property: KProperty<*>): FlowModel<T>? {
+    private operator fun getValue(any: Any, property: KProperty<*>): FlowModel<TScope>? {
         return this[property.name]
     }
 

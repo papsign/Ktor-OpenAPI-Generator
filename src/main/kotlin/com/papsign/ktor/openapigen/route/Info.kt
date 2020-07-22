@@ -6,6 +6,9 @@ import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.RouteOpenAPIModule
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
 
+/**
+ * Adds a summary and description for the endpoint being configured
+ */
 fun info(summary: String? = null, description: String? = null) = EndpointInfo(summary, description)
 
 data class EndpointInfo(

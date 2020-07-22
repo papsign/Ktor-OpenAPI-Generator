@@ -10,12 +10,12 @@ import com.papsign.ktor.openapigen.route.path.normal.NormalOpenAPIRoute
 import io.ktor.application.ApplicationCall
 import io.ktor.util.pipeline.PipelineContext
 
-interface AuthProvider<A>: OpenAPIModule, DependentModule {
-    suspend fun getAuth(pipeline: PipelineContext<Unit, ApplicationCall>): A
-    fun apply(route: NormalOpenAPIRoute): OpenAPIAuthenticatedRoute<A>
+interface AuthProvider<TAuth>: OpenAPIModule, DependentModule {
+    suspend fun getAuth(pipeline: PipelineContext<Unit, ApplicationCall>): TAuth
+    fun apply(route: NormalOpenAPIRoute): OpenAPIAuthenticatedRoute<TAuth>
     val security: Iterable<Iterable<Security<*>>>
     override val handlers: Collection<OpenAPIModule>
         get() = listOf(AuthHandler)
 
-    data class  Security<T>(val scheme: SecuritySchemeModel<T>, val requirements: List<T>) where T: Enum<T>, T: Described
+    data class  Security<TScope>(val scheme: SecuritySchemeModel<TScope>, val requirements: List<TScope>) where TScope: Enum<TScope>, TScope: Described
 }
