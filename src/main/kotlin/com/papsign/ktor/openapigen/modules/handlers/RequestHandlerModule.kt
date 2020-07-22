@@ -1,6 +1,5 @@
 package com.papsign.ktor.openapigen.modules.handlers
 
-import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.OpenAPIGen
 import com.papsign.ktor.openapigen.annotations.Request
 import com.papsign.ktor.openapigen.classLogger
@@ -14,12 +13,11 @@ import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.openapi.OperationModule
 import com.papsign.ktor.openapigen.modules.providers.ParameterProvider
 import com.papsign.ktor.openapigen.modules.registerModule
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.jvmErasure
 
 class RequestHandlerModule<T : Any>(
-        val requestClass: KClass<T>,
         val requestType: KType,
         val requestExample: T? = null
 ) : OperationModule {
@@ -34,7 +32,7 @@ class RequestHandlerModule<T : Any>(
             mediaType.map { Pair(it.key.toString(), it.value) }
         }.flatten().associate { it }
 
-        val requestMeta = requestClass.findAnnotation<Request>()
+        val requestMeta = requestType.jvmErasure.findAnnotation<Request>()
 
         val parameters = provider.ofType<ParameterProvider>().flatMap { it.getParameters(apiGen, provider) }
         operation.parameters = operation.parameters?.let { (it + parameters).distinct() } ?: parameters
@@ -51,7 +49,6 @@ class RequestHandlerModule<T : Any>(
     }
 
     companion object {
-        inline fun <reified T : Any> create(requestExample: T? = null) = RequestHandlerModule(T::class,
-            getKType<T>(), requestExample)
+        fun <T : Any> create(tType: KType, requestExample: T? = null) = RequestHandlerModule(tType, requestExample)
     }
 }

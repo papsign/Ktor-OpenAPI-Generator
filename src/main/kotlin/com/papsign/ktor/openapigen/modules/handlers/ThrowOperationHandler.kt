@@ -21,8 +21,11 @@ object ThrowOperationHandler : OperationModule {
     private val log = classLogger()
     override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: OperationModel) {
 
-        val exceptions = provider.ofType<ThrowInfoProvider>().flatMap { it.exceptions }
-        exceptions.groupBy { it.status }.forEach { exceptions ->
+        provider
+            .ofType<ThrowInfoProvider>()
+            .flatMap { it.exceptions }
+            .groupBy { it.status }
+            .forEach { exceptions ->
             val map: MutableMap<String, MediaTypeModel<*>> = exceptions.value.flatMap { ex ->
                 provider.ofType<ResponseSerializer>().mapNotNull {
                     if (ex.contentType == unitKType) return@mapNotNull null

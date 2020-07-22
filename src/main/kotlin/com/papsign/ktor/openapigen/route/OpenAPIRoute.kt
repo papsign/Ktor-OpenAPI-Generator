@@ -23,18 +23,20 @@ import io.ktor.routing.accept
 import io.ktor.routing.application
 import io.ktor.routing.contentType
 import io.ktor.util.pipeline.PipelineContext
-import kotlin.reflect.KClass
-import kotlin.reflect.typeOf
+import kotlin.reflect.KType
 
 abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provider: CachingModuleProvider) {
     private val log = classLogger()
 
     abstract fun child(route: Route = this.ktorRoute): T
 
-    inline fun <reified P : Any, reified R : Any, reified B : Any> handle(
-            crossinline pass: suspend OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>, responder: Responder, P, B) -> Unit
+    fun <P : Any, R : Any, B : Any> handle(
+        paramsType: KType,
+        responseType: KType,
+        bodyType: KType,
+        pass: suspend OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>, responder: Responder, P, B) -> Unit
     ) {
-        val parameterHandler = buildParameterHandler<P>()
+        val parameterHandler = buildParameterHandler<P>(paramsType)
         provider.registerModule(parameterHandler)
 
         val apiGen = ktorRoute.application.openAPIGen
@@ -42,26 +44,29 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
             it.configure(apiGen, provider)
         }
 
-        val BHandler = ValidationHandler.build<B>()
-        val PHandler = ValidationHandler.build<P>()
+        val BHandler = ValidationHandler.build(bodyType)
+        val PHandler = ValidationHandler.build(paramsType)
 
         ktorRoute.apply {
-            getAcceptMap(R::class).let {
+            getAcceptMap<R>(responseType).let {
                 if (it.isNotEmpty()) it else listOf(ContentType.Any to listOf(SelectedSerializer(KtorContentProvider)))
             }.forEach { (acceptType, serializers) ->
                 val responder = ContentTypeResponder(serializers.getResponseSerializer(acceptType), acceptType)
                 accept(acceptType) {
-                    if (Unit is B) {
+                    if (bodyType.classifier == Unit::class) {
                         handle {
-                            val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters, call.request.headers)
-                            pass(this, responder, PHandler.handle(params), Unit)
+                            @Suppress("UNCHECKED_CAST")
+                            val params: P = if (paramsType.classifier == Unit::class) Unit as P else parameterHandler.parse(call.parameters, call.request.headers)
+                            @Suppress("UNCHECKED_CAST")
+                            pass(this, responder, PHandler.handle(params), Unit as B)
                         }
                     } else {
-                        getContentTypesMap(B::class).forEach { (contentType, parsers) ->
+                        getContentTypesMap<B>(bodyType).forEach { (contentType, parsers) ->
                             contentType(contentType) {
                                 handle {
-                                    val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(typeOf<B>(), this)
-                                    val params: P = if (Unit is P) Unit else parameterHandler.parse(call.parameters, call.request.headers)
+                                    val receive: B = parsers.getBodyParser(call.request.contentType()).parseBody(bodyType, this)
+                                    @Suppress("UNCHECKED_CAST")
+                                    val params: P = if (paramsType.classifier == Unit::class) Unit as P else parameterHandler.parse(call.parameters, call.request.headers)
                                     pass(this, responder, PHandler.handle(params), BHandler.handle(receive))
                                 }
                             }
@@ -82,9 +87,9 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
         return firstOrNull()?.module ?: throw OpenAPINoParserException(contentType)
     }
 
-    fun <B : Any> getContentTypesMap(clazz: KClass<B>) = mapContentTypes<SelectedParser> { module.getParseableContentTypes(clazz) }
+    fun <B : Any> getContentTypesMap(type: KType) = mapContentTypes<SelectedParser> { module.getParseableContentTypes<B>(type) }
 
-    fun <R : Any> getAcceptMap(clazz: KClass<R>) = mapContentTypes<SelectedSerializer> { module.getSerializableContentTypes(clazz) }
+    fun <R : Any> getAcceptMap(type: KType) = mapContentTypes<SelectedSerializer> { module.getSerializableContentTypes<R>(type) }
 
     inline fun <reified T : OpenAPIModule> mapContentTypes(noinline fn: T.() -> List<ContentType>): List<Pair<ContentType, List<T>>> {
         return provider.ofType<T>().flatMap { parser ->
