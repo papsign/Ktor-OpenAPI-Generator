@@ -29,12 +29,12 @@ object BinaryContentTypeParser: BodyParser, ResponseSerializer, OpenAPIGenModule
         return constructors.first { it.parameters.size == 1 && acceptedTypes.contains(it.parameters[0].type) }
     }
 
-    override fun <T : Any> getParseableContentTypes(clazz: KClass<T>): List<ContentType> {
-        return clazz.findAnnotation<BinaryRequest>()?.contentTypes?.map(ContentType.Companion::parse) ?: listOf()
+    override fun <T : Any> getParseableContentTypes(type: KType): List<ContentType> {
+        return type.jvmErasure.findAnnotation<BinaryRequest>()?.contentTypes?.map(ContentType.Companion::parse) ?: listOf()
     }
 
-    override fun <T: Any> getSerializableContentTypes(clazz: KClass<T>):  List<ContentType> {
-        return clazz.findAnnotation<BinaryResponse>()?.contentTypes?.map(ContentType.Companion::parse) ?: listOf()
+    override fun <T: Any> getSerializableContentTypes(type: KType):  List<ContentType> {
+        return type.jvmErasure.findAnnotation<BinaryResponse>()?.contentTypes?.map(ContentType.Companion::parse) ?: listOf()
     }
 
     override suspend fun <T : Any> respond(response: T, request: PipelineContext<Unit, ApplicationCall>, contentType: ContentType) {

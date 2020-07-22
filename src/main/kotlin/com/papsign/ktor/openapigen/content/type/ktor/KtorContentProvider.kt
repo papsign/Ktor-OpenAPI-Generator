@@ -22,7 +22,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.jvmErasure
@@ -63,7 +62,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
         return contentTypes.associateWith { media.copy() }
     }
 
-    override fun <T : Any> getParseableContentTypes(clazz: KClass<T>): List<ContentType> {
+    override fun <T : Any> getParseableContentTypes(type: KType): List<ContentType> {
         return contentTypes!!.toList()
     }
 
@@ -71,7 +70,7 @@ object KtorContentProvider : ContentTypeProvider, BodyParser, ResponseSerializer
         return request.call.receive(clazz)
     }
 
-    override fun <T: Any> getSerializableContentTypes(clazz: KClass<T>): List<ContentType> {
+    override fun <T: Any> getSerializableContentTypes(type: KType): List<ContentType> {
         return contentTypes!!.toList()
     }
 
