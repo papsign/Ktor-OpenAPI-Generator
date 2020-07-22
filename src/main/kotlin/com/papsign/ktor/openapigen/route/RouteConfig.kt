@@ -8,6 +8,10 @@ import io.ktor.routing.Routing
 import io.ktor.routing.routing
 import io.ktor.util.pipeline.ContextDsl
 
+/**
+ * Wrapper for [io.ktor.routing.routing] to create the endpoints while configuring OpenAPI
+ * documentation at the same time.
+ */
 @ContextDsl
 fun Application.apiRouting(config: NormalOpenAPIRoute.() -> Unit) {
     routing {
@@ -18,6 +22,12 @@ fun Application.apiRouting(config: NormalOpenAPIRoute.() -> Unit) {
     }
 }
 
+/**
+ * Wrapper for [io.ktor.routing.routing] to create the endpoints while configuring OpenAPI
+ * documentation at the same time.
+ * 
+ * @param config 
+ */
 @ContextDsl
 fun Routing.apiRouting(config: NormalOpenAPIRoute.() -> Unit) {
     NormalOpenAPIRoute(

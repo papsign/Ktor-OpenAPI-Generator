@@ -10,49 +10,49 @@ import io.ktor.routing.Route
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-class OpenAPIAuthenticatedRoute<A>(
+class OpenAPIAuthenticatedRoute<TAuth>(
     route: Route,
     provider: CachingModuleProvider = CachingModuleProvider(),
-    val authProvider: AuthProvider<A>
-) : OpenAPIRoute<OpenAPIAuthenticatedRoute<A>>(route, provider) {
+    val authProvider: AuthProvider<TAuth>
+) : OpenAPIRoute<OpenAPIAuthenticatedRoute<TAuth>>(route, provider) {
 
-    override fun child(route: Route): OpenAPIAuthenticatedRoute<A> {
+    override fun child(route: Route): OpenAPIAuthenticatedRoute<TAuth> {
         return OpenAPIAuthenticatedRoute(route, provider.child(), authProvider)
     }
 
     @PublishedApi
-    internal fun <P : Any, R : Any, B : Any> handle(
-        pType: KType,
-        rType: KType,
-        bType: KType,
-        body: suspend OpenAPIPipelineAuthContext<A, R>.(P, B) -> Unit
+    internal fun <TParams : Any, TResponse : Any, TRequest : Any> handle(
+        paramsType: KType,
+        responseType: KType,
+        requestType: KType,
+        body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
     ) {
         child().apply {// child in case path is branch to prevent propagation of the mutable nature of the provider
             provider.registerModule(authProvider)
-            handle<P, R, B>(
-                pType,
-                rType,
-                bType
+            handle<TParams, TResponse, TRequest>(
+                paramsType,
+                responseType,
+                requestType
             ) { pipeline, responder, p, b ->
-                AuthResponseContextImpl<A, R>(pipeline, authProvider, this, responder).body(p, b)
+                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, responder).body(p, b)
             }
         }
     }
 
     @PublishedApi
-    internal fun <P : Any, R : Any> handle(
-        pType: KType,
-        rType: KType,
-        body: suspend OpenAPIPipelineAuthContext<A, R>.(P) -> Unit
+    internal fun <TParams : Any, TResponse : Any> handle(
+        paramsType: KType,
+        responseType: KType,
+        body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
     ) {
         child().apply {// child in case path is branch to prevent propagation of the mutable nature of the provider
             provider.registerModule(authProvider)
-            handle<P, R, Unit>(
-                pType,
-                rType,
+            handle<TParams, TResponse, Unit>(
+                paramsType,
+                responseType,
                 typeOf<Unit>()
-            ) { pipeline, responder, p: P, _ ->
-                AuthResponseContextImpl<A, R>(pipeline, authProvider, this, responder).body(p)
+            ) { pipeline, responder, p: TParams, _ ->
+                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, responder).body(p)
             }
         }
     }
