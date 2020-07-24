@@ -1,50 +1,45 @@
 package com.papsign.ktor.openapigen.modules
 
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashSet
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.starProjectedType
-import kotlin.reflect.full.superclasses
+import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.isSupertypeOf
 
-class CachingModuleProvider: ModuleProvider<CachingModuleProvider> {
+class CachingModuleProvider(previous: Iterable<Pair<KType, OpenAPIModule>> = listOf()) : ModuleProvider<CachingModuleProvider> {
 
-    @Synchronized
-    override fun ofType(type: KType): Collection<Any> {
-        return modules[type]?.toList() ?: listOf()
+    private val modules: MutableList<Pair<KType, OpenAPIModule>> = Collections.synchronizedList( synchronized(previous) { previous.toMutableList() } )
+
+    override fun ofType(type: KType): Collection<OpenAPIModule> {
+        val set = LinkedHashSet<OpenAPIModule>()
+        synchronized(modules) {
+            modules.filter {
+                it.first.isSubtypeOf(type)
+            }
+        }.forEach {
+            set.remove(it.second)
+            set.add(it.second)
+        }
+        return set
     }
 
-    @Synchronized
     override fun registerModule(module: OpenAPIModule, type: KType) {
-        registerModuleForClass(type, module)
         if (module is DependentModule) {
-            module.handlers.forEach { registerModule(it, it::class.starProjectedType) }
+            module.handlers.forEach { (depType, depModule) ->
+                if (synchronized(modules) { modules.find { it.second == depModule } } == null) {
+                    registerModule(depModule, depType)
+                }
+            }
         }
+        modules.add(type to module)
     }
 
-    @Synchronized
     override fun unRegisterModule(module: OpenAPIModule) {
-        modules.values.forEach { it.remove(module) }
+        synchronized(modules) { modules.removeIf { it.second == module } }
     }
 
-    @Synchronized
-    private fun registerModuleForClass(type: KType, module: OpenAPIModule) {
-        val lst = modules.getOrPut(type) {LinkedHashSet()}
-        lst.remove(module)
-        lst.add(module)
-        (type.classifier as KClass<*>).supertypes.forEach {
-            registerModuleForClass(it, module)
-        }
-    }
-
-    private val modules = HashMap<KType, LinkedHashSet<OpenAPIModule>>()
-
-    @Synchronized
     override fun child(): CachingModuleProvider {
-        val new = CachingModuleProvider()
-        modules.forEach { (t: KType, u) ->
-            new.modules[t] = LinkedHashSet(u)
-        }
-        return new
+        return CachingModuleProvider(modules)
     }
 }
