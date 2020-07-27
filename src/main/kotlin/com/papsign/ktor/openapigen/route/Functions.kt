@@ -3,6 +3,7 @@ package com.papsign.ktor.openapigen.route
 import com.papsign.ktor.openapigen.APITag
 import com.papsign.ktor.openapigen.annotations.Path
 import com.papsign.ktor.openapigen.content.type.ContentTypeProvider
+import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.modules.handlers.RequestHandlerModule
 import com.papsign.ktor.openapigen.modules.handlers.ResponseHandlerModule
 import com.papsign.ktor.openapigen.modules.registerModule
@@ -13,7 +14,11 @@ import io.ktor.routing.HttpMethodRouteSelector
 import io.ktor.routing.createRouteFromPath
 import io.ktor.util.pipeline.ContextDsl
 import kotlin.reflect.KType
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KVariance
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.typeOf
 
@@ -141,13 +146,15 @@ internal fun <TParams : Any, TResponse : Any, TRequest : Any, TRoute : OpenAPIRo
             RequestHandlerModule.create(
                 bType,
                 exampleRequest
-            )
+            ),
+            RequestHandlerModule::class.createType(listOf(KTypeProjection(KVariance.INVARIANT, bType)))
         )
         provider.registerModule(
             ResponseHandlerModule.create(
                 rType,
                 exampleResponse
-            )
+            ),
+            ResponseHandlerModule::class.createType(listOf(KTypeProjection(KVariance.INVARIANT, rType)))
         )
         if (path != null) {
             provider.registerModule(PathProviderModule(path.path))

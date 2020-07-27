@@ -11,6 +11,7 @@ import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
 import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.openAPIGen
+import com.papsign.ktor.openapigen.parameters.handlers.ParameterHandler
 import com.papsign.ktor.openapigen.parameters.util.buildParameterHandler
 import com.papsign.ktor.openapigen.route.response.Responder
 import com.papsign.ktor.openapigen.validation.ValidationHandler
@@ -24,6 +25,9 @@ import io.ktor.routing.application
 import io.ktor.routing.contentType
 import io.ktor.util.pipeline.PipelineContext
 import kotlin.reflect.KType
+import kotlin.reflect.KTypeProjection
+import kotlin.reflect.KVariance
+import kotlin.reflect.full.createType
 
 abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provider: CachingModuleProvider) {
     private val log = classLogger()
@@ -37,7 +41,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
         pass: suspend OpenAPIRoute<*>.(pipeline: PipelineContext<Unit, ApplicationCall>, responder: Responder, P, B) -> Unit
     ) {
         val parameterHandler = buildParameterHandler<P>(paramsType)
-        provider.registerModule(parameterHandler)
+        provider.registerModule(parameterHandler, ParameterHandler::class.createType(listOf(KTypeProjection(KVariance.INVARIANT, paramsType))))
 
         val apiGen = ktorRoute.application.openAPIGen
         provider.ofType<HandlerModule>().forEach {
