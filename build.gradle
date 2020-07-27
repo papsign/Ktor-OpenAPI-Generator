@@ -27,6 +27,10 @@ dependencies {
     testImplementation "io.ktor:ktor-server-netty:$ktor_version"
     testImplementation "io.ktor:ktor-server-test-host:$ktor_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
+    testImplementation "io.ktor:ktor-auth:$ktor_version"
+    testImplementation "io.ktor:ktor-auth-jwt:$ktor_version"
+
+
 }
 
 compileKotlin {
