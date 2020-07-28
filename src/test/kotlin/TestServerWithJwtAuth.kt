@@ -162,10 +162,10 @@ object TestServerWithJwtAuth {
             listOf(listOf(
                 AuthProvider.Security(
                     SecuritySchemeModel(
-                        SecuritySchemeType.openIdConnect,
+                        SecuritySchemeType.http,
                         scheme = HttpSecurityScheme.bearer,
                         bearerFormat = "JWT",
-                        name = "JWT"
+                        name = "jwtAuth"
                     ), emptyList<Scopes>()
                 )
             ))

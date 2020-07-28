@@ -18,11 +18,11 @@ internal class JwtAuthDocumentationGenerationTest {
         with(handleRequest(HttpMethod.Get, "//openapi.json")) {
             assertEquals(HttpStatusCode.OK, response.status())
             assertTrue(response.content!!.contains("\"securitySchemes\" : {\n" +
-                    "      \"JWT\" : {\n" +
+                    "      \"jwtAuth\" : {\n" +
                     "        \"bearerFormat\" : \"JWT\",\n" +
-                    "        \"name\" : \"JWT\",\n" +
+                    "        \"name\" : \"jwtAuth\",\n" +
                     "        \"scheme\" : \"bearer\",\n" +
-                    "        \"type\" : \"openIdConnect\"\n" +
+                    "        \"type\" : \"http\"\n" +
                     "      }\n" +
                     "    }"))
             assertTrue(response.content!!.contains("\"security\" : [ { } ],"))
