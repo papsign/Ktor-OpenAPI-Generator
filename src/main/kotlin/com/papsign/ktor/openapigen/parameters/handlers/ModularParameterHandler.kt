@@ -7,6 +7,7 @@ import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.annotations.parameters.apiParam
+import com.papsign.ktor.openapigen.exceptions.OpenAPIRequiredFieldException
 import com.papsign.ktor.openapigen.model.operation.ParameterLocation
 import com.papsign.ktor.openapigen.model.operation.ParameterModel
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
@@ -26,7 +27,10 @@ class ModularParameterHandler<T>(val parsers: Map<KParameter, Builder<*>>, val c
     ParameterHandler<T> {
 
     override fun parse(parameters: Parameters, headers: Headers): T {
-        return constructor.callBy(parsers.mapValues { it.value.build(it.key.name.toString(), it.key.remapOpenAPINames(parameters.toMap() + headers.toMap())) })
+        return constructor.callBy(parsers.mapValues {
+            it.value.build(it.key.name.toString(), it.key.remapOpenAPINames(parameters.toMap() + headers.toMap()))
+                ?: throw OpenAPIRequiredFieldException("""The field ${it.key.openAPIName ?: "unknow field"} is required""")
+        })
     }
 
     override fun getParameters(apiGen: OpenAPIGen, provider: ModuleProvider<*>): List<ParameterModel<*>> {
