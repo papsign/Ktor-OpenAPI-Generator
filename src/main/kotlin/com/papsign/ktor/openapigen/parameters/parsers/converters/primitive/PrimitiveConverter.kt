@@ -20,9 +20,11 @@ object PrimitiveConverter : ConverterSelector {
     private val dateFormat = SimpleDateFormat()
 
     private val primitiveParsers = mapOf(
-        primitive {
-            it.toIntOrNull() ?: 0
-        },
+        primitive { it.toByteOrNull() ?: 0 },
+        primitive { it.toByteOrNull() },
+        primitive { it.toShortOrNull() ?: 0 },
+        primitive { it.toShortOrNull() },
+        primitive { it.toIntOrNull() ?: 0 },
         primitive { it.toIntOrNull() },
         primitive {
             it.toLongOrNull() ?: 0
