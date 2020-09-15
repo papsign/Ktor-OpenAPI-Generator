@@ -28,8 +28,12 @@ class ModularParameterHandler<T>(val parsers: Map<KParameter, Builder<*>>, val c
 
     override fun parse(parameters: Parameters, headers: Headers): T {
         return constructor.callBy(parsers.mapValues {
-            it.value.build(it.key.name.toString(), it.key.remapOpenAPINames(parameters.toMap() + headers.toMap()))
-                ?: throw OpenAPIRequiredFieldException("""The field ${it.key.openAPIName ?: "unknow field"} is required""")
+            val value = it.value.build(it.key.name.toString(), it.key.remapOpenAPINames(parameters.toMap() + headers.toMap()))
+            if (value != null || it.key.type.isMarkedNullable) {
+                value
+            } else {
+                throw OpenAPIRequiredFieldException("""The field ${it.key.openAPIName ?: "unknow field"} is required""")
+            }
         })
     }
 
