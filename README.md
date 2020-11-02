@@ -25,6 +25,12 @@ Extra Features:
 
 Take a look at [a few examples](https://github.com/papsign/Ktor-OpenAPI-Generator/wiki/A-few-examples)
 
+### Who is using it?
+
+* <https://github.com/SerVB/e-shop>
+
+And others... (add your name above)
+
 ## Installation
 
 ### Gradle
