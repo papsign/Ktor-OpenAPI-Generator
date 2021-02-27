@@ -13,7 +13,7 @@ import com.papsign.ktor.openapigen.schema.builder.SchemaBuilder
 import java.io.InputStream
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
+import java.time.*
 import java.util.*
 import kotlin.reflect.KType
 
@@ -33,9 +33,9 @@ object DefaultPrimitiveSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenMo
                 )
             }
 
-            inline operator fun <reified T> invoke(type: DataType, format: DataFormat? = null): Builder {
+            inline operator fun <reified T> invoke(type: DataType, format: DataFormat? = null, pattern: String? = null, example: T? = null): Builder {
                 return Builder(
-                    SchemaModel.SchemaModelLitteral<T>(type, format)
+                    SchemaModel.SchemaModelLitteral<T>(type, format, pattern = pattern, example = example)
                 )
             }
         }
@@ -74,9 +74,40 @@ object DefaultPrimitiveSchemaProvider: SchemaBuilderProviderModule, OpenAPIGenMo
         Builder<BigDecimal>(
             DataType.number
         ),
+        Builder<LocalDate>(
+            DataType.string,
+            DataFormat.date,
+            example = LocalDate.now()
+        ),
+        Builder<LocalTime>(
+            DataType.string,
+            pattern = "HH:mm:ss",
+            example = LocalTime.now()
+        ),
+        Builder<OffsetTime>(
+            DataType.string,
+            pattern = "HH:mm:ss+XXX",
+            example = OffsetTime.now()
+        ),
+        Builder<LocalDateTime>(
+            DataType.string,
+            DataFormat.`date-time`,
+            example = LocalDateTime.now()
+        ),
+        Builder<OffsetDateTime>(
+            DataType.string,
+            DataFormat.`date-time`,
+            example = OffsetDateTime.now()
+        ),
+        Builder<ZonedDateTime>(
+            DataType.string,
+            DataFormat.`date-time`,
+            example = ZonedDateTime.now()
+        ),
         Builder<Instant>(
             DataType.string,
-            DataFormat.`date-time`
+            DataFormat.`date-time`,
+            example = Instant.now()
         ),
         Builder<Date>(
             DataType.string,

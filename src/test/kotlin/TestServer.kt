@@ -286,6 +286,17 @@ object TestServer {
                             }
                         }
                     }
+                    route("local-time") {
+                        get<LocalTimeQuery, LocalTimeResponse> { params ->
+                            respond(LocalTimeResponse(params.time))
+                        }
+                    }
+                    route("offset-time") {
+                        get<OffsetTimeQuery, OffsetTimeResponse> { params ->
+                            respond(OffsetTimeResponse(params.time))
+                        }
+                    }
+
                     route("local-date-time") {
                         get<LocalDateTimeQuery, LocalDateTimeResponse> { params ->
                             respond(LocalDateTimeResponse(params.date))
@@ -391,9 +402,14 @@ object TestServer {
     data class ZonedDateTimeQuery(@QueryParam("OffsetDateTime") val date: ZonedDateTime)
     data class InstantQuery(@QueryParam("Instant") val date: Instant)
 
+    data class LocalTimeQuery(@QueryParam("LocalTime") val time: LocalTime)
+    data class OffsetTimeQuery(@QueryParam("OffsetTime") val time: OffsetTime)
+
     data class LocalDateResponse(val date: LocalDate?)
     data class LocalDateTimeResponse(val date: LocalDateTime?)
     data class OffsetDateTimeResponse(val date: OffsetDateTime?)
     data class ZonedDateTimeResponse(val date: ZonedDateTime?)
     data class InstantResponse(val instant: Instant)
+    data class LocalTimeResponse(val time: LocalTime?)
+    data class OffsetTimeResponse(val time: OffsetTime?)
 }
