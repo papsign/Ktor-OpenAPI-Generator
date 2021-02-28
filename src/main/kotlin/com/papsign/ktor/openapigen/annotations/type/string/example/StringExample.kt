@@ -5,6 +5,6 @@ import com.papsign.ktor.openapigen.schema.processor.SchemaProcessorAnnotation
 /**
  * Provide examples for a String property
  */
-@Target(AnnotationTarget.PROPERTY)
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 @SchemaProcessorAnnotation(StringExampleProcessor::class)
 annotation class StringExample(vararg val examples: String)

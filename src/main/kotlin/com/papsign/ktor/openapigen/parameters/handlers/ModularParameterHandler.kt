@@ -47,7 +47,7 @@ class ModularParameterHandler<T>(val parsers: Map<KParameter, Builder<*>>, val c
                 !param.type.isMarkedNullable
             ).also {
                 @Suppress("UNCHECKED_CAST")
-                it.schema = schemaBuilder.build(param.type.withNullability(false)) as SchemaModel<Any>
+                it.schema = schemaBuilder.build(param.type.withNullability(false), param.annotations) as SchemaModel<Any>
                 config(it)
             }
         }
