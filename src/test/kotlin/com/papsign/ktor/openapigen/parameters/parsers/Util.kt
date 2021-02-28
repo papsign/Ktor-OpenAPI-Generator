@@ -7,6 +7,7 @@ import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderFactory
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderSelector
 import java.lang.reflect.Array
 import kotlin.reflect.full.isSuperclassOf
+import kotlin.test.assertFails
 import kotlin.test.assertNotNull
 
 inline fun <reified T> BuilderSelector<*>.testSelector(
@@ -50,8 +51,24 @@ inline fun <reified T, B: Builder<S>, S> BuilderFactory<B, S>.testSelector(
     val builder = buildBuilder(type, explode)
     assertNotNull(builder, "BuilderSelector ${javaClass.simpleName} could not be generated for type $type")
     val actual = builder.build(key, parseData)
+    println("$expect = $actual")
     if (actual != null) {
         assert(T::class.isSuperclassOf(actual::class)) { "Actual class ${actual.javaClass.simpleName} from builder ${builder.javaClass.simpleName} must be subclass of ${T::class.java.simpleName}" }
     }
     assert(equals(expect, actual as T)) { "Expected ${toStr(expect)}, Actual: ${toStr(actual)}" }
 }
+
+
+inline fun <reified T> BuilderFactory<*, *>.testSelectorFails(
+    key: String,
+    parseData: Map<String, List<String>>,
+    explode: Boolean
+) {
+    val type = getKType<T>()
+    val builder = buildBuilder(type, explode)
+    assertNotNull(builder, "BuilderSelector ${javaClass.simpleName} could not be generated for type $type")
+    assertFails("Expected to fail $parseData") {
+        builder.build(key, parseData)
+    }
+}
+

@@ -3,9 +3,14 @@ package com.papsign.ktor.openapigen.parameters.parsers.converters.primitive
 import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.parameters.parsers.converters.Converter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.ConverterSelector
+import com.papsign.ktor.openapigen.parameters.util.localDateTimeFormatter
+import com.papsign.ktor.openapigen.parameters.util.offsetDateTimeFormatter
+import com.papsign.ktor.openapigen.parameters.util.zonedDateTimeFormatter
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.text.SimpleDateFormat
+import java.time.*
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.*
 import kotlin.reflect.KType
 
@@ -17,7 +22,7 @@ object PrimitiveConverter : ConverterSelector {
         }
     }
 
-    private val dateFormat = SimpleDateFormat()
+//    private val dateFormat = SimpleDateFormat()
 
     private val primitiveParsers = mapOf(
         primitive { it.toByteOrNull() ?: 0 },
@@ -47,10 +52,85 @@ object PrimitiveConverter : ConverterSelector {
         primitive { it.toBoolean() },
         primitive<Boolean?> { it.toBoolean() },
         // removed temporarily because behavior may not be standard or expected
-//    primitive { it?.toLongOrNull()?.let(::Date) ?: it?.let(dateFormat::parse) ?: Date() },
-//    primitive { it?.toLongOrNull()?.let(::Date) ?: it?.let(dateFormat::parse) },
-//    primitive { it?.toLongOrNull()?.let(Instant::ofEpochMilli) ?: it?.let(Instant::parse) ?: Instant.now() },
-//    primitive { it?.toLongOrNull()?.let(Instant::ofEpochMilli) ?: it?.let(Instant::parse) },
+
+        primitive {
+            LocalDate.parse(it, DateTimeFormatter.ISO_DATE)
+        },
+        primitive {
+            try {
+                LocalDate.parse(it, DateTimeFormatter.ISO_DATE)
+            } catch(e: DateTimeParseException) {
+                null
+            }
+        },
+
+        primitive {
+            LocalTime.parse(it, DateTimeFormatter.ISO_LOCAL_TIME)
+        },
+        primitive {
+            try {
+                LocalTime.parse(it, DateTimeFormatter.ISO_LOCAL_TIME)
+            } catch(e: DateTimeParseException) {
+                null
+            }
+        },
+
+        primitive {
+            OffsetTime.parse(it, DateTimeFormatter.ISO_OFFSET_TIME)
+        },
+        primitive {
+            try {
+                OffsetTime.parse(it, DateTimeFormatter.ISO_OFFSET_TIME)
+            } catch(e: DateTimeParseException) {
+                null
+            }
+        },
+
+        primitive {
+            LocalDateTime.parse(it, localDateTimeFormatter)
+        },
+        primitive {
+            try {
+                LocalDateTime.parse(it, localDateTimeFormatter)
+            } catch(e: DateTimeParseException) {
+                null
+            }
+        },
+
+        primitive {
+            OffsetDateTime.parse(it, offsetDateTimeFormatter)
+        },
+        primitive {
+            try {
+                OffsetDateTime.parse(it, offsetDateTimeFormatter)
+            } catch(e: DateTimeParseException) {
+                null
+            }
+        },
+
+        primitive {
+            ZonedDateTime.parse(it, zonedDateTimeFormatter)
+        },
+        primitive {
+            try {
+                ZonedDateTime.parse(it, zonedDateTimeFormatter)
+            } catch(e: DateTimeParseException) {
+                null
+            }
+        },
+
+        primitive { it.toLongOrNull()?.let(Instant::ofEpochMilli) ?: Instant.from(offsetDateTimeFormatter.parse(it)) },
+        primitive {
+            try {
+                it.toLongOrNull()?.let(Instant::ofEpochMilli) ?: Instant.from(offsetDateTimeFormatter.parse(it))
+            } catch(e: DateTimeParseException) {
+                null
+            }
+        },
+
+//        primitive { it?.toLongOrNull()?.let(::Date) ?: it?.let(dateFormat::parse) ?: Date() },
+//        primitive { it?.toLongOrNull()?.let(::Date) ?: it?.let(dateFormat::parse) },
+
         primitive {
             try {
                 UUID.fromString(it)

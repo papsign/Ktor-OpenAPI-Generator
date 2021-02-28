@@ -15,6 +15,7 @@ import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.annotations.mapping.OpenAPIName
 import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
+import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.annotations.properties.description.Description
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.WithExample
@@ -39,22 +40,17 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer
 import com.papsign.ktor.openapigen.schema.namer.SchemaNamer
-import io.ktor.application.application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.StatusPages
-import io.ktor.features.origin
-import io.ktor.http.HttpStatusCode
-import io.ktor.jackson.jackson
-import io.ktor.request.host
-import io.ktor.request.port
-import io.ktor.response.respond
-import io.ktor.response.respondRedirect
-import io.ktor.routing.get
-import io.ktor.routing.routing
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.jackson.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import java.time.*
+import java.util.*
 import kotlin.reflect.KType
 
 object TestServer {
@@ -97,6 +93,9 @@ object TestServer {
                     )
 
                     enable(SerializationFeature.WRAP_EXCEPTIONS, SerializationFeature.INDENT_OUTPUT)
+
+                    disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
 
                     setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
@@ -273,6 +272,53 @@ object TestServer {
                         }
                     }
                 }
+
+
+                route("datetime") {
+                    route("date") {
+                        get<LocalDateQuery, LocalDateResponse> { params ->
+                            respond(LocalDateResponse(params.date))
+                        }
+                        route("optional") {
+                            get<LocalDateOptionalQuery, LocalDateResponse> { params ->
+                                println(params)
+                                respond(LocalDateResponse(params.date))
+                            }
+                        }
+                    }
+                    route("local-time") {
+                        get<LocalTimeQuery, LocalTimeResponse> { params ->
+                            respond(LocalTimeResponse(params.time))
+                        }
+                    }
+                    route("offset-time") {
+                        get<OffsetTimeQuery, OffsetTimeResponse> { params ->
+                            respond(OffsetTimeResponse(params.time))
+                        }
+                    }
+
+                    route("local-date-time") {
+                        get<LocalDateTimeQuery, LocalDateTimeResponse> { params ->
+                            respond(LocalDateTimeResponse(params.date))
+                        }
+                    }
+                    route("offset-date-time") {
+                        get<OffsetDateTimeQuery, OffsetDateTimeResponse> { params ->
+                            respond(OffsetDateTimeResponse(params.date))
+                        }
+                    }
+                    route("zoned-date-time") {
+                        get<ZonedDateTimeQuery, ZonedDateTimeResponse> { params ->
+                            println(ZonedDateTime.now())
+                            respond(ZonedDateTimeResponse(params.date))
+                        }
+                    }
+                    route("instant") {
+                        get<InstantQuery, InstantResponse> { params ->
+                            respond(InstantResponse(params.date))
+                        }
+                    }
+                }
             }
         }.start(true)
     }
@@ -346,4 +392,24 @@ object TestServer {
     }
 
     data class APIPrincipal(val a: String, val b: String)
+
+
+    @Request("A LocalDate Request")
+    data class LocalDateQuery(@QueryParam("LocalDate") val date: LocalDate)
+    data class LocalDateOptionalQuery(@QueryParam("LocalDate") val date: LocalDate?)
+    data class LocalDateTimeQuery(@QueryParam("LocalDateTime") val date: LocalDateTime)
+    data class OffsetDateTimeQuery(@QueryParam("OffsetDateTime") val date: OffsetDateTime)
+    data class ZonedDateTimeQuery(@QueryParam("OffsetDateTime") val date: ZonedDateTime)
+    data class InstantQuery(@QueryParam("Instant") val date: Instant)
+
+    data class LocalTimeQuery(@QueryParam("LocalTime") val time: LocalTime)
+    data class OffsetTimeQuery(@QueryParam("OffsetTime") val time: OffsetTime)
+
+    data class LocalDateResponse(val date: LocalDate?)
+    data class LocalDateTimeResponse(val date: LocalDateTime?)
+    data class OffsetDateTimeResponse(val date: OffsetDateTime?)
+    data class ZonedDateTimeResponse(val date: ZonedDateTime?)
+    data class InstantResponse(val instant: Instant)
+    data class LocalTimeResponse(val time: LocalTime?)
+    data class OffsetTimeResponse(val time: OffsetTime?)
 }
