@@ -1,13 +1,23 @@
 plugins {
     id "org.jetbrains.kotlin.jvm" version "$kotlin_version"
+    id 'maven-publish'
 }
 
 group 'com.papsign.ktor'
-version '1.0-SNAPSHOT'
+version '0.2-beta.15-SNAPSHOT'
 
 repositories {
     mavenCentral()
     jcenter()
+}
+
+publishing {
+    publications {
+        jarModule(MavenPublication) {
+            artifactId 'Ktor-OpenAPI-Generator'
+            from components.java
+        }
+    }
 }
 
 dependencies {
