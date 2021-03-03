@@ -17,7 +17,7 @@ internal inline fun <reified T> classLogger(): Logger {
     return LoggerFactory.getLogger(T::class.java)
 }
 
-fun Map<String, *>.cleanEmptyValues(serializationSettings: SerializationSettings = SerializationSettings.default): Map<String, *> {
+fun Map<String, *>.cleanEmptyValues(serializationSettings: SerializationSettings = SerializationSettings()): Map<String, *> {
     return filterValues {
         when (it) {
             is Map<*, *> -> it.isNotEmpty() || serializationSettings.skipEmptyMap
@@ -27,7 +27,7 @@ fun Map<String, *>.cleanEmptyValues(serializationSettings: SerializationSettings
     }
 }
 
-fun convertToValue(value: Any?, serializationSettings: SerializationSettings = SerializationSettings.default): Any? {
+fun convertToValue(value: Any?, serializationSettings: SerializationSettings = SerializationSettings()): Any? {
     return when (value) {
         is DataModel -> value.serialize()
         is Map<*, *> -> value.entries.associate { (key, value) -> Pair(key.toString(), convertToValue(value, serializationSettings)) }
