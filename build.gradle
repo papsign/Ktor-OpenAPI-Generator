@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.papsign.ktor'
+group 'com.github.papsign'
 version '0.2-beta.15-SNAPSHOT'
 
 repositories {
