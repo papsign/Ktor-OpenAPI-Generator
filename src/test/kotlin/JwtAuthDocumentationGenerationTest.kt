@@ -20,12 +20,13 @@ internal class JwtAuthDocumentationGenerationTest {
             assertTrue(response.content!!.contains("\"securitySchemes\" : {\n" +
                     "      \"jwtAuth\" : {\n" +
                     "        \"bearerFormat\" : \"JWT\",\n" +
-                    "        \"name\" : \"jwtAuth\",\n" +
                     "        \"scheme\" : \"bearer\",\n" +
                     "        \"type\" : \"http\"\n" +
                     "      }\n" +
                     "    }"))
-            assertTrue(response.content!!.contains("\"security\" : [ { } ],"))
+            assertTrue(response.content!!.contains("\"security\" : [ {\n" +
+                    "          \"jwtAuth\" : [ ]\n" +
+                    "        } ]"))
         }
     }
 
