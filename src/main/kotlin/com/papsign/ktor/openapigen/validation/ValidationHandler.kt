@@ -2,7 +2,6 @@ package com.papsign.ktor.openapigen.validation
 
 import com.papsign.ktor.openapigen.*
 import com.papsign.ktor.openapigen.classLogger
-import org.reflections.ReflectionUtils
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.*
@@ -236,12 +235,12 @@ class ValidationHandler private constructor(
                         transformFun = { t: Any? ->
                             if (t != null) {
                                 val copy = t.javaClass.kotlin.memberFunctions.find { it.name == "copy" }
-                                val map = copy?.instanceParameter?.let { mutableMapOf<KParameter, Any?>(it to t) } ?: mutableMapOf()
+                                val copyParams = copy?.instanceParameter?.let { mutableMapOf<KParameter, Any?>(it to t) } ?: mutableMapOf()
                                 handled.forEach { (handler, field) ->
                                     val getter = field.kotlinProperty?.javaGetter
                                     if (copy != null && getter != null) {
                                         val param = copy.parameters.first { it.name == field.name }
-                                        map[param] = handler.handle(getter(t))
+                                        copyParams[param] = handler.handle(getter(t))
                                     } else {
                                         // TODO convert this to canAccess and only change status if false
                                         val accessible = field.isAccessible
@@ -250,7 +249,7 @@ class ValidationHandler private constructor(
                                         field.isAccessible = accessible
                                     }
                                 }
-                                copy?.callBy(map.toMap()) ?: t
+                                copy?.callBy(copyParams.toMap()) ?: t
                             } else t
                         }
                     }
