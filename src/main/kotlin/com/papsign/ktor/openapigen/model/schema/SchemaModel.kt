@@ -3,7 +3,7 @@ package com.papsign.ktor.openapigen.model.schema
 import com.papsign.ktor.openapigen.model.DataModel
 import com.papsign.ktor.openapigen.model.base.RefModel
 
-sealed class SchemaModel<T>: DataModel {
+sealed class SchemaModel<T> : DataModel {
 
     abstract var example: T?
     abstract var examples: List<T>?
@@ -16,7 +16,8 @@ sealed class SchemaModel<T>: DataModel {
         override var example: T? = null,
         override var examples: List<T>? = null,
         var type: DataType = DataType.`object`,
-        override var description: String? = null
+        override var description: String? = null,
+        var discriminator: Discriminator<T>? = null
     ) : SchemaModel<T>()
 
     data class SchemaModelMap<T : Map<String, U>, U>(
@@ -69,7 +70,12 @@ sealed class SchemaModel<T>: DataModel {
         override var description: String? = null
     }
 
-    data class OneSchemaModelOf<T>(val oneOf: List<SchemaModel<out T>>) : SchemaModel<T>() {
+    data class OneSchemaModelOf<T>(
+        val oneOf: List<SchemaModel<out T>>,
+        var properties: Map<String, SchemaModel<*>>? = null,
+        val discriminator: Discriminator<T>? = null
+    ) :
+        SchemaModel<T>() {
         override var example: T? = null
         override var examples: List<T>? = null
         override var description: String? = null
