@@ -17,6 +17,7 @@ Currently Supported:
 - Exception handling (use `.throws(ex) {}` in the routes with an APIException object) with Status pages interop (with .withAPI in the StatusPages configuration)
 - tags (`.tag(tag) {}` in route with a tag object, currently must be an enum, but may be subject to change)
 - Spec compliant Parameter Parsing (see basic example)
+- Legacy Polymorphism with use of `@DiscriminatorAnnotation()` attribute and sealed classes 
 
 Extra Features:
 - Includes Swagger-UI (enabled by default, can be managed in the `install(OpenAPIGen) { ... }` section)
