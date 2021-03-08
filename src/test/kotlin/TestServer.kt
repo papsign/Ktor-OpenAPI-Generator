@@ -25,6 +25,7 @@ import com.papsign.ktor.openapigen.annotations.type.string.length.Length
 import com.papsign.ktor.openapigen.annotations.type.string.length.MaxLength
 import com.papsign.ktor.openapigen.annotations.type.string.length.MinLength
 import com.papsign.ktor.openapigen.annotations.type.string.pattern.RegularExpression
+import com.papsign.ktor.openapigen.annotations.type.string.trim.Trim
 import com.papsign.ktor.openapigen.interop.withAPI
 import com.papsign.ktor.openapigen.model.Described
 import com.papsign.ktor.openapigen.model.server.ServerModel
@@ -235,6 +236,12 @@ object TestServer {
                         respond(InstantResponse(params.date))
                     }
                 }
+
+                route("employees") {
+                    get<FilterQuery, FilterQuery> { params ->
+                        respond(params)
+                    }
+                }
             }
         }
     }
@@ -404,4 +411,52 @@ object TestServer {
     data class InstantResponse(val instant: Instant)
     data class LocalTimeResponse(val time: LocalTime?)
     data class OffsetTimeResponse(val time: OffsetTime?)
+
+    data class FilterQuery(
+        @QueryParam("Vendor Code") @Trim
+        val vendorCode: String? = null,
+        @QueryParam("Organization") @Trim
+        val organization: String? = null,
+        @QueryParam("startDate")
+        val startDate: LocalDate? = null,
+        @QueryParam("endDate")
+        val endDate: LocalDate? = null,
+        @QueryParam("tenant") @Trim
+        val tenant: String? = null,
+        @QueryParam("manager") @Trim
+        val manager: String? = null,
+        @QueryParam("performer") @Trim
+        val performer: String? = null,
+        @QueryParam("condition") @Trim
+        val condition: String? = null,
+        @QueryParam("onlyNew")
+        val onlyNew: Boolean? = null,
+        @QueryParam("name") @Trim
+        val name: String? = null,
+        @QueryParam("minQuantity") @Min(0)
+        val minQuantity: Int? = null,
+        @QueryParam("maxQuantity") @Min(0)
+        val maxQuantity: Int? = null,
+        @QueryParam("minCost") @Min(0)
+        val minCost: Int? = null,
+        @QueryParam("maxCost") @Min(0)
+        val maxCost: Int? = null,
+        @QueryParam("inStock")
+        val inStock: Boolean? = null,
+        @QueryParam("active")
+        val active: Boolean? = null,
+
+        @QueryParam("employeeName") @Trim
+        val employeeName: String? = null,
+
+        @QueryParam("sortToken")
+        @StringExample("fullName") @Trim
+        val sortToken: String? = null,
+        @QueryParam("pageSize")
+        @Min(1)
+        val pageSize: Int? = null,
+        @QueryParam("page")
+        @Min(0)
+        val page: Long? = 0
+    )
 }

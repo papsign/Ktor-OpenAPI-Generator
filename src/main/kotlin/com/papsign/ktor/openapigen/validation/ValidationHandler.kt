@@ -4,8 +4,7 @@ import com.papsign.ktor.openapigen.*
 import com.papsign.ktor.openapigen.classLogger
 import kotlin.reflect.*
 import kotlin.reflect.full.*
-import kotlin.reflect.jvm.javaField
-import kotlin.reflect.jvm.jvmErasure
+import kotlin.reflect.jvm.*
 
 
 /**
@@ -139,7 +138,7 @@ class ValidationHandler private constructor(
                 } else {
                     val appropriateConstructor = type.jvmErasure.constructors.find {
                         it.parameters.size == 1 && it.parameters[0].type.isSubtypeOf(iterableType)
-                    } ?: error("Unsupported Iterable type $type, must have a constructor that takes an iterable");
+                    } ?: error("Unsupported Iterable type $type, must have a constructor that takes an iterable")
                     when {
                         handler.isUseful() && shouldTransform -> {
                             transformFun = { t: Any? ->
@@ -208,8 +207,7 @@ class ValidationHandler private constructor(
             }
             else -> {
                 val handled = type.memberProperties.mapNotNull { prop ->
-                    val validator =
-                        build(prop)
+                    val validator = build(prop)
                     if (validator.isUseful()) {
                         prop.source.javaField.also {
                             if (it == null) {
@@ -236,15 +234,25 @@ class ValidationHandler private constructor(
                     handled.isNotEmpty() -> {
                         transformFun = { t: Any? ->
                             if (t != null) {
+                                val copy = t.javaClass.kotlin.memberFunctions.find { it.name == "copy" }
+                                val copyParams = copy?.instanceParameter?.let { mutableMapOf<KParameter, Any?>(it to t) }
                                 handled.forEach { (handler, field) ->
-                                    // TODO convert this to canAccess and only change status if false
-                                    val accessible = field.isAccessible
-                                    field.isAccessible = true
-                                    field.set(t, handler.handle(field.get(t)))
-                                    field.isAccessible = accessible
+                                    val getter = field.kotlinProperty?.javaGetter
+                                    if (copy != null && copyParams != null && getter != null) {
+                                        val param = copy.parameters.first { it.name == field.name }
+                                        copyParams[param] = handler.handle(getter(t))
+                                    } else {
+                                        // TODO convert this to canAccess and only change status if false
+                                        val accessible = field.isAccessible
+                                        field.isAccessible = true
+                                        field.set(t, handler.handle(field.get(t)))
+                                        field.isAccessible = accessible
+                                    }
                                 }
-                            }
-                            t
+                                if (copy != null && copyParams != null) {
+                                    copy.callBy(copyParams)
+                                } else t
+                            } else t
                         }
                     }
                     shouldTransform -> {
