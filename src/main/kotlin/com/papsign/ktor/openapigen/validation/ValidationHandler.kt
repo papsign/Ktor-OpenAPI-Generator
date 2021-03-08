@@ -235,10 +235,10 @@ class ValidationHandler private constructor(
                         transformFun = { t: Any? ->
                             if (t != null) {
                                 val copy = t.javaClass.kotlin.memberFunctions.find { it.name == "copy" }
-                                val copyParams = copy?.instanceParameter?.let { mutableMapOf<KParameter, Any?>(it to t) } ?: mutableMapOf()
+                                val copyParams = copy?.instanceParameter?.let { mutableMapOf<KParameter, Any?>(it to t) }
                                 handled.forEach { (handler, field) ->
                                     val getter = field.kotlinProperty?.javaGetter
-                                    if (copy != null && getter != null) {
+                                    if (copy != null && copyParams != null && getter != null) {
                                         val param = copy.parameters.first { it.name == field.name }
                                         copyParams[param] = handler.handle(getter(t))
                                     } else {
@@ -249,7 +249,9 @@ class ValidationHandler private constructor(
                                         field.isAccessible = accessible
                                     }
                                 }
-                                copy?.callBy(copyParams.toMap()) ?: t
+                                if (copy != null && copyParams != null) {
+                                    copy.callBy(copyParams)
+                                } else t
                             } else t
                         }
                     }
