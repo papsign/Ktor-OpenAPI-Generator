@@ -7,3 +7,4 @@ import com.papsign.ktor.openapigen.validation.ValidatorAnnotation
 @SchemaProcessorAnnotation(FMinProcessor::class)
 @ValidatorAnnotation(FMinProcessor::class)
 annotation class FMin(val value: Double, val errorMessage: String = "")
+

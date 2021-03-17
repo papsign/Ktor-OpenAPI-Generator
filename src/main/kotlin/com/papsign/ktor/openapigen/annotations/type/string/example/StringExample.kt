@@ -8,3 +8,4 @@ import com.papsign.ktor.openapigen.schema.processor.SchemaProcessorAnnotation
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
 @SchemaProcessorAnnotation(StringExampleProcessor::class)
 annotation class StringExample(vararg val examples: String)
+

@@ -8,6 +8,7 @@ import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.annotations.parameters.apiParam
 import com.papsign.ktor.openapigen.exceptions.OpenAPIRequiredFieldException
+import com.papsign.ktor.openapigen.memberProperties
 import com.papsign.ktor.openapigen.model.operation.ParameterLocation
 import com.papsign.ktor.openapigen.model.operation.ParameterModel
 import com.papsign.ktor.openapigen.model.schema.SchemaModel
@@ -39,6 +40,7 @@ class ModularParameterHandler<T>(val parsers: Map<KParameter, Builder<*>>, val c
 
     override fun getParameters(apiGen: OpenAPIGen, provider: ModuleProvider<*>): List<ParameterModel<*>> {
         val schemaBuilder = provider.ofType<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
+        val ktype = constructor.returnType
 
         fun createParam(param: KParameter, `in`: ParameterLocation, config: (ParameterModel<*>) -> Unit): ParameterModel<*> {
             return ParameterModel<Any>(
@@ -47,7 +49,7 @@ class ModularParameterHandler<T>(val parsers: Map<KParameter, Builder<*>>, val c
                 !param.type.isMarkedNullable
             ).also {
                 @Suppress("UNCHECKED_CAST")
-                it.schema = schemaBuilder.build(param.type.withNullability(false), param.annotations) as SchemaModel<Any>
+                it.schema = schemaBuilder.build(param.type.withNullability(false), ktype.memberProperties.find { it.name == param.name }?.source?.annotations ?: listOf()) as SchemaModel<Any>
                 config(it)
             }
         }

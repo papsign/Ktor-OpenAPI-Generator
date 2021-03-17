@@ -9,3 +9,4 @@ import com.papsign.ktor.openapigen.validation.ValidatorAnnotation
 annotation class FClamp(val min: Double, val max: Double, val errorMessage: String = "")
 
 
+
