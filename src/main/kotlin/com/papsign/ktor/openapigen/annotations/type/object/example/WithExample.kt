@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 /**
  * Careful, no type checking done if you give the wrong provider
  */
-@Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
+@Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE, AnnotationTarget.PROPERTY)
 @SchemaProcessorAnnotation(ExampleProcessor::class)
 annotation class WithExample(val provider: KClass<out ExampleProvider<*>> = NoExampleProvider::class)
 
