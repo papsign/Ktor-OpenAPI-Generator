@@ -71,6 +71,7 @@ inline fun <T: OpenAPIRoute<T>, reified EX : Throwable> T.throws(
  *   throws(
  *      status = HttpStatusCode.NotFound.description("Customer not found"),
  *      example = ErrorMessage("Customer not found"),
+ *      // ErrorMessage is: data class ErrorMessage(val error: String)
  *      exceptionClass = IllegalArgumentException::class
  *   ) { /* add routes here */ }
  * }
@@ -98,6 +99,7 @@ inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(
  *   throws(
  *      status = HttpStatusCode.NotFound.description("Customer not found"),
  *      example = ErrorMessage("Customer not found"),
+ *      // ErrorMessage is: data class ErrorMessage(val error: String)
  *      contentFn = { ex: IllegalArgumentException ->
  *          ErrorMessage(ex.message ?: "Customer with uuid 300e47ad-263c-4e9a-a0b7-26d1229eaba8 not found")
  *      }
@@ -127,6 +129,7 @@ inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(
  *   throws(
  *      status = HttpStatusCode.NotFound.description("Customer not found"),
  *      example = ErrorMessage("Customer with uuid 300e47ad-263c-4e9a-a0b7-26d1229eaba8 not found"),
+ *      // ErrorMessage is: data class ErrorMessage(val error: String)
  *      exceptionClass = IllegalArgumentException::class,
  *      contentFn = { ErrorMessage(it.message ?: "Customer not found") }
  *   ) { /* add routes here */ }
@@ -147,6 +150,27 @@ inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(
     crossinline fn: T.() -> Unit = {}
 ): T = throws(APIException.apiException(status, example, contentFn), fn = fn)
 
+/**
+ * Create one or multiple exception handler(s).
+ * The exception class is inferred from the contentFn function.
+ *
+ * Example:
+ * <pre>
+ * {@code
+*    throws(
+ *      APIException.apiException(
+ *         HttpStatusCode.NotFound.description("Customer not found"),
+ *         ErrorMessage("Customer with uuid 300e47ad-263c-4e9a-a0b7-26d1229eaba8 not found"),
+ *         contentFn = { ex: IllegalArgumentException -> ErrorMessage(ex.message ?: "Customer not found") }
+ *      ),
+ *      APIException.apiException(
+ *         HttpStatusCode.Unauthorized.description("Unauthorized access"),
+ *         ErrorMessage("You don't have permission to access customer with uuid 300e47ad-263c-4e9a-a0b7-26d1229eaba8"),
+ *         contentFn = { ex: IllegalAccessException -> ErrorMessage(ex.message ?: "Unauthorized access") }
+ *      )
+ *    ) { /* add routes here */ }
+ * </pre>
+ */
 inline fun <T: OpenAPIRoute<T>> T.throws(
     vararg responses: APIException<*, *>,
     crossinline fn: T.() -> Unit = {}
