@@ -9,21 +9,16 @@ import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.OpenAPIModule
 import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
-import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.parameters.handlers.ParameterHandler
 import com.papsign.ktor.openapigen.parameters.util.buildParameterHandler
 import com.papsign.ktor.openapigen.route.response.Responder
 import com.papsign.ktor.openapigen.validation.ValidationHandler
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.http.ContentType
-import io.ktor.request.contentType
-import io.ktor.routing.Route
-import io.ktor.routing.accept
-import io.ktor.routing.application
-import io.ktor.routing.contentType
-import io.ktor.util.pipeline.PipelineContext
+import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.routing.*
+import io.ktor.util.pipeline.*
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.KVariance
@@ -53,7 +48,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
 
         ktorRoute.apply {
             getAcceptMap<R>(responseType).let {
-                if (it.isNotEmpty()) it else listOf(ContentType.Any to listOf(SelectedSerializer(KtorContentProvider)))
+                it.ifEmpty { listOf(ContentType.Any to listOf(SelectedSerializer(KtorContentProvider))) }
             }.forEach { (acceptType, serializers) ->
                 val responder = ContentTypeResponder(serializers.getResponseSerializer(acceptType), acceptType)
                 accept(acceptType) {

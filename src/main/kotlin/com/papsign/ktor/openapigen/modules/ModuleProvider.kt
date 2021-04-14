@@ -10,10 +10,8 @@ interface ModuleProvider<THIS: ModuleProvider<THIS>> {
     fun child(): THIS
 }
 
-inline fun <reified T: OpenAPIModule> ModuleProvider<*>.ofType(): Collection<T> {
-    return ofType(getKType<T>()) as Collection<T>
-}
+inline fun <reified T: OpenAPIModule> ModuleProvider<*>.ofType(): Collection<T> =
+    ofType(getKType<T>()) as Collection<T>
 
-inline fun <reified T: OpenAPIModule> ModuleProvider<*>.registerModule(module: T) {
-    return registerModule(module, getKType<T>())
-}
+inline fun <reified T: OpenAPIModule> ModuleProvider<*>.registerModule(module: T) =
+    registerModule(module, getKType<T>())
