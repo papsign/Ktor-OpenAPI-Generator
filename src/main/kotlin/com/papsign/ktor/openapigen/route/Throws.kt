@@ -17,164 +17,85 @@ import kotlin.reflect.full.superclasses
 data class ThrowsInfo(override val exceptions: List<APIException<*, *>>) : ThrowInfoProvider
 
 /**
- * Create an exception handler passing in the HTTP return code.
- * The exception class is explicitly declared as generics parameter.
- *
- * Example:
- * <pre>
- * {@code
- *   throws<NormalOpenAPIRoute, IllegalArgumentException>(
- *      status = HttpStatusCode.NotFound.description("Customer not found")
- *   ) { /* add routes here */ }
- * }
- * </pre>
- *
- * @param status The HTTP status code to return
- * @param fn The lambda with your OpenAPIRoute as receiver to setup routes
- */
-inline fun <T: OpenAPIRoute<T>, reified EX : Throwable> T.throws(
-    status: HttpStatusCode,
-    crossinline fn: T.() -> Unit = {}
-): T = throws<T, EX, Unit>(status, fn = fn)
-
-/**
- * Create an exception handler passing in the HTTP return code and the exception class.
- * The exception class is explicitly declared as function parameter.
- *
- * Example:
- * <pre>
- * {@code
- *   throws(
- *      status = HttpStatusCode.NotFound.description("Customer not found"),
- *      exceptionClass = IllegalArgumentException::class
- *   ) { /* add routes here */ }
- * }
- * </pre>
- *
- * @param status The HTTP status code to return
- * @param exceptionClass The exception class this handler will handle.
- * @param fn The lambda with your OpenAPIRoute as receiver to setup routes
- */
-inline fun <T: OpenAPIRoute<T>, reified EX : Throwable> T.throws(
-    status: HttpStatusCode,
-    exceptionClass: KClass<EX>,
-    crossinline fn: T.() -> Unit = {}
-): T = throws<T, EX>(status, fn)
-
-/**
  * Create an exception handler.
- * The exception class is explicitly declared as function parameter.
  *
- * Example:
- * <pre>
- * {@code
- *   throws(
- *      status = HttpStatusCode.NotFound.description("Customer not found"),
- *      example = ErrorMessage("Customer not found"),
- *      // ErrorMessage is: data class ErrorMessage(val error: String)
- *      exceptionClass = IllegalArgumentException::class
- *   ) { /* add routes here */ }
- * }
- * </pre>
- *
- * @param status The HTTP status code to return
- * @param example An example of the HTTP response
- * @param exceptionClass The exception class this handler will handle.
- * @param fn The lambda with your OpenAPIRoute as receiver to setup routes
- */
-inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(
-    status: HttpStatusCode,
-    example: B? = null,
-    exceptionClass: KClass<EX>,
-    crossinline fn: T.() -> Unit = {}
-) = throws<T, EX, B>(status, example, fn = fn)
-
-/**
- * Create an exception handler.
- * The exception class is inferred from the contentFn function.
- *
- * Example:
- * <pre>
- * {@code
- *   throws(
- *      status = HttpStatusCode.NotFound.description("Customer not found"),
- *      example = ErrorMessage("Customer not found"),
- *      // ErrorMessage is: data class ErrorMessage(val error: String)
- *      contentFn = { ex: IllegalArgumentException ->
- *          ErrorMessage(ex.message ?: "Customer with uuid 300e47ad-263c-4e9a-a0b7-26d1229eaba8 not found")
- *      }
- *   ) { /* add routes here */ }
- * }
- * </pre>
- *
- * @param status The HTTP status code to return
- * @param example An example of the HTTP response
- * @param contentFn The function that creates the HTTP response
- * @param fn The lambda with your OpenAPIRoute as receiver to setup routes
- */
-inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(
-    status: HttpStatusCode,
-    example: B? = null,
-    noinline contentFn: ((EX) -> B)? = null,
-    crossinline fn: T.() -> Unit = {}
-): T = throws(APIException.apiException(status, example, contentFn), fn = fn)
-
-/**
- * Create an exception handler.
- * The exception class is explicitly declared as function parameter.
- *
+ * If all parameters are passed in, the type parameters are inferred.
  * Example:
  * <pre>
  * {@code
  *   throws(
  *      status = HttpStatusCode.NotFound.description("Customer not found"),
  *      example = ErrorMessage("Customer with uuid 300e47ad-263c-4e9a-a0b7-26d1229eaba8 not found"),
- *      // ErrorMessage is: data class ErrorMessage(val error: String)
- *      exceptionClass = IllegalArgumentException::class,
- *      contentFn = { ErrorMessage(it.message ?: "Customer not found") }
- *   ) { /* add routes here */ }
+ *      contentFn = { ex: NotFoundException -> ErrorMessage(ex.message ?: "Customer not found") }
+ *   ) { /* add route here */ }
+ *
+ * If not all parameters are passed, the type parameters needs to be explicitly named.
+ * Example:
+ * <pre>
+ * {@code
+ *   throws<NormalOpenAPIRoute, NotFoundException, ErrorMessage>(
+ *      status = HttpStatusCode.NotFound.description("Customer not found"),
+ *   ) { getOneCustomer(this) }
  * }
  * </pre>
  *
  * @param status The HTTP status code to return
  * @param example An example of the HTTP response
- * @param exceptionClass The exception class this handler will handle.
  * @param contentFn The function that creates the HTTP response
  * @param fn The lambda with your OpenAPIRoute as receiver to setup routes
  */
-inline fun <T: OpenAPIRoute<T>, reified EX : Throwable, reified B> T.throws(
+inline fun <TRoute: OpenAPIRoute<TRoute>, reified TException : Throwable, reified TMessage> TRoute.throws(
     status: HttpStatusCode,
-    example: B? = null,
-    exceptionClass: KClass<EX>,
-    noinline contentFn: ((EX) -> B)? = null,
-    crossinline fn: T.() -> Unit = {}
-): T = throws(APIException.apiException(status, example, contentFn), fn = fn)
+    example: TMessage? = null,
+    noinline contentFn: ((TException) -> TMessage)? = null,
+    crossinline fn: TRoute.() -> Unit = {}
+): TRoute {
+    val apiException = APIException.apiException(status, example, contentFn)
+    return throws(apiException, fn = fn)
+}
 
 /**
  * Create one or multiple exception handler(s).
- * The exception class is inferred from the contentFn function.
+ * The exception handlers (responses parameter can either be created
+ * 1. APIException.Companion.apiException: direct object creation
+ * 2. APIExceptionBuilder.Companion.apiException: object creation using the builder pattern
  *
- * Example:
+ * Example 1:
  * <pre>
  * {@code
-*    throws(
+ *    throws(
  *      APIException.apiException(
- *         HttpStatusCode.NotFound.description("Customer not found"),
- *         ErrorMessage("Customer with uuid 300e47ad-263c-4e9a-a0b7-26d1229eaba8 not found"),
- *         contentFn = { ex: IllegalArgumentException -> ErrorMessage(ex.message ?: "Customer not found") }
+ *         status = HttpStatusCode.NotFound.description("Customer not found"),
+ *         example = ErrorMessage("Customer with id 756 not found"),
+ *         contentFn = { ex: NotFoundException -> ErrorMessage(ex.message ?: "Customer not found") }
  *      ),
- *      APIException.apiException(
- *         HttpStatusCode.Unauthorized.description("Unauthorized access"),
- *         ErrorMessage("You don't have permission to access customer with uuid 300e47ad-263c-4e9a-a0b7-26d1229eaba8"),
- *         contentFn = { ex: IllegalAccessException -> ErrorMessage(ex.message ?: "Unauthorized access") }
+ *      APIException.apiException<ValidationException, ErrorMessage>(
+ *         status = HttpStatusCode.BadRequest.description("Invalid Request"),
+ *         example = ErrorMessage("Parameter too short")
  *      )
  *    ) { /* add routes here */ }
  * </pre>
+ *
+ * Example 2 (builder):
+ * <pre>
+ * {@code
+ *    throws(
+ *       apiException<ValidationException, ErrorMessage> {
+ *          status = HttpStatusCode.BadRequest.description("Invalid Request")
+ *          example = ErrorMessage("parameter doesn't match \"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$\"")
+ *          contentFn = { ErrorMessage(it.message ?: "Bad Request" ) }
+ *       },
+ *       apiException<NotFoundException, ErrorMessage> {
+ *          status = HttpStatusCode.NotFound.description("Customer not found")
+ *          contentFn = { ErrorMessage(it.message ?: "Customer not found") }
+ *       }
+ *    ) { /* add routes here */ }
+ * </pre>
  */
-inline fun <T: OpenAPIRoute<T>> T.throws(
+inline fun <TRoute: OpenAPIRoute<TRoute>> TRoute.throws(
     vararg responses: APIException<*, *>,
-    crossinline fn: T.() -> Unit = {}
-): T = child(ktorRoute.createConstantChild()).apply {
+    crossinline fn: TRoute.() -> Unit = {}
+): TRoute = child(ktorRoute.createConstantChild()).apply {
     provider.registerModule(ThrowsInfo(responses.asList()))
     val handler = makeExceptionHandler(responses)
     ktorRoute.intercept(ApplicationCallPipeline.Monitoring) {
