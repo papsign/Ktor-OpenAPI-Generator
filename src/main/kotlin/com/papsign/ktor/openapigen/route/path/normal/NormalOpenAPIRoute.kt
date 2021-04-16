@@ -11,9 +11,7 @@ import kotlin.reflect.typeOf
 class NormalOpenAPIRoute(route: Route, provider: CachingModuleProvider = CachingModuleProvider()) :
     OpenAPIRoute<NormalOpenAPIRoute>(route, provider) {
 
-    override fun child(route: Route): NormalOpenAPIRoute {
-        return NormalOpenAPIRoute(route, provider.child())
-    }
+    override fun child(route: Route) = NormalOpenAPIRoute(route, provider.child())
 
     @PublishedApi
     internal fun <P : Any, R : Any, B : Any> handle(

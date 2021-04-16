@@ -1,7 +1,6 @@
 package com.papsign.ktor.openapigen.modules.providers
 
 import com.papsign.ktor.openapigen.APITag
-import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.modules.DependentModule
 import com.papsign.ktor.openapigen.modules.DependentModule.Companion.handler
 import com.papsign.ktor.openapigen.modules.OpenAPIModule

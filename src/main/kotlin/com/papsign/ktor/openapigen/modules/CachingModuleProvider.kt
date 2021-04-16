@@ -1,11 +1,8 @@
 package com.papsign.ktor.openapigen.modules
 
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashSet
 import kotlin.reflect.KType
 import kotlin.reflect.full.isSubtypeOf
-import kotlin.reflect.full.isSupertypeOf
 
 class CachingModuleProvider(previous: Iterable<Pair<KType, OpenAPIModule>> = listOf()) : ModuleProvider<CachingModuleProvider> {
 
