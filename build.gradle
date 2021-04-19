@@ -3,9 +3,6 @@ plugins {
     id 'maven-publish'
 }
 
-group 'com.github.papsign'
-version '0.2-beta.16-SNAPSHOT'
-
 repositories {
     mavenCentral()
     jcenter()
@@ -14,8 +11,15 @@ repositories {
 publishing {
     publications {
         jarModule(MavenPublication) {
-            artifactId 'Ktor-OpenAPI-Generator'
+            group 'com.1gravity'
+            artifactId = 'Ktor-OpenAPI-Generator'
+            version '0.2-beta.17-SNAPSHOT'
             from components.java
+
+            pom {
+                name = 'Ktor OpenAPI Generator'
+                description = 'The Ktor OpenAPI Generator automatically generate the OpenAPI documentation based on the ktor application routing definition'
+            }
         }
     }
 }

@@ -5,9 +5,7 @@ import com.papsign.ktor.openapigen.route.path.normal.post
 import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import installOpenAPI
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
+import io.ktor.http.*
 import io.ktor.server.testing.contentType
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
@@ -20,7 +18,6 @@ import kotlin.random.Random
 const val contentType = "image/png"
 
 class BinaryContentTypeParserTest {
-
 
     @BinaryRequest([contentType])
     @BinaryResponse([contentType])
@@ -68,7 +65,7 @@ class BinaryContentTypeParserTest {
                 addHeader(HttpHeaders.Accept, contentType)
                 setBody(bytes)
             }.apply {
-                assertNull(response.status())
+                assertEquals(response.status(), HttpStatusCode.NotFound)
             }
 
             println("Test: Bad Accept")
@@ -77,7 +74,7 @@ class BinaryContentTypeParserTest {
                 addHeader(HttpHeaders.Accept, ContentType.Application.Json.toString())
                 setBody(bytes)
             }.apply {
-                assertNull(response.status())
+                assertEquals(response.status(), HttpStatusCode.NotFound)
             }
 
             println("Test: Bad Content-Type")
@@ -86,7 +83,7 @@ class BinaryContentTypeParserTest {
                 addHeader(HttpHeaders.Accept, contentType)
                 setBody(bytes)
             }.apply {
-                assertNull(response.status())
+                assertEquals(response.status(), HttpStatusCode.NotFound)
             }
         }
     }

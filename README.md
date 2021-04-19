@@ -1,6 +1,6 @@
 # Ktor OpenAPI Generator
-[![](https://jitpack.io/v/papsign/Ktor-OpenAPI-Generator.svg)](https://jitpack.io/#papsign/Ktor-OpenAPI-Generator)
-[![Build](https://github.com/papsign/Ktor-OpenAPI-Generator/workflows/Build/badge.svg)](https://github.com/papsign/Ktor-OpenAPI-Generator/actions)
+[![](https://jitpack.io/v/1gravity/Ktor-OpenAPI-Generator.svg)](https://jitpack.io/#1gravity/Ktor-OpenAPI-Generator)
+[![Build](https://github.com/1gravity/Ktor-OpenAPI-Generator/workflows/Build/badge.svg)](https://github.com/1gravity/Ktor-OpenAPI-Generator/actions)
 
 The Ktor OpenAPI Generator is a library to automatically generate the descriptor as you route your ktor application.
 
@@ -24,7 +24,7 @@ Extra Features:
 
 ## Examples
 
-Take a look at [a few examples](https://github.com/papsign/Ktor-OpenAPI-Generator/wiki/A-few-examples)
+Take a look at [a few examples](https://github.com/1gravity/Ktor-OpenAPI-Generator/wiki/A-few-examples)
 
 ### Who is using it?
 
@@ -48,14 +48,14 @@ allprojects {
 Step 2. Add the dependency:
 ```groovy
 dependencies {
-        implementation 'com.github.papsign:Ktor-OpenAPI-Generator:-SNAPSHOT'
+        implementation 'com.1gravity:Ktor-OpenAPI-Generator:-SNAPSHOT'
 }
 ```
 
 ### Git Submodule
 Install the submodule:
 ```shell
-git submodule add https://github.com/papsign/Ktor-OpenAPI-Generator.git openapigen
+git submodule add https://github.com/1gravity/Ktor-OpenAPI-Generator.git openapigen
 ```
 
 Declare the folder in settings.gradle:
