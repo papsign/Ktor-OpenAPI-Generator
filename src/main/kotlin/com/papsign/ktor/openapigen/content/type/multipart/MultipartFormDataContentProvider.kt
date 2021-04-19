@@ -17,7 +17,7 @@ import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.http.content.streamProvider
 import io.ktor.request.receiveMultipart
-import io.ktor.util.asStream
+import io.ktor.util.*
 import io.ktor.util.pipeline.PipelineContext
 import java.io.InputStream
 import java.time.Instant
@@ -68,6 +68,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
     private val typeContentTypes = HashMap<KType, Map<String, MediaTypeEncodingModel>>()
 
 
+    @OptIn(KtorExperimentalAPI::class)
     override suspend fun <T : Any> parseBody(type: KType, request: PipelineContext<Unit, ApplicationCall>): T {
         val objectMap = HashMap<String, Any>()
         request.context.receiveMultipart().forEachPart {

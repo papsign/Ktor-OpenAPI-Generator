@@ -92,7 +92,7 @@ class RoutingTest {
             apiRouting {
                 (this.ktorRoute as Routing).trace { println(it.buildText()) }
                 route(route) {
-                    post<Unit, TestResponse, Unit> { params, body ->
+                    post<Unit, TestResponse, Unit> { _, _ ->
                         respond(TestResponse("Test Response"))
                     }
                 }
@@ -119,7 +119,7 @@ class RoutingTest {
             apiRouting {
                 (this.ktorRoute as Routing).trace { println(it.buildText()) }
                 route(route) {
-                    get<Unit, TestResponse> { params ->
+                    get<Unit, TestResponse> {
                         respond(TestResponse("Test Response"))
                     }
                 }

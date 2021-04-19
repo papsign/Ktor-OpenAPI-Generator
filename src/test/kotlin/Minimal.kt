@@ -92,7 +92,7 @@ object Minimal {
                         info("String Post Endpoint", "This is a String Post Endpoint"),
                         exampleRequest = StringUsable("Ho"),
                         exampleResponse = StringUsable("Ho")
-                    ) { params, body ->
+                    ) { _, body ->
                         respond(body)
                     }
                 }

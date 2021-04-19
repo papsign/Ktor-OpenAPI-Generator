@@ -106,7 +106,7 @@ object TestServer {
                     "5a21be2"
                 ),
                 exampleResponse = StringResponse("All of the fields were valid")
-            ) { params, body ->
+            ) { _, _ ->
                 respond(StringResponse("All of the fields were valid"))
             }
 
@@ -122,7 +122,7 @@ object TestServer {
                     0.023f
                 ),
                 exampleResponse = StringResponse("All of the fields were valid")
-            ) { params, body ->
+            ) { _, _ ->
                 respond(StringResponse("All of the fields were valid"))
             }
 
@@ -314,8 +314,6 @@ object TestServer {
             }
         }
 
-        val scopes = Scopes.values().asList()
-
         // serve OpenAPI and redirect from root
         routing {
             get("/openapi.json") {
@@ -391,9 +389,6 @@ object TestServer {
     enum class Scopes(override val description: String) : Described {
         profile("Basic Profile scope"), email("Email scope")
     }
-
-    data class APIPrincipal(val a: String, val b: String)
-
 
     @Request("A LocalDate Request")
     data class LocalDateQuery(@QueryParam("LocalDate") val date: LocalDate)

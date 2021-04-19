@@ -93,13 +93,13 @@ object Basic {
                         info("String Post Endpoint", "This is a String Post Endpoint"),
                         exampleRequest = setOf(StringUsable("Ho")),
                         exampleResponse = StringUsable("Ho")
-                    ) { params, body ->
+                    ) { _, body ->
                         respond(body.first())
                     }
                 }
 
                 route("generic") {
-                    post<Unit, GenericTest<A?>, GenericTest<A?>> { params, body ->
+                    post<Unit, GenericTest<A?>, GenericTest<A?>> { _, body ->
                         respond(body)
                     }
                 }

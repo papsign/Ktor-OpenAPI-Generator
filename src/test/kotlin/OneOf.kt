@@ -24,7 +24,7 @@ fun NormalOpenAPIRoute.SealedRoute() {
             info("Sealed class Endpoint", "This is a Sealed class Endpoint"),
             exampleRequest = Base.A("Hi"),
             exampleResponse = Base.A("Hi")
-        ) { params, base ->
+        ) { _, base ->
             respond(base)
         }
     }

@@ -56,10 +56,10 @@ object TestServerWithJwtAuth {
         }.start(true)
     }
 
-    public fun Application.testServerWithJwtAuth() {
+    fun Application.testServerWithJwtAuth() {
         //define basic OpenAPI info
-        val authProvider = JwtProvider();
-        val api = install(com.papsign.ktor.openapigen.OpenAPIGen) {
+        val authProvider = JwtProvider()
+        install(OpenAPIGen) {
             info {
                 version = "0.1"
                 title = "Test API"
@@ -73,44 +73,44 @@ object TestServerWithJwtAuth {
                 description = "Main production server"
             }
             addModules(authProvider)
-            replaceModule(com.papsign.ktor.openapigen.schema.namer.DefaultSchemaNamer, object: SchemaNamer {
-                val regex = kotlin.text.Regex("[A-Za-z0-9_.]+")
+            replaceModule(DefaultSchemaNamer, object: SchemaNamer {
+                val regex = Regex("[A-Za-z0-9_.]+")
                 override fun get(type: KType): String {
-                    return type.toString().replace(regex) { it.value.split(".").last() }.replace(kotlin.text.Regex(">|<|, "), "_")
+                    return type.toString().replace(regex) { it.value.split(".").last() }.replace(Regex(">|<|, "), "_")
                 }
             })
         }
 
-        install(io.ktor.features.ContentNegotiation) {
+        install(ContentNegotiation) {
             jackson {
                 enable(
-                    com.fasterxml.jackson.databind.DeserializationFeature.WRAP_EXCEPTIONS,
-                    com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,
-                    com.fasterxml.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
+                    DeserializationFeature.WRAP_EXCEPTIONS,
+                    DeserializationFeature.USE_BIG_INTEGER_FOR_INTS,
+                    DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS
                 )
 
-                enable(com.fasterxml.jackson.databind.SerializationFeature.WRAP_EXCEPTIONS, com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)
+                enable(SerializationFeature.WRAP_EXCEPTIONS, SerializationFeature.INDENT_OUTPUT)
 
-                setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+                setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-                setDefaultPrettyPrinter(com.fasterxml.jackson.core.util.DefaultPrettyPrinter().apply {
-                    indentArraysWith(com.fasterxml.jackson.core.util.DefaultPrettyPrinter.FixedSpaceIndenter.instance)
-                    indentObjectsWith(com.fasterxml.jackson.core.util.DefaultIndenter("  ", "\n"))
+                setDefaultPrettyPrinter(DefaultPrettyPrinter().apply {
+                    indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                    indentObjectsWith(DefaultIndenter("  ", "\n"))
                 })
 
-                registerModule(com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+                registerModule(JavaTimeModule())
             }
         }
 
-        install(io.ktor.auth.Authentication) {
+        install(Authentication) {
             installJwt(this)
         }
 
         // serve OpenAPI and redirect from root
         routing {
             get("/openapi.json") {
-                val host = com.papsign.ktor.openapigen.model.server.ServerModel(
-                    call.request.origin.scheme + "://" + call.request.host() + if (kotlin.collections.setOf(
+                val host = ServerModel(
+                    call.request.origin.scheme + "://" + call.request.host() + if (setOf(
                             80,
                             443
                         ).contains(call.request.port())
@@ -129,10 +129,10 @@ object TestServerWithJwtAuth {
         apiRouting {
             auth {
                 get<StringParam, StringResponse, UserPrincipal>(
-                    com.papsign.ktor.openapigen.route.info("String Param Endpoint", "This is a String Param Endpoint"),
+                    info("String Param Endpoint", "This is a String Param Endpoint"),
                     example = StringResponse("Hi")
                 ) { params ->
-                    val (userId, name) = principal()
+                    val (_, name) = principal()
                     respond(StringResponse("Hello $name, you submitted ${params.a}"))
                 }
             }
@@ -145,11 +145,11 @@ object TestServerWithJwtAuth {
     @Response("A String Response")
     data class StringResponse(@Description("The string value") val str: String)
 
-    val authProvider = JwtProvider();
+    private val authProvider = JwtProvider()
 
-    inline fun NormalOpenAPIRoute.auth(route: OpenAPIAuthenticatedRoute<UserPrincipal>.() -> Unit): OpenAPIAuthenticatedRoute<UserPrincipal> {
+    private inline fun NormalOpenAPIRoute.auth(route: OpenAPIAuthenticatedRoute<UserPrincipal>.() -> Unit): OpenAPIAuthenticatedRoute<UserPrincipal> {
         val authenticatedKtorRoute = this.ktorRoute.authenticate { }
-        var openAPIAuthenticatedRoute= OpenAPIAuthenticatedRoute(authenticatedKtorRoute, this.provider.child(), authProvider = authProvider);
+        val openAPIAuthenticatedRoute= OpenAPIAuthenticatedRoute(authenticatedKtorRoute, this.provider.child(), authProvider = authProvider)
         return openAPIAuthenticatedRoute.apply {
             route()
         }
@@ -184,11 +184,11 @@ object TestServerWithJwtAuth {
         Profile("Some scope")
     }
 
-    val jwtRealm : String = "example-jwt-realm"
-    val jwtIssuer: String = "http://localhost:9091/auth/realms/$jwtRealm"
-    val jwtEndpoint: String = "$jwtIssuer/protocol/openid-connect/certs"
+    private const val jwtRealm = "example-jwt-realm"
+    private const val jwtIssuer = "http://localhost:9091/auth/realms/$jwtRealm"
+    private const val jwtEndpoint = "$jwtIssuer/protocol/openid-connect/certs"
 
-    fun installJwt (provider: Authentication.Configuration) {
+    private fun installJwt (provider: Authentication.Configuration) {
         provider.apply {
             jwt {
                 realm = jwtRealm

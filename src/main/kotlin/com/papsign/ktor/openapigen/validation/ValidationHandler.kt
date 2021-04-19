@@ -6,7 +6,6 @@ import kotlin.reflect.*
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.*
 
-
 /**
  * don't mind the evil leak, it's that or a two-step builder structure to be able to handle recursive types
  */
@@ -315,11 +314,7 @@ class ValidationHandler private constructor(
          */
         fun build(type: AnnotatedKType): ValidationHandler {
             val str = type.toString()
-            return map[str] ?: {
-                ValidationHandler(type) {
-                    map[str] = it
-                }
-            }()
+            return map[str] ?: ValidationHandler(type) { map[str] = it }
         }
 
         fun <T:Any> build(tClass: KClass<T>, annotations: List<Annotation> = listOf()): ValidationHandler {

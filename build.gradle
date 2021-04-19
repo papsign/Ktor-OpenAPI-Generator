@@ -39,18 +39,12 @@ dependencies {
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
     testImplementation "io.ktor:ktor-auth:$ktor_version"
     testImplementation "io.ktor:ktor-auth-jwt:$ktor_version"
-
-
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.6"
+    kotlinOptions.jvmTarget = "1.8"
     kotlinOptions.freeCompilerArgs += ["-Xuse-experimental=kotlin.ExperimentalStdlibApi"]
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.6"
-}
-
-wrapper {
-    gradleVersion = '6.0.1'
+    kotlinOptions.jvmTarget = "1.8"
 }
