@@ -2,7 +2,9 @@ package com.papsign.ktor.openapigen.parameters.parsers.builders.path.simple
 
 import com.papsign.ktor.openapigen.parameters.PathParamStyle
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
+import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderParameters
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderSelector
+import com.papsign.ktor.openapigen.parameters.parsers.builders.withMatchingKey
 import com.papsign.ktor.openapigen.parameters.parsers.converters.Converter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.ConverterFactory
 import kotlin.reflect.KType
@@ -11,8 +13,8 @@ class SimpleBuilder(val type: KType, override val explode: Boolean): Builder<Pat
     override val style: PathParamStyle = PathParamStyle.simple
     private val converter: Converter = ConverterFactory.buildConverterForced(type)
 
-    override fun build(key: String, parameters: Map<String, List<String>>): Any? {
-        val value = parameters[key]?.let { it[0] } ?: return null
+    override fun build(key: String, parameters: BuilderParameters): Any? {
+        val value = parameters.withMatchingKey(key)?.let { it[0] } ?: return null
         val adjusted = if (explode) value.replace('=', ',') else value
         return converter.convert(adjusted)
     }

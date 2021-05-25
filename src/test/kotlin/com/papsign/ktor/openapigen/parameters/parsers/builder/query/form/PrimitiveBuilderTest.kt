@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.parsers.builder.query.form
 
+import com.papsign.ktor.openapigen.parameters.parsers.builders.toStringWithIgnoreCaseFlag
 import com.papsign.ktor.openapigen.parameters.parsers.builders.query.form.FormBuilderFactory
 import com.papsign.ktor.openapigen.parameters.parsers.testSelector
 import com.papsign.ktor.openapigen.parameters.parsers.testSelectorFails
@@ -13,7 +14,7 @@ class PrimitiveBuilderTest {
         val key = "key"
         val expected = 1f
         val parse = mapOf(
-            key to listOf("1")
+            key.toStringWithIgnoreCaseFlag() to listOf("1")
         )
         FormBuilderFactory.testSelector(expected, key, parse, true)
     }
@@ -23,10 +24,10 @@ class PrimitiveBuilderTest {
         val key = "key"
         val expected = LocalDate.of(2021, Month.FEBRUARY, 27)
         val parse = mapOf(
-            key to listOf("2021-02-27")
+            key.toStringWithIgnoreCaseFlag() to listOf("2021-02-27")
         )
         FormBuilderFactory.testSelector(expected, key, parse, true)
-        FormBuilderFactory.testSelectorFails<LocalDate>(key, mapOf(key to listOf("")), true)
+        FormBuilderFactory.testSelectorFails<LocalDate>(key, mapOf(key.toStringWithIgnoreCaseFlag() to listOf("")), true)
     }
 
     @Test
@@ -45,7 +46,7 @@ class PrimitiveBuilderTest {
         cases.forEach {
             val expected = it.second
             val parse = mapOf(
-                key to listOf(it.first)
+                key.toStringWithIgnoreCaseFlag() to listOf(it.first)
             )
             FormBuilderFactory.testSelector(expected, key, parse, true)
         }
@@ -54,7 +55,7 @@ class PrimitiveBuilderTest {
             "10"
         )
         failCases.forEach {
-            FormBuilderFactory.testSelectorFails<LocalDateTime>(key, mapOf(key to listOf(it)), true)
+            FormBuilderFactory.testSelectorFails<LocalDateTime>(key, mapOf(key.toStringWithIgnoreCaseFlag() to listOf(it)), true)
         }
     }
 
@@ -75,7 +76,7 @@ class PrimitiveBuilderTest {
         cases.forEach {
             val expected = it.second
             val parse = mapOf(
-                key to listOf(it.first)
+                key.toStringWithIgnoreCaseFlag() to listOf(it.first)
             )
             FormBuilderFactory.testSelector(expected, key, parse, true)
         }
@@ -86,7 +87,7 @@ class PrimitiveBuilderTest {
             "10:30:00"
         )
         failCases.forEach {
-            FormBuilderFactory.testSelectorFails<LocalDateTime>(key, mapOf(key to listOf(it)), true)
+            FormBuilderFactory.testSelectorFails<LocalDateTime>(key, mapOf(key.toStringWithIgnoreCaseFlag() to listOf(it)), true)
         }
     }
 
@@ -109,7 +110,7 @@ class PrimitiveBuilderTest {
         cases.forEach {
             val expected = it.second
             val parse = mapOf(
-                key to listOf(it.first)
+                key.toStringWithIgnoreCaseFlag() to listOf(it.first)
             )
             FormBuilderFactory.testSelector(expected, key, parse, true)
         }
@@ -122,7 +123,7 @@ class PrimitiveBuilderTest {
             "2021-02-27T10"
         )
         failCases.forEach {
-            FormBuilderFactory.testSelectorFails<LocalDateTime>(key, mapOf(key to listOf(it)), true)
+            FormBuilderFactory.testSelectorFails<LocalDateTime>(key, mapOf(key.toStringWithIgnoreCaseFlag() to listOf(it)), true)
         }
 
     }
@@ -150,7 +151,7 @@ class PrimitiveBuilderTest {
         cases.forEach {
             val expected = it.second
             val parse = mapOf(
-                key to listOf(it.first)
+                key.toStringWithIgnoreCaseFlag() to listOf(it.first)
             )
             FormBuilderFactory.testSelector(expected, key, parse, true)
         }
@@ -171,7 +172,7 @@ class PrimitiveBuilderTest {
         )
 
         failCases.forEach {
-            FormBuilderFactory.testSelectorFails<OffsetDateTime>(key, mapOf(key to listOf(it)), true)
+            FormBuilderFactory.testSelectorFails<OffsetDateTime>(key, mapOf(key.toStringWithIgnoreCaseFlag() to listOf(it)), true)
         }
     }
 
@@ -201,7 +202,7 @@ class PrimitiveBuilderTest {
         cases.forEach {
             val expected = it.second
             val parse = mapOf(
-                key to listOf(it.first)
+                key.toStringWithIgnoreCaseFlag() to listOf(it.first)
             )
             FormBuilderFactory.testSelector(expected, key, parse, true)
         }
@@ -224,7 +225,7 @@ class PrimitiveBuilderTest {
         )
 
         failCases.forEach {
-            FormBuilderFactory.testSelectorFails<ZonedDateTime>(key, mapOf(key to listOf(it)), true)
+            FormBuilderFactory.testSelectorFails<ZonedDateTime>(key, mapOf(key.toStringWithIgnoreCaseFlag() to listOf(it)), true)
         }
     }
 
@@ -252,7 +253,7 @@ class PrimitiveBuilderTest {
         cases.forEach {
             val expected = it.second
             val parse = mapOf(
-                key to listOf(it.first)
+                key.toStringWithIgnoreCaseFlag() to listOf(it.first)
             )
             FormBuilderFactory.testSelector(expected, key, parse, true)
         }
@@ -265,7 +266,7 @@ class PrimitiveBuilderTest {
         )
 
         failCases.forEach {
-            FormBuilderFactory.testSelectorFails<Instant>(key, mapOf(key to listOf(it)), true)
+            FormBuilderFactory.testSelectorFails<Instant>(key, mapOf(key.toStringWithIgnoreCaseFlag() to listOf(it)), true)
         }
     }
 }

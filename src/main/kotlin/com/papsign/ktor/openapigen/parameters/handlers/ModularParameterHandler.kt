@@ -15,6 +15,8 @@ import com.papsign.ktor.openapigen.model.schema.SchemaModel
 import com.papsign.ktor.openapigen.modules.ModuleProvider
 import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
+import com.papsign.ktor.openapigen.parameters.parsers.builders.StringWithIgnoreCaseFlag
+import com.papsign.ktor.openapigen.parameters.parsers.builders.toStringWithIgnoreCaseFlag
 import com.papsign.ktor.openapigen.schema.builder.provider.FinalSchemaBuilderProviderModule
 import io.ktor.http.Headers
 import io.ktor.http.Parameters
@@ -29,11 +31,20 @@ class ModularParameterHandler<T>(val parsers: Map<KParameter, Builder<*>>, val c
 
     override fun parse(parameters: Parameters, headers: Headers): T {
         return constructor.callBy(parsers.mapValues {
-            val value = it.value.build(it.key.name.toString(), it.key.remapOpenAPINames(parameters.toMap() + headers.toMap()))
+            val value = it.value.build(
+                it.key.name.toString(),
+                it.key.remapOpenAPINames(parameters).toMap().mapKeys { (k, _) ->
+                    //Path, Query and Cookie parameters should be case sensitive.
+                    k.toStringWithIgnoreCaseFlag(ignoreCase = false)
+                } + it.key.remapOpenAPINames(headers).toMap().mapKeys { (k, _) ->
+                    //Header parameters should be case INsensitive.
+                    k.toStringWithIgnoreCaseFlag(ignoreCase = true)
+                })
+
             if (value != null || it.key.type.isMarkedNullable) {
                 value
             } else {
-                throw OpenAPIRequiredFieldException("""The field ${it.key.openAPIName ?: "unknow field"} is required""")
+                throw OpenAPIRequiredFieldException("""The field ${it.key.openAPIName ?: "unknown field"} is required""")
             }
         })
     }

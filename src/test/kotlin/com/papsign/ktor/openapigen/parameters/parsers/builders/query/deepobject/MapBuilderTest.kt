@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.parsers.builders.query.deepobject
 
+import com.papsign.ktor.openapigen.parameters.parsers.builders.toStringWithIgnoreCaseFlag
 import com.papsign.ktor.openapigen.parameters.parsers.testSelector
 import org.junit.Test
 
@@ -12,7 +13,7 @@ class MapBuilderTest {
             "test" to "test"
         )
         val parse = mapOf(
-            "$key[test]" to listOf("test")
+            "$key[test]".toStringWithIgnoreCaseFlag() to listOf("test")
         )
         DeepBuilderFactory.testSelector(expected, key, parse, true)
     }
@@ -24,7 +25,7 @@ class MapBuilderTest {
             12.5f to "test"
         )
         val parse = mapOf(
-            "$key[12.5]" to listOf("test")
+            "$key[12.5]".toStringWithIgnoreCaseFlag() to listOf("test")
         )
         DeepBuilderFactory.testSelector(expected, key, parse, true)
     }
@@ -36,7 +37,7 @@ class MapBuilderTest {
             true to "test"
         )
         val parse = mapOf(
-            "$key[true]" to listOf("test")
+            "$key[true]".toStringWithIgnoreCaseFlag() to listOf("test")
         )
         DeepBuilderFactory.testSelector(expected, key, parse, true)
     }

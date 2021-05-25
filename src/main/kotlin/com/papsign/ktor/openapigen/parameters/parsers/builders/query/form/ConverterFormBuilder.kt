@@ -1,6 +1,8 @@
 package com.papsign.ktor.openapigen.parameters.parsers.builders.query.form
 
+import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderParameters
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderSelector
+import com.papsign.ktor.openapigen.parameters.parsers.builders.withMatchingKey
 import com.papsign.ktor.openapigen.parameters.parsers.converters.Converter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.ConverterFactory
 import com.papsign.ktor.openapigen.parameters.parsers.converters.primitive.PrimitiveConverterFactory
@@ -11,8 +13,8 @@ open class ConverterFormBuilder(type: KType, factory: ConverterFactory): FormBui
     private val converter: Converter = factory.buildConverterForced(type)
     override val explode: Boolean = false
 
-    override fun build(key: String, parameters: Map<String, List<String>>): Any? {
-        return parameters[key]?.let{it[0]}?.let { converter.convert(it) }
+    override fun build(key: String, parameters: BuilderParameters): Any? {
+        return parameters.withMatchingKey(key)?.let{it[0]}?.let { converter.convert(it) }
     }
 
     open class Selector(private val factory: ConverterFactory, private val ignoreExplode: Boolean = false): BuilderSelector<ConverterFormBuilder> {

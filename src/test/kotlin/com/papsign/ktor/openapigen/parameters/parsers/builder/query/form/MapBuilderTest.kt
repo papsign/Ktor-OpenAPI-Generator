@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.parsers.builder.query.form
 
+import com.papsign.ktor.openapigen.parameters.parsers.builders.toStringWithIgnoreCaseFlag
 import com.papsign.ktor.openapigen.parameters.parsers.builders.query.form.FormBuilderFactory
 import com.papsign.ktor.openapigen.parameters.parsers.testSelector
 import org.junit.Test
@@ -13,7 +14,7 @@ class MapBuilderTest {
             "test" to "test"
         )
         val parse = mapOf(
-            key to listOf("test,test")
+            key.toStringWithIgnoreCaseFlag() to listOf("test,test")
         )
         FormBuilderFactory.testSelector(expected, key, parse, false)
     }
@@ -25,7 +26,7 @@ class MapBuilderTest {
             12.5f to "test"
         )
         val parse = mapOf(
-            key to listOf("12.5,test")
+            key.toStringWithIgnoreCaseFlag() to listOf("12.5,test")
         )
         FormBuilderFactory.testSelector(expected, key, parse, false)
     }
@@ -37,7 +38,7 @@ class MapBuilderTest {
             true to "test"
         )
         val parse = mapOf(
-            key to listOf("true,test")
+            key.toStringWithIgnoreCaseFlag() to listOf("true,test")
         )
         FormBuilderFactory.testSelector(expected, key, parse, false)
     }

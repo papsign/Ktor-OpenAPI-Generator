@@ -1,5 +1,7 @@
 package com.papsign.ktor.openapigen.parameters.parsers.builders.query.form
 
+import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderParameters
+import com.papsign.ktor.openapigen.parameters.parsers.builders.withMatchingKey
 import com.papsign.ktor.openapigen.parameters.parsers.converters.Converter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.ConverterFactory
 import com.papsign.ktor.openapigen.parameters.util.ListToArray
@@ -14,7 +16,7 @@ abstract class CollectionExplodedFormBuilder(type: KType): FormBuilder() {
 
     private val converter: Converter = ConverterFactory.buildConverterForced(ListToArray.arrayComponentKType(type))
 
-    override fun build(key: String, parameters: Map<String, List<String>>): Any? {
-        return (parameters[key] ?: listOf()).map(converter::convert).let(::transform)
+    override fun build(key: String, parameters: BuilderParameters): Any? {
+        return (parameters.withMatchingKey(key) ?: listOf()).map(converter::convert).let(::transform)
     }
 }

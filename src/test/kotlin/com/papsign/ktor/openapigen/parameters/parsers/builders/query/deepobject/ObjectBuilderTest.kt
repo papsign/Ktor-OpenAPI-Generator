@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.parameters.parsers.builders.query.deepobject
 
+import com.papsign.ktor.openapigen.parameters.parsers.builders.toStringWithIgnoreCaseFlag
 import com.papsign.ktor.openapigen.parameters.parsers.testSelector
 import org.junit.Test
 
@@ -12,7 +13,7 @@ class ObjectBuilderTest {
         val key = "key"
         val expected = TestClass1("test")
         val parse = mapOf(
-            "$key[string]" to listOf("test")
+            "$key[string]".toStringWithIgnoreCaseFlag() to listOf("test")
         )
         DeepBuilderFactory.testSelector(expected, key, parse, true)
     }
@@ -25,8 +26,8 @@ class ObjectBuilderTest {
         val key = "key"
         val expected = TestClass2(TestClass2Nested("test", 1f))
         val parse = mapOf(
-            "$key[nested][string]" to listOf("test"),
-            "$key[nested][float]" to listOf("1")
+            "$key[nested][string]".toStringWithIgnoreCaseFlag() to listOf("test"),
+            "$key[nested][float]".toStringWithIgnoreCaseFlag() to listOf("1")
         )
         DeepBuilderFactory.testSelector(expected, key, parse, true)
     }
@@ -38,8 +39,8 @@ class ObjectBuilderTest {
     fun test3() {
         val key = "key"
         val expected = TestClass3(mapOf(true to TestClass3(mapOf(false to TestClass3(mapOf())))))
-        val parse = mapOf<String, List<String>>(
-            "$key[nested][true][nested][false][string]" to listOf<String>()
+        val parse = mapOf(
+            "$key[nested][true][nested][false][string]".toStringWithIgnoreCaseFlag() to listOf<String>()
         )
         DeepBuilderFactory.testSelector(expected, key, parse, true)
     }
@@ -50,8 +51,8 @@ class ObjectBuilderTest {
     fun test4() {
         val key = "key"
         val expected = TestClass4(listOf(TestClass4(listOf())))
-        val parse = mapOf<String, List<String>>(
-            "$key[nested][0][0][nested]" to listOf<String>()
+        val parse = mapOf(
+            "$key[nested][0][0][nested]".toStringWithIgnoreCaseFlag() to listOf<String>()
         )
         DeepBuilderFactory.testSelector(expected, key, parse, true)
     }

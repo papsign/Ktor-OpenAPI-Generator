@@ -1,6 +1,9 @@
 package com.papsign.ktor.openapigen.routing
 
+import com.papsign.ktor.openapigen.annotations.Path
 import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
+import com.papsign.ktor.openapigen.annotations.parameters.PathParam
+import com.papsign.ktor.openapigen.annotations.parameters.QueryParam
 import com.papsign.ktor.openapigen.route.apiRouting
 import com.papsign.ktor.openapigen.route.path.normal.get
 import com.papsign.ktor.openapigen.route.path.normal.post
@@ -8,8 +11,7 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import installJackson
 import installOpenAPI
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
+import io.ktor.http.*
 import io.ktor.routing.Routing
 import io.ktor.server.testing.contentType
 import io.ktor.server.testing.handleRequest
@@ -21,6 +23,9 @@ import kotlin.test.assertTrue
 
 class RoutingTest {
 
+    @Path("{pathParameter}")
+    data class TestPathParams(@PathParam("test param") val pathParameter: String)
+    data class TestQueryParams(@QueryParam("test param") val queryParameter: String?)
     data class TestHeaderParams(@HeaderParam("test param") val `Test-Header`: Long)
     data class TestBodyParams(val xyz: Long)
     data class TestResponse(val msg: String)
@@ -120,6 +125,72 @@ class RoutingTest {
                 assertTrue { response.contentType().match("application/json") }
                 assertEquals(
                     "{\"msg\":\"${TestHeaderParams(123)}\"}",
+                    response.content
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testGetWithPathParams() {
+        val route = "/test"
+        withTestApplication({
+            installOpenAPI()
+            installJackson()
+            apiRouting {
+                (this.ktorRoute as Routing).trace { println(it.buildText()) }
+                route(route) {
+                    get<TestPathParams, TestResponse> { (params) ->
+                        respond(TestResponse("$params"))
+                    }
+                }
+            }
+        }) {
+            handleRequest(HttpMethod.Get, route + "/myTestParamValue") {
+                addHeader(HttpHeaders.Accept, "application/json")
+            }.apply {
+                assertTrue { response.contentType().match("application/json") }
+                assertEquals(
+                    "{\"msg\":\"myTestParamValue\"}",
+                    response.content
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testGetWithQueryParamShouldBeCaseSensitive() {
+        val route = "/test"
+        withTestApplication({
+            installOpenAPI()
+            installJackson()
+            apiRouting {
+                (this.ktorRoute as Routing).trace { println(it.buildText()) }
+                route(route) {
+                    get<TestQueryParams, TestResponse> { (params) ->
+                        respond(TestResponse("$params"))
+                    }
+                }
+            }
+        }) {
+            val queryParameterName = "queryParameter"
+            val queryValue = "MyQueryValue"
+
+            handleRequest(HttpMethod.Get, route + "?$queryParameterName=$queryValue") {
+                addHeader(HttpHeaders.Accept, "application/json")
+            }.apply {
+                assertTrue { response.contentType().match("application/json") }
+                assertEquals(
+                    "{\"msg\":\"$queryValue\"}",
+                    response.content
+                )
+            }
+
+            handleRequest(HttpMethod.Get, route + "?${queryParameterName.toUpperCase()}=$queryValue") {
+                addHeader(HttpHeaders.Accept, "application/json")
+            }.apply {
+                assertEquals(
+                    "{\"msg\":\"null\"}",
                     response.content
                 )
             }

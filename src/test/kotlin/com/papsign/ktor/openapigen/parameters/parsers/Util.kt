@@ -4,6 +4,7 @@ import com.papsign.ktor.openapigen.getKType
 import com.papsign.ktor.openapigen.parameters.ParameterStyle
 import com.papsign.ktor.openapigen.parameters.parsers.builders.Builder
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderFactory
+import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderParameters
 import com.papsign.ktor.openapigen.parameters.parsers.builders.BuilderSelector
 import java.lang.reflect.Array
 import kotlin.reflect.full.isSuperclassOf
@@ -13,7 +14,7 @@ import kotlin.test.assertNotNull
 inline fun <reified T> BuilderSelector<*>.testSelector(
     expect: T,
     key: String,
-    parseData: Map<String, List<String>>,
+    parseData: BuilderParameters,
     explode: Boolean,
     equals: (expected: T, actual: T) -> Boolean = { a, b -> a == b }
 ) {
@@ -42,7 +43,7 @@ fun toStr(any: Any?): String {
 inline fun <reified T, B: Builder<S>, S> BuilderFactory<B, S>.testSelector(
     expect: T,
     key: String,
-    parseData: Map<String, List<String>>,
+    parseData: BuilderParameters,
     explode: Boolean,
     equals: (expected: T, actual: T) -> Boolean = { a, b -> a == b }
 ) where S: ParameterStyle<S>, S: Enum<S> {
@@ -61,7 +62,7 @@ inline fun <reified T, B: Builder<S>, S> BuilderFactory<B, S>.testSelector(
 
 inline fun <reified T> BuilderFactory<*, *>.testSelectorFails(
     key: String,
-    parseData: Map<String, List<String>>,
+    parseData: BuilderParameters,
     explode: Boolean
 ) {
     val type = getKType<T>()
