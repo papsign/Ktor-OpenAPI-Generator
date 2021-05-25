@@ -56,6 +56,49 @@ class RoutingTest {
     }
 
     @Test
+    fun testHeaderParamCaseInsensitivity() {
+        val route = "/test"
+        withTestApplication({
+            installOpenAPI()
+            installJackson()
+            apiRouting {
+                (this.ktorRoute as Routing).trace { println(it.buildText()) }
+                route(route) {
+                    post<TestHeaderParams, TestResponse, TestBodyParams> { params, body ->
+                        respond(TestResponse("$params -> $body"))
+                    }
+                }
+            }
+        }) {
+            handleRequest(HttpMethod.Post, route) {
+                addHeader(HttpHeaders.ContentType, "application/json")
+                addHeader(HttpHeaders.Accept, "application/json")
+                addHeader("Test-Header".toLowerCase(), "123")
+                setBody("{\"xyz\":456}")
+            }.apply {
+                assertTrue { response.contentType().match("application/json") }
+                assertEquals(
+                    "{\"msg\":\"${TestHeaderParams(123)} -> ${TestBodyParams(456)}\"}",
+                    response.content
+                )
+            }
+
+            handleRequest(HttpMethod.Post, route) {
+                addHeader(HttpHeaders.ContentType, "application/json")
+                addHeader(HttpHeaders.Accept, "application/json")
+                addHeader("Test-Header".toUpperCase(), "123")
+                setBody("{\"xyz\":456}")
+            }.apply {
+                assertTrue { response.contentType().match("application/json") }
+                assertEquals(
+                    "{\"msg\":\"${TestHeaderParams(123)} -> ${TestBodyParams(456)}\"}",
+                    response.content
+                )
+            }
+        }
+    }
+
+    @Test
     fun testGetWithHeaderParams() {
         val route = "/test"
         withTestApplication({
