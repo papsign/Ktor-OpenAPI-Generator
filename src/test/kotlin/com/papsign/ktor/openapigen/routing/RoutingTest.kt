@@ -22,6 +22,7 @@ import kotlin.test.assertTrue
 class RoutingTest {
 
     data class TestHeaderParams(@HeaderParam("test param") val `Test-Header`: Long)
+    data class TestHeaderParams2(@HeaderParam("test param") val `test-header`: Long)
     data class TestBodyParams(val xyz: Long)
     data class TestResponse(val msg: String)
 
@@ -43,7 +44,7 @@ class RoutingTest {
             handleRequest(HttpMethod.Post, route) {
                 addHeader(HttpHeaders.ContentType, "application/json")
                 addHeader(HttpHeaders.Accept, "application/json")
-                addHeader("Test-Header", "123")
+                addHeader("test-header", "123")
                 setBody("{\"xyz\":456}")
             }.apply {
                 assertTrue { response.contentType().match("application/json") }
@@ -64,7 +65,7 @@ class RoutingTest {
             apiRouting {
                 (this.ktorRoute as Routing).trace { println(it.buildText()) }
                 route(route) {
-                    get<TestHeaderParams, TestResponse> { params ->
+                    get<TestHeaderParams2, TestResponse> { params ->
                         respond(TestResponse("$params"))
                     }
                 }
@@ -76,7 +77,7 @@ class RoutingTest {
             }.apply {
                 assertTrue { response.contentType().match("application/json") }
                 assertEquals(
-                    "{\"msg\":\"${TestHeaderParams(123)}\"}",
+                    "{\"msg\":\"${TestHeaderParams2(123)}\"}",
                     response.content
                 )
             }

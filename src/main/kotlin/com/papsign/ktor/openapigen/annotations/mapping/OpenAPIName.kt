@@ -1,5 +1,6 @@
 package com.papsign.ktor.openapigen.annotations.mapping
 
+import com.papsign.ktor.openapigen.annotations.parameters.HeaderParam
 import java.util.*
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
@@ -10,7 +11,10 @@ annotation class OpenAPIName(val name: String)
 private val cache = Collections.synchronizedMap(HashMap<KParameter, String?>())
 
 val KParameter.openAPIName: String?
-    get() = cache.getOrPut(this) { findAnnotation<OpenAPIName>()?.name ?: name }
+    get() = cache.getOrPut(this) {
+       val caseSensitiveName = findAnnotation<OpenAPIName>()?.name ?: name
+       if (findAnnotation<HeaderParam>() != null) caseSensitiveName?.toLowerCase() else caseSensitiveName
+    }
 
 fun <T> KParameter.remapOpenAPINames(map: Map<String, T>): Map<String, T> {
     val replace = this.openAPIName
