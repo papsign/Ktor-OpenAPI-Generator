@@ -2,6 +2,7 @@ package com.papsign.ktor.openapigen.parameters.parsers.converters
 
 import com.papsign.ktor.openapigen.parameters.parsers.converters.`object`.MapConverter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.`object`.ObjectConverter
+import com.papsign.ktor.openapigen.parameters.parsers.converters.`object`.OptionalConverter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.collection.ArrayConverter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.collection.ListConverter
 import com.papsign.ktor.openapigen.parameters.parsers.converters.primitive.EnumConverter
@@ -18,6 +19,7 @@ interface ConverterFactory {
         ListConverter,
         ArrayConverter,
         MapConverter,
+        OptionalConverter,
         ObjectConverter
     )
 }

@@ -10,5 +10,6 @@ object DeepBuilderFactory : BuilderSelectorFactory<Builder<QueryParamStyle>, Que
     ListDeepBuilder,
     ArrayDeepBuilder,
     MapDeepBuilder,
+    OptionalDeepBuilder,
     ObjectDeepBuilder
 )
