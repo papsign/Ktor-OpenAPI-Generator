@@ -14,7 +14,9 @@ import java.util.*
 import kotlin.Comparator
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.withNullability
 import kotlin.reflect.jvm.jvmErasure
 
 object FinalSchemaBuilderProvider: FinalSchemaBuilderProviderModule, OpenAPIGenModuleExtension {
@@ -63,10 +65,17 @@ object FinalSchemaBuilderProvider: FinalSchemaBuilderProviderModule, OpenAPIGenM
         }
 
         override fun build(type: KType, annotations: List<Annotation>): SchemaModel<*> {
-            return map.getOrPut(type) {
-                map.entries.firstOrNull { type.isSubtypeOf(it.key) }?.value
-                    ?: error("Schema builder could not find declared builder for type $type, make sure it has a provider registered on the route")
-            }.build(type, this) { it.applyAnnotations(type, type.jvmErasure.annotations).applyAnnotations(type, type.annotations).applyAnnotations(type, annotations) }
+            type.let {
+                when {
+                    type.jvmErasure.isSubclassOf(Optional::class) -> type.arguments[0].type!!.withNullability(true)
+                    else -> type
+                }
+            }.let { type ->
+                return map.getOrPut(type) {
+                    map.entries.firstOrNull { type.isSubtypeOf(it.key) }?.value
+                        ?: error("Schema builder could not find declared builder for type $type, make sure it has a provider registered on the route")
+                }.build(type, this) { it.applyAnnotations(type, type.jvmErasure.annotations).applyAnnotations(type, type.annotations).applyAnnotations(type, annotations) }
+            }
         }
     }
 }
