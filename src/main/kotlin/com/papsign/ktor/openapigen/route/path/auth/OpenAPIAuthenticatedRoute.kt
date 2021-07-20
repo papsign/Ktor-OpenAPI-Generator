@@ -28,7 +28,7 @@ class OpenAPIAuthenticatedRoute<TAuth>(
         body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
     ) {
         child().apply {// child in case path is branch to prevent propagation of the mutable nature of the provider
-            provider.registerModule(authProvider)
+            provider.registerModule(authProvider as AuthProvider<*>)
             handle<TParams, TResponse, TRequest>(
                 paramsType,
                 responseType,
@@ -46,7 +46,7 @@ class OpenAPIAuthenticatedRoute<TAuth>(
         body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
     ) {
         child().apply {// child in case path is branch to prevent propagation of the mutable nature of the provider
-            provider.registerModule(authProvider)
+            provider.registerModule(authProvider as AuthProvider<*>)
             handle<TParams, TResponse, Unit>(
                 paramsType,
                 responseType,

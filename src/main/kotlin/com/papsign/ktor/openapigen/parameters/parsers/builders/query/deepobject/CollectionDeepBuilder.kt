@@ -23,7 +23,7 @@ abstract class CollectionDeepBuilder(type: KType) : DeepBuilder {
             val indices =
                 names.entries.groupBy { (k, _) -> k.substring(key.length + 1, k.indexOf("]", key.length)).toInt() }
             indices.entries.fold(
-                ArrayList<Any?>((0..(indices.keys.max() ?: 0)).map { null })
+                ArrayList<Any?>((0..(indices.keys.maxOrNull() ?: 0)).map { null })
             ) { acc, (idx, params) ->
                 acc[idx] = builder.build("$key[$idx]", params.associate { (key, value) -> key to value })
                 acc
