@@ -162,8 +162,11 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
 ) {
+    val paramsType = typeOf<TParams>()
+    val responseType = typeOf<TResponse>()
+    val requestType = typeOf<TRequest>()
     preHandle<TParams, TResponse, TRequest, NormalOpenAPIRoute>(exampleResponse, exampleRequest) {
-        handle(typeOf<TParams>(), typeOf<TResponse>(), typeOf<TRequest>(), body)
+        handle(paramsType, responseType, requestType, body)
     }
 }
 
@@ -172,7 +175,9 @@ inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.h
     exampleResponse: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
 ) {
+    val paramsType = typeOf<TParams>()
+    val responseType = typeOf<TResponse>()
     preHandle<TParams, TResponse, Unit, NormalOpenAPIRoute>(exampleResponse, Unit) {
-        handle(typeOf<TParams>(), typeOf<TResponse>(), body)
+        handle(paramsType, responseType, body)
     }
 }
