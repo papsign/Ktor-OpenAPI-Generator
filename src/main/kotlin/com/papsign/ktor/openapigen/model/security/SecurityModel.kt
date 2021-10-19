@@ -9,7 +9,7 @@ import com.papsign.ktor.openapigen.model.Described
 class SecurityModel : MutableMap<String, List<*>> by mutableMapOf(), DataModel {
 
     operator fun <T> set(scheme: SecuritySchemeModel<T>, requirements: List<T>) where T: Enum<T>, T: Described {
-        this[scheme.name] = requirements
+        this[scheme.referenceName] = requirements
     }
 
     fun <T> set(scheme: SecuritySchemeModel<T>) where T: Enum<T>, T: Described {

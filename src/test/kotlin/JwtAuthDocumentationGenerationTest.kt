@@ -18,20 +18,26 @@ internal class JwtAuthDocumentationGenerationTest {
             assertEquals(HttpStatusCode.OK, response.status())
             assertTrue(
                 response.content!!.contains(
-                    "\"securitySchemes\" : {\n" +
-                            "      \"jwtAuth\" : {\n" +
-                            "        \"bearerFormat\" : \"JWT\",\n" +
-                            "        \"scheme\" : \"bearer\",\n" +
-                            "        \"type\" : \"http\"\n" +
-                            "      }\n" +
-                            "    }"
+                    """"securitySchemes" : {
+      "ThisIsSchemeName" : {
+        "in" : "cookie",
+        "name" : "ThisIsCookieName",
+        "type" : "apiKey"
+      },
+      "jwtAuth" : {
+        "bearerFormat" : "JWT",
+        "scheme" : "bearer",
+        "type" : "http"
+      }
+    }"""
                 )
             )
             assertTrue(
                 response.content!!.contains(
-                    "\"security\" : [ {\n" +
-                            "          \"jwtAuth\" : [ ]\n" +
-                            "        } ]"
+                    """"security" : [ {
+          "jwtAuth" : [ ],
+          "ThisIsSchemeName" : [ ]
+        }"""
                 )
             )
         }

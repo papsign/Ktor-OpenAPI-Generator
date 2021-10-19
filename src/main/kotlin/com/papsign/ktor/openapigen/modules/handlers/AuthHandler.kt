@@ -14,9 +14,9 @@ object AuthHandler: OperationModule {
         val authHandlers = provider.ofType<AuthProvider<*>>()
         val security = authHandlers.flatMap { it.security }.distinct()
         operation.security = security.map { SecurityModel().also { sec ->
-            it.forEach { sec[it.scheme.name] = it.requirements }
+            it.forEach { sec[it.scheme.referenceName] = it.requirements }
         } }
-        apiGen.api.components.securitySchemes.putAll(security.flatMap { it.map { it.scheme } }.associateBy { it.name })
+        apiGen.api.components.securitySchemes.putAll(security.flatMap { it.map { it.scheme } }.associateBy { it.referenceName })
     }
 
 }
