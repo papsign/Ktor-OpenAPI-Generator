@@ -14,18 +14,18 @@ import io.ktor.response.*
 import io.ktor.server.testing.*
 import kotlin.test.*
 
-enum class TestEnum {
+enum class NonStrictTestEnum {
     VALID,
     ALSO_VALID,
 }
 
 @Path("/")
-data class NullableEnumParams(@QueryParam("") val type: TestEnum? = null)
+data class NullableNonStrictEnumParams(@QueryParam("") val type: NonStrictTestEnum? = null)
 
 @Path("/")
-data class NonNullableEnumParams(@QueryParam("") val type: TestEnum)
+data class NonNullableNonStrictEnumParams(@QueryParam("") val type: NonStrictTestEnum)
 
-class EnumTestServer {
+class NonStrictEnumTestServer {
 
     companion object {
         // test server for nullable enums
@@ -37,9 +37,9 @@ class EnumTestServer {
                 }
             }
             apiRouting {
-                get<NullableEnumParams, String> { params ->
+                get<NullableNonStrictEnumParams, String> { params ->
                     if (params.type != null)
-                        assertTrue { TestEnum.values().contains(params.type) }
+                        assertTrue { NonStrictTestEnum.values().contains(params.type) }
                     respond(params.type?.toString() ?: "null")
                 }
             }
@@ -57,8 +57,8 @@ class EnumTestServer {
                 }
             }
             apiRouting {
-                get<NonNullableEnumParams, String> { params ->
-                    assertTrue { TestEnum.values().contains(params.type) }
+                get<NonNullableNonStrictEnumParams, String> { params ->
+                    assertTrue { NonStrictTestEnum.values().contains(params.type) }
                     respond(params.type.toString())
                 }
             }
@@ -90,34 +90,25 @@ class EnumTestServer {
     }
 
     @Test
-    fun `nullable enum parsing should be case-sensitive and should throw on passing wrong case`() {
+    fun `nullable enum parsing should be case-sensitive and should return 200 with null result`() {
         withTestApplication({ nullableEnum() }) {
             handleRequest(HttpMethod.Get, "/?type=valid").apply {
-                assertEquals(HttpStatusCode.BadRequest, response.status())
-                assertEquals(
-                    "Invalid value [valid] for enum parameter of type TestEnum. Expected: [VALID,ALSO_VALID]",
-                    response.content
-                )
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals("null", response.content)
             }
             handleRequest(HttpMethod.Get, "/?type=also_valid").apply {
-                assertEquals(HttpStatusCode.BadRequest, response.status())
-                assertEquals(
-                    "Invalid value [also_valid] for enum parameter of type TestEnum. Expected: [VALID,ALSO_VALID]",
-                    response.content
-                )
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals("null", response.content)
             }
         }
     }
 
     @Test
-    fun `nullable enum parsing should not parse values outside of enum`() {
+    fun `nullable enum parsing should return 200 with null result on parse values outside of enum`() {
         withTestApplication({ nullableEnum() }) {
             handleRequest(HttpMethod.Get, "/?type=what").apply {
-                assertEquals(HttpStatusCode.BadRequest, response.status())
-                assertEquals(
-                    "Invalid value [what] for enum parameter of type TestEnum. Expected: [VALID,ALSO_VALID]",
-                    response.content
-                )
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals("null", response.content)
             }
         }
     }
@@ -151,17 +142,11 @@ class EnumTestServer {
         withTestApplication({ nonNullableEnum() }) {
             handleRequest(HttpMethod.Get, "/?type=valid").apply {
                 assertEquals(HttpStatusCode.BadRequest, response.status())
-                assertEquals(
-                    "Invalid value [valid] for enum parameter of type TestEnum. Expected: [VALID,ALSO_VALID]",
-                    response.content
-                )
+                assertEquals("The field type is required", response.content)
             }
             handleRequest(HttpMethod.Get, "/?type=also_valid").apply {
                 assertEquals(HttpStatusCode.BadRequest, response.status())
-                assertEquals(
-                    "Invalid value [also_valid] for enum parameter of type TestEnum. Expected: [VALID,ALSO_VALID]",
-                    response.content
-                )
+                assertEquals("The field type is required", response.content)
             }
         }
     }
@@ -171,10 +156,7 @@ class EnumTestServer {
         withTestApplication({ nonNullableEnum() }) {
             handleRequest(HttpMethod.Get, "/?type=what").apply {
                 assertEquals(HttpStatusCode.BadRequest, response.status())
-                assertEquals(
-                    "Invalid value [what] for enum parameter of type TestEnum. Expected: [VALID,ALSO_VALID]",
-                    response.content
-                )
+                assertEquals("The field type is required", response.content)
             }
         }
     }
