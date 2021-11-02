@@ -234,7 +234,7 @@ class GenericRoutesTest {
                 listOf(
                     AuthProvider.Security(
                         SecuritySchemeModel(
-                            name = "basicAuth",
+                            referenceName = "basicAuth",
                             type = SecuritySchemeType.http,
                             scheme = HttpSecurityScheme.basic
                         ), emptyList<Scopes>()

@@ -9,7 +9,8 @@ import kotlin.reflect.full.memberProperties
 
 data class SecuritySchemeModel<TScope> constructor(
     val type: SecuritySchemeType,
-    val name: String,
+    val referenceName: String,
+    val name: String? = null,
     val `in`: APIKeyLocation? = null,
     val scheme: HttpSecurityScheme? = null,
     val bearerFormat: String? = null,
@@ -20,6 +21,6 @@ data class SecuritySchemeModel<TScope> constructor(
     override fun serialize(): Map<String, Any?> {
         return this::class.memberProperties.associateBy { it.name }.mapValues<String, KProperty1<out SecuritySchemeModel<TScope>, Any?>, Any?> { (_, prop) ->
             convertToValue((prop as KProperty1<DataModel, *>).get(this))
-        }.filter { it.key != "name" }.cleanEmptyValues()
+        }.filter { it.key != "referenceName" }.cleanEmptyValues()
     }
 }

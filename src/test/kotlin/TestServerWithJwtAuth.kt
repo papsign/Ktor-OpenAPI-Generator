@@ -13,6 +13,7 @@ import com.papsign.ktor.openapigen.annotations.Response
 import com.papsign.ktor.openapigen.annotations.parameters.PathParam
 import com.papsign.ktor.openapigen.annotations.properties.description.Description
 import com.papsign.ktor.openapigen.model.Described
+import com.papsign.ktor.openapigen.model.security.APIKeyLocation
 import com.papsign.ktor.openapigen.model.security.HttpSecurityScheme
 import com.papsign.ktor.openapigen.model.security.SecuritySchemeModel
 import com.papsign.ktor.openapigen.model.security.SecuritySchemeType
@@ -165,7 +166,15 @@ object TestServerWithJwtAuth {
                         SecuritySchemeType.http,
                         scheme = HttpSecurityScheme.bearer,
                         bearerFormat = "JWT",
-                        name = "jwtAuth"
+                        referenceName = "jwtAuth",
+                    ), emptyList<Scopes>()
+                ),
+                AuthProvider.Security(
+                    SecuritySchemeModel(
+                        SecuritySchemeType.apiKey,
+                        `in` = APIKeyLocation.cookie,
+                        name = "ThisIsCookieName",
+                        referenceName = "ThisIsSchemeName",
                     ), emptyList<Scopes>()
                 )
             ))
