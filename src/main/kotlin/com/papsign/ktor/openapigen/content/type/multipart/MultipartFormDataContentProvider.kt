@@ -114,7 +114,7 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
 
     override fun <T> getMediaType(type: KType, apiGen: OpenAPIGen, provider: ModuleProvider<*>, example: T?, usage: ContentTypeProvider.Usage): Map<ContentType, MediaTypeModel<T>>? {
         if (type == unitKType) return null
-        type.jvmErasure.findAnnotation<FormDataRequest>() ?: return null
+        val formContentType = type.jvmErasure.findAnnotation<FormDataRequest>()?.type?.contentType ?: return null
         val ctor = type.jvmErasure.primaryConstructor
         when (usage) {
             ContentTypeProvider.Usage.PARSE -> {
@@ -143,6 +143,6 @@ object MultipartFormDataContentProvider : BodyParser, OpenAPIGenModuleExtension 
         }
         val schemaBuilder = provider.ofType<FinalSchemaBuilderProviderModule>().last().provide(apiGen, provider)
         @Suppress("UNCHECKED_CAST")
-        return mapOf(ContentType.MultiPart.FormData to MediaTypeModel(schemaBuilder.build(type) as SchemaModel<T>, example, null, contentTypes))
+        return mapOf(formContentType to MediaTypeModel(schemaBuilder.build(type) as SchemaModel<T>, example, null, contentTypes))
     }
 }
