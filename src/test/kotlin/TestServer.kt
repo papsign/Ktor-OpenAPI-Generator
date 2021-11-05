@@ -55,7 +55,7 @@ object TestServer {
     class ProperException(msg: String, val id: String = "proper.exception") : Exception(msg)
 
     fun Application.testServer() {
-        Setup()
+        setupBaseTestServer()
 
         apiRouting {
 
@@ -247,7 +247,7 @@ object TestServer {
     }
 
 
-    fun Application.Setup() {
+    fun Application.setupBaseTestServer() {
         //define basic OpenAPI info
         val api = install(OpenAPIGen) {
             info {

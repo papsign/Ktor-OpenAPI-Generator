@@ -1,4 +1,4 @@
-import TestServer.Setup
+import TestServer.setupBaseTestServer
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.papsign.ktor.openapigen.annotations.type.`object`.example.ExampleProvider
@@ -57,7 +57,7 @@ val ref = "\$ref"
 internal class OneOfLegacyGenerationTests {
     @Test
     fun willDiscriminatorsBePresent() = withTestApplication({
-        Setup()
+        setupBaseTestServer()
         apiRouting {
             SealedRoute()
         }
