@@ -9,7 +9,6 @@ import com.papsign.ktor.openapigen.modules.CachingModuleProvider
 import com.papsign.ktor.openapigen.modules.OpenAPIModule
 import com.papsign.ktor.openapigen.modules.ofType
 import com.papsign.ktor.openapigen.modules.openapi.HandlerModule
-import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.openAPIGen
 import com.papsign.ktor.openapigen.parameters.handlers.ParameterHandler
 import com.papsign.ktor.openapigen.parameters.util.buildParameterHandler
@@ -43,7 +42,7 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
         val parameterHandler = buildParameterHandler<P>(paramsType)
         provider.registerModule(parameterHandler, ParameterHandler::class.createType(listOf(KTypeProjection(KVariance.INVARIANT, paramsType))))
 
-        val apiGen = ktorRoute.application.openAPIGen
+        val apiGen = application.openAPIGen
         provider.ofType<HandlerModule>().forEach {
             it.configure(apiGen, provider)
         }
@@ -108,3 +107,5 @@ abstract class OpenAPIRoute<T : OpenAPIRoute<T>>(val ktorRoute: Route, val provi
         }
     }
 }
+
+val OpenAPIRoute<*>.application get() = ktorRoute.application
